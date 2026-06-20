@@ -60,7 +60,12 @@ export function EntryScreen() {
             <span className="flex h-[46px] w-[46px] shrink-0 items-center justify-center rounded-full bg-emerald2 font-serif text-xl text-teal">
               {u.name[0]}
             </span>
-            <span className="flex-1 font-serif text-[22px] leading-none text-cream">{u.name}</span>
+            <span className="flex-1">
+              <span className="block font-serif text-[22px] leading-tight text-cream">{u.name}</span>
+              {u.username && (
+                <span className="block text-[10.5px] font-semibold tracking-[.06em] text-teal/70">{u.username}</span>
+              )}
+            </span>
             <span className="text-[11px] font-semibold tracking-[.12em] text-teal">{u.language}</span>
             <span className="text-lg text-teal opacity-70">›</span>
           </button>

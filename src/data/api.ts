@@ -6,7 +6,7 @@ export async function getRoster(): Promise<User[]> {
   if (useSupabase && supabase) {
     const { data, error } = await supabase
       .from('users')
-      .select('id, name, language')
+      .select('id, name, language, username')
       .eq('role', 'adventurer')
       .order('name');
     if (!error && data && data.length) return data as User[];

@@ -7,6 +7,7 @@ export interface User {
   id: string;
   name: string;
   language: string;
+  username?: string;
 }
 
 export interface Sentence {
@@ -31,8 +32,8 @@ export interface Lesson {
 export const USERS: User[] = [
   { id: 'u1', name: 'Charles', language: 'JAPANESE' },
   { id: 'u2', name: 'Tom', language: 'KHMER' },
-  { id: 'u3', name: 'Anamarija', language: 'GERMAN' },
-  { id: 'u4', name: 'Jerod', language: 'THAI' },
+  { id: 'u3', name: 'Anamarija', language: 'GERMAN', username: 'ANAMARIJAC2604-de' },
+  { id: 'u4', name: 'Jerod', language: 'THAI', username: 'JERODC2604-th' },
   { id: 'u5', name: 'Jason', language: 'JAPANESE' },
   { id: 'u6', name: 'Trenton', language: 'SPANISH' },
 ];
