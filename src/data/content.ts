@@ -81,6 +81,22 @@ export const PRACTICE_LESSONS: PracticeLesson[] = [
     pointsPerStep: 1,
     audioStepCount: 0,
   },
+  {
+    code: 'TOMR2504-km-001',
+    title: 'Lesson 1',
+    language: 'KHMER',
+    audio: {},
+    pointsPerStep: 1,
+    audioStepCount: 0,
+  },
+  {
+    code: 'WONCHAKL2401-ja-001',
+    title: 'Lesson 1',
+    language: 'JAPANESE',
+    audio: {},
+    pointsPerStep: 1,
+    audioStepCount: 0,
+  },
 ];
 
 export function getPracticeLesson(code: string): PracticeLesson | undefined {

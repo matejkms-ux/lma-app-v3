@@ -27,8 +27,9 @@ const LANG_CODE: Record<string, string> = {
 };
 
 function buildLessonCode(user: User, nr: number): string {
-  const lang = LANG_CODE[user.language] ?? user.language.toLowerCase().slice(0, 2);
   const n = nr.toString().padStart(3, '0');
+  if (user.username) return `${user.username}-${n}`;
+  const lang = LANG_CODE[user.language] ?? user.language.toLowerCase().slice(0, 2);
   return `${user.name.toUpperCase()}${COHORT}-${lang}-${n}`;
 }
 

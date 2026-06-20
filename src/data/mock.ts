@@ -30,11 +30,10 @@ export interface Lesson {
 }
 
 export const USERS: User[] = [
-  { id: 'u1', name: 'Charles', language: 'JAPANESE' },
-  { id: 'u2', name: 'Tom', language: 'KHMER' },
-  { id: 'u3', name: 'Anamarija', language: 'GERMAN', username: 'ANAMARIJAC2604-de' },
-  { id: 'u4', name: 'Jerod', language: 'THAI', username: 'JERODC2604-th' },
-  { id: 'u5', name: 'Jason', language: 'JAPANESE' },
+  { id: 'u3', name: 'Anamarija Cvelbar', language: 'GERMAN',   username: 'ANAMARIJAC2604-de' },
+  { id: 'u4', name: 'Jerod',             language: 'THAI',     username: 'JERODC2604-th'    },
+  { id: 'u2', name: 'Tom Roberge',       language: 'KHMER',    username: 'TOMR2504-km'      },
+  { id: 'u1', name: 'Won-Chak Leung',    language: 'JAPANESE', username: 'WONCHAKL2401-ja'  },
 ];
 
 /** Placeholder sentences — replaced by live data once sentences are imported. */

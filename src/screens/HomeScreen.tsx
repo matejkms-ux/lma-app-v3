@@ -2,9 +2,8 @@ import { useNavigate } from 'react-router-dom';
 import { DeviceFrame } from '../components/DeviceFrame';
 import { StatusBar } from '../components/StatusBar';
 import { BottomNav } from '../components/BottomNav';
-import { METRICS } from '../data/mock';
 import { lessonsForLanguage } from '../data/content';
-import { lessonProgress, lifetimeReps, repsToday } from '../lib/progress';
+import { lessonProgress, lifetimeReps, repsToday, isLessonUnlockComplete, getStepStars } from '../lib/progress';
 import { STEPS } from '../tokens';
 import { useSession } from '../session';
 
@@ -15,7 +14,8 @@ export function HomeScreen() {
   const name = user?.name ?? 'adventurer';
   const language = user?.language ?? 'JAPANESE';
 
-  const lesson = user ? lessonsForLanguage(user.language)[0] : undefined;
+  const lessons = lessonsForLanguage(language);
+  const lesson = lessons[0];
   const reps = user ? lifetimeReps(user.id) : 0;
   const today = user ? repsToday(user.id) : 0;
 
@@ -23,6 +23,20 @@ export function HomeScreen() {
   const progress = user && lesson ? lessonProgress(user.id, lesson.code) : null;
   const doneCount = progress ? available.filter((s) => progress.completedSteps.includes(s)).length : 0;
   const currentIdx = Math.min(doneCount, Math.max(0, available.length - 1));
+
+  // Real progress stats
+  const lessonsPassed = user
+    ? lessons.filter((l) => isLessonUnlockComplete(user.id, l.code)).length
+    : 0;
+  const allRatedStars = user
+    ? lessons.flatMap((l) =>
+        STEPS.map((s) => getStepStars(user.id, l.code, s)).filter((v): v is number => v !== null),
+      )
+    : [];
+  const avgGrade =
+    allRatedStars.length > 0
+      ? (allRatedStars.reduce((sum, s) => sum + s, 0) / allRatedStars.length).toFixed(1)
+      : null;
 
   const openPractice = () => {
     if (lesson) navigate('/practice', { state: { lessonCode: lesson.code } });
@@ -36,9 +50,7 @@ export function HomeScreen() {
       <div className="scroll-region flex-1 px-6 pb-5 pt-3.5">
         <div className="flex items-start justify-between">
           <div>
-            <div className="text-xs font-semibold tracking-[.04em] text-muted">
-              DAY {METRICS.dayOfProgram} OF {METRICS.programLength} · {language}
-            </div>
+            <div className="text-xs font-semibold tracking-[.04em] text-muted">{language}</div>
             <div className="mt-[7px] font-serif text-[32px] italic leading-[1.06] text-heading">
               Welcome back,
               <br />
@@ -100,17 +112,19 @@ export function HomeScreen() {
           </button>
         )}
 
-        {/* Stats (lessons/grade still illustrative until more is wired) */}
+        {/* Stats — real values from progress store */}
         <div className="mt-3.5 flex gap-3">
           <div className="flex-1 rounded-[18px] border border-rule bg-white p-3.5">
             <div className="text-[10px] font-bold tracking-[.1em] text-muted">LESSONS PASSED</div>
             <div className="mt-[3px] font-serif text-lg text-heading">
-              {METRICS.lessonsPassed} of {METRICS.lessonsTotal}
+              {lessonsPassed} of {lessons.length}
             </div>
           </div>
           <div className="flex-1 rounded-[18px] border border-rule bg-white p-3.5">
             <div className="text-[10px] font-bold tracking-[.1em] text-muted">AVG GRADE</div>
-            <div className="mt-[3px] font-serif text-lg text-heading">{METRICS.avgGradeSelf}★ self</div>
+            <div className="mt-[3px] font-serif text-lg text-heading">
+              {avgGrade !== null ? `${avgGrade}★` : '—'}
+            </div>
           </div>
         </div>
       </div>
