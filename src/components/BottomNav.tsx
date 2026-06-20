@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useSession } from '../session';
 
 type Tab = 'home' | 'practice' | 'activities';
 
@@ -31,20 +32,25 @@ const ITEMS: { tab: Tab; label: string; Icon: () => JSX.Element }[] = [
 ];
 
 /**
- * The bottom tab bar — Home / Practice / Activities. Appears only once you're
- * "in"; the entry screen has none (v3 brief §2).
+ * The bottom tab bar — Home / Practice / Activities / Switch learner.
+ * Appears only once you're "in"; the entry screen has none (v3 brief §2).
  */
 export function BottomNav({ active }: { active: Tab }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, signOut } = useSession();
 
-  // Practice tab stays highlighted across lessons/practice/overview.
   const isActive = (tab: Tab) => {
     if (tab === active) return true;
     if (tab === 'practice') {
       return ['/lessons', '/practice', '/overview'].includes(location.pathname);
     }
     return false;
+  };
+
+  const handleSwitch = () => {
+    signOut();
+    navigate('/');
   };
 
   return (
@@ -55,7 +61,7 @@ export function BottomNav({ active }: { active: Tab }) {
           <button
             key={tab}
             onClick={() => navigate(ROUTE[tab])}
-            className={`flex flex-col items-center gap-[5px] px-5 ${on ? 'text-cream' : 'text-teal-dim'}`}
+            className={`flex flex-col items-center gap-[5px] px-3 ${on ? 'text-cream' : 'text-teal-dim'}`}
           >
             <span className="flex h-5 w-5 items-center justify-center">
               <Icon />
@@ -64,6 +70,18 @@ export function BottomNav({ active }: { active: Tab }) {
           </button>
         );
       })}
+
+      {/* Switch learner */}
+      <button
+        onClick={handleSwitch}
+        className="flex flex-col items-center gap-[5px] px-3 text-teal-dim"
+      >
+        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-teal/20 font-serif text-[11px] font-bold leading-none text-cream/70">
+          {user?.name[0] ?? '·'}
+        </span>
+        <span className="text-[10px] font-semibold">Switch</span>
+      </button>
+
       <div className="absolute bottom-[7px] left-1/2 h-[5px] w-[120px] -translate-x-1/2 rounded-[3px] bg-cream/35" />
     </div>
   );
