@@ -17,6 +17,14 @@ export interface LessonAudioRow {
   updated_at: string;
 }
 
+/** Returns the set of lesson codes that have at least one row in lesson_audio. */
+export async function getUploadedLessonCodes(): Promise<Set<string>> {
+  if (!adminClient) return new Set();
+  const { data } = await adminClient.from('lesson_audio').select('lesson_code');
+  if (!data) return new Set();
+  return new Set(data.map((r: { lesson_code: string }) => r.lesson_code));
+}
+
 /** Fetch all uploaded step audio for a lesson. */
 export async function getLessonAudio(lessonCode: string): Promise<Record<Step, LessonAudioRow> | null> {
   if (!adminClient) return null;

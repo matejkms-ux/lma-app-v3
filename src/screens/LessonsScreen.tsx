@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { DeviceFrame } from '../components/DeviceFrame';
 import { StatusBar } from '../components/StatusBar';
@@ -6,6 +7,7 @@ import { PulseDot } from '../components/MicIndicator';
 import { useSession } from '../session';
 import { lessonsForLanguage, type PracticeLesson } from '../data/content';
 import { lessonProgress, isLessonUnlockComplete } from '../lib/progress';
+import { getUploadedLessonCodes } from '../data/lessonAudio';
 import { STEPS } from '../tokens';
 
 function LockIcon({ size = 18 }: { size?: number }) {
@@ -59,14 +61,10 @@ function LessonRow({ userId, lesson, onOpen }: { userId: string; lesson: Practic
   );
 }
 
-/** Locked lesson — enterable but visually flagged as locked. */
-function LockedLessonRow({ lesson, onOpen }: { lesson: PracticeLesson; onOpen: () => void }) {
+/** Locked lesson — visible but not enterable. Tapping does nothing. */
+function LockedLessonRow({ lesson }: { lesson: PracticeLesson }) {
   return (
-    <button
-      onClick={onOpen}
-      className="relative mb-[11px] w-full overflow-hidden rounded-2xl border border-teal/[.12] bg-cream-panel/30 px-4 py-[15px] text-left"
-    >
-      {/* Dimmed row content */}
+    <div className="relative mb-[11px] overflow-hidden rounded-2xl border border-teal/[.12] bg-cream-panel/30 px-4 py-[15px]">
       <div className="flex items-center gap-3.5">
         <span className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full border border-teal/[.15]">
           <span className="h-[11px] w-[11px] rounded-full bg-teal/20" />
@@ -77,20 +75,18 @@ function LockedLessonRow({ lesson, onOpen }: { lesson: PracticeLesson; onOpen: (
           </span>
           <span className="block font-serif text-[19px] leading-[1.15] text-heading/35">{lesson.title}</span>
         </span>
-        {/* Counter placeholder bars */}
         <span className="flex flex-col items-end gap-1.5">
           <span className="h-4 w-7 rounded bg-teal/[.12]" />
           <span className="h-2.5 w-10 rounded bg-teal/[.08]" />
         </span>
       </div>
-      {/* Lock overlay pill */}
       <div className="pointer-events-none absolute inset-0 flex items-center justify-end rounded-2xl bg-cream/25 pr-4">
         <div className="flex items-center gap-1.5 rounded-full border border-teal/[.22] bg-cream-panel/90 px-3 py-[5px]">
           <span className="text-teal/50"><LockIcon size={12} /></span>
           <span className="text-[10px] font-bold tracking-[.1em] text-teal/50">LOCKED</span>
         </div>
       </div>
-    </button>
+    </div>
   );
 }
 
@@ -98,6 +94,12 @@ function LockedLessonRow({ lesson, onOpen }: { lesson: PracticeLesson; onOpen: (
 export function LessonsScreen() {
   const navigate = useNavigate();
   const { user } = useSession();
+  const [uploadedCodes, setUploadedCodes] = useState<Set<string> | null>(null);
+
+  useEffect(() => {
+    void getUploadedLessonCodes().then(setUploadedCodes);
+  }, []);
+
   if (!user) return <Navigate to="/" replace />;
 
   const lessons = lessonsForLanguage(user.language);
@@ -113,20 +115,26 @@ export function LessonsScreen() {
         {lessons.length > 0 ? (
           <>
             {lessons.map((l, i) => {
-              // Lesson 0 is always unlocked; each subsequent lesson unlocks when
-              // the prior one is unlock-complete (same 2-pass / 4-star rule).
               const unlocked =
                 i === 0 || isLessonUnlockComplete(user.id, lessons[i - 1].code);
-              return unlocked ? (
-                <LessonRow
-                  key={l.code}
-                  userId={user.id}
-                  lesson={l}
-                  onOpen={() => navigate('/practice', { state: { lessonCode: l.code } })}
-                />
-              ) : (
-                <LockedLessonRow key={l.code} lesson={l} onOpen={() => navigate('/practice', { state: { lessonCode: l.code } })} />
-              );
+
+              if (unlocked) {
+                return (
+                  <LessonRow
+                    key={l.code}
+                    userId={user.id}
+                    lesson={l}
+                    onOpen={() => navigate('/practice', { state: { lessonCode: l.code } })}
+                  />
+                );
+              }
+
+              // Locked: only show if audio has been uploaded for this lesson.
+              // While the upload-codes fetch is in flight, hide locked rows to
+              // avoid a flash of incorrect content.
+              if (!uploadedCodes || !uploadedCodes.has(l.code)) return null;
+
+              return <LockedLessonRow key={l.code} lesson={l} />;
             })}
             <div className="mt-2 flex items-center gap-2 px-1 text-[11px] text-muted">
               <PulseDot size={9} />
