@@ -6,12 +6,13 @@ import { lessonsForLanguage } from '../data/content';
 import { lessonProgress, lifetimeReps, repsToday, isLessonUnlockComplete, getStepStars } from '../lib/progress';
 import { STEPS } from '../tokens';
 import { useSession } from '../session';
+import { displayName } from '../data/mock';
 
 /** Home — the adventure. Warm greeting, reps (now real) as the hero, current step, CTA. */
 export function HomeScreen() {
   const navigate = useNavigate();
   const { user } = useSession();
-  const name = user?.name ?? 'adventurer';
+  const name = user ? displayName(user) : 'adventurer';
   const language = user?.language ?? 'JAPANESE';
 
   const lessons = lessonsForLanguage(language);
@@ -59,7 +60,7 @@ export function HomeScreen() {
             </div>
           </div>
           <span className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full bg-emerald font-serif text-lg text-teal">
-            {name[0]}
+            {(user?.calledName ?? user?.firstName ?? name)[0]}
           </span>
         </div>
 

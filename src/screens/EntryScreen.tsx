@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DeviceFrame } from '../components/DeviceFrame';
 import { StatusBar } from '../components/StatusBar';
-import { USERS } from '../data/mock';
+import { USERS, displayName } from '../data/mock';
 import { getRoster } from '../data/api';
 import { useAsync } from '../lib/useAsync';
 import { useSession } from '../session';
@@ -17,7 +17,14 @@ export function EntryScreen() {
   const [query, setQuery] = useState('');
   const { data: users } = useAsync(getRoster, USERS);
 
-  const roster = users.filter((u) => u.name.toLowerCase().includes(query.toLowerCase()));
+  const roster = users.filter((u) => {
+    const q = query.toLowerCase();
+    return (
+      u.name.toLowerCase().includes(q) ||
+      (u.calledName?.toLowerCase().includes(q) ?? false) ||
+      (u.firstName?.toLowerCase().includes(q) ?? false)
+    );
+  });
 
   const enter = (user: (typeof roster)[number]) => {
     selectUser(user);
@@ -58,10 +65,10 @@ export function EntryScreen() {
             className="flex w-full items-center gap-3.5 border-b border-teal/[.16] py-3.5 text-left"
           >
             <span className="flex h-[46px] w-[46px] shrink-0 items-center justify-center rounded-full bg-emerald2 font-serif text-xl text-teal">
-              {u.name[0]}
+              {(u.calledName ?? u.firstName ?? u.name)[0]}
             </span>
             <span className="flex-1">
-              <span className="block font-serif text-[22px] leading-tight text-cream">{u.name}</span>
+              <span className="block font-serif text-[22px] leading-tight text-cream">{displayName(u)}</span>
               {u.username && (
                 <span className="block text-[10.5px] font-semibold tracking-[.06em] text-teal/70">{u.username}</span>
               )}

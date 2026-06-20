@@ -8,9 +8,10 @@ import {
   adminClient,
   type LessonAudioRow,
 } from '../data/lessonAudio';
-import { USERS, type User } from '../data/mock';
+import { USERS, displayName, type User } from '../data/mock';
 import { SentenceUploader } from './admin/SentenceUploader';
 import { RefAudioUploader } from './admin/RefAudioUploader';
+import { LearnerEditor } from './admin/LearnerEditor';
 
 // Fixed cohort suffix for this programme cohort.
 const COHORT = 'C2604';
@@ -50,7 +51,7 @@ function initStates(): Record<Step, StepState> {
 export function AdminScreen() {
   const [roster, setRoster] = useState<User[]>(USERS);
   const [selectedId, setSelectedId] = useState<string>(
-    USERS.find((u) => u.name === 'Anamarija')?.id ?? USERS[0]?.id ?? '',
+    USERS.find((u) => u.firstName === 'Anamarija')?.id ?? USERS[0]?.id ?? '',
   );
   const [lessonNr, setLessonNr] = useState(1);
   const [states, setStates] = useState<Record<Step, StepState>>(initStates);
@@ -62,14 +63,23 @@ export function AdminScreen() {
     if (!adminClient) return;
     adminClient
       .from('users')
-      .select('id, name, language')
+      .select('id, name, first_name, last_names, called_name, language, username')
       .eq('role', 'adventurer')
       .order('name')
       .then(({ data }) => {
         if (data && data.length) {
-          setRoster(data as User[]);
-          const anamarija = data.find((u: User) => u.name === 'Anamarija');
-          setSelectedId(anamarija?.id ?? data[0].id);
+          const mapped: User[] = data.map((r) => ({
+            id: r.id as string,
+            name: r.name as string,
+            firstName: (r.first_name as string | null) ?? undefined,
+            lastNames: (r.last_names as string | null) ?? undefined,
+            calledName: (r.called_name as string | null) ?? undefined,
+            language: r.language as string,
+            username: (r.username as string | null) ?? undefined,
+          }));
+          setRoster(mapped);
+          const anamarija = mapped.find((u) => u.firstName === 'Anamarija');
+          setSelectedId(anamarija?.id ?? mapped[0].id);
         }
       });
   }, []);
@@ -183,7 +193,7 @@ export function AdminScreen() {
               >
                 {roster.map((u) => (
                   <option key={u.id} value={u.id}>
-                    {u.name} · {u.language}
+                    {displayName(u)} · {u.language}
                   </option>
                 ))}
               </select>
@@ -347,6 +357,18 @@ export function AdminScreen() {
             </div>
 
             <RefAudioUploader lessonCode={lessonCode} />
+
+            <LearnerEditor
+              user={selectedUser ?? null}
+              onSaved={(updated) => {
+                setRoster((prev) =>
+                  prev.some((u) => u.id === updated.id)
+                    ? prev.map((u) => (u.id === updated.id ? updated : u))
+                    : [...prev, updated],
+                );
+                setSelectedId(updated.id);
+              }}
+            />
 
             <SentenceUploader
               lessonCode={lessonCode}

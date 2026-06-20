@@ -5,7 +5,12 @@
 
 export interface User {
   id: string;
+  /** Full birth name: firstName + " " + lastNames. */
   name: string;
+  firstName?: string;
+  lastNames?: string;
+  /** Preferred name if different from firstName (e.g. "Charles" for Won-Chak). */
+  calledName?: string;
   language: string;
   username?: string;
 }
@@ -30,11 +35,35 @@ export interface Lesson {
 }
 
 export const USERS: User[] = [
-  { id: 'u3', name: 'Anamarija Cvelbar', language: 'GERMAN',   username: 'ANAMARIJAC2604-de' },
-  { id: 'u4', name: 'Jerod',             language: 'THAI',     username: 'JERODC2604-th'    },
-  { id: 'u2', name: 'Tom Roberge',       language: 'KHMER',    username: 'TOMR2504-km'      },
-  { id: 'u1', name: 'Won-Chak Leung',    language: 'JAPANESE', username: 'WONCHAKL2401-ja'  },
+  { id: 'u3', name: 'Anamarija Cvelbar', firstName: 'Anamarija', lastNames: 'Cvelbar',                      language: 'GERMAN',   username: 'ANAMARIJAC2604-de' },
+  { id: 'u4', name: 'Jerod Cox',         firstName: 'Jerod',     lastNames: 'Cox',                           language: 'THAI',     username: 'JERODC2604-th'    },
+  { id: 'u2', name: 'Tom Roberge',       firstName: 'Tom',       lastNames: 'Roberge',                       language: 'KHMER',    username: 'TOMR2504-km'      },
+  { id: 'u1', name: 'Won-Chak Leung',    firstName: 'Won-Chak',  lastNames: 'Leung',    calledName: 'Charles', language: 'JAPANESE', username: 'WONCHAKL2401-ja'  },
 ];
+
+/**
+ * Display label: called name (or first name) + initials.
+ * - When called == first name → append surname initials only: "Anamarija C"
+ * - When called is a nickname  → append all birth-name initials: "Charles WCL"
+ */
+export function displayName(user: User): string {
+  const fn = user.firstName ?? user.name.split(' ')[0] ?? '';
+  const ln = user.lastNames ?? user.name.split(' ').slice(1).join(' ') ?? '';
+  const called = user.calledName || fn || user.name;
+
+  if (!fn || !ln) return called;
+
+  // Split full birth name into tokens (handles hyphenated names like Won-Chak).
+  const allParts = `${fn} ${ln}`.split(/[\s-]+/).filter(Boolean);
+
+  const calledMatchesFirst = !user.calledName || user.calledName === fn;
+  const initialsSource = calledMatchesFirst
+    ? allParts.slice(1)  // called IS the first name: only surname initials
+    : allParts;          // called is a nickname: initials of entire birth name
+
+  const initials = initialsSource.map((p) => p[0].toUpperCase()).join('');
+  return initials ? `${called} ${initials}` : called;
+}
 
 /** Placeholder sentences — replaced by live data once sentences are imported. */
 export const SENTENCES: Sentence[] = [

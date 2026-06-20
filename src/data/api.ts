@@ -6,12 +6,52 @@ export async function getRoster(): Promise<User[]> {
   if (useSupabase && supabase) {
     const { data, error } = await supabase
       .from('users')
-      .select('id, name, language, username')
+      .select('id, name, first_name, last_names, called_name, language, username')
       .eq('role', 'adventurer')
       .order('name');
-    if (!error && data && data.length) return data as User[];
+    if (!error && data && data.length) {
+      return data.map((r) => ({
+        id: r.id as string,
+        name: r.name as string,
+        firstName: (r.first_name as string | null) ?? undefined,
+        lastNames: (r.last_names as string | null) ?? undefined,
+        calledName: (r.called_name as string | null) ?? undefined,
+        language: r.language as string,
+        username: (r.username as string | null) ?? undefined,
+      })) as User[];
+    }
   }
   return USERS;
+}
+
+/**
+ * Upsert a learner to the users table, keyed by username.
+ * Returns the Supabase-assigned UUID on success, null otherwise.
+ */
+export async function upsertUser(
+  userData: Omit<User, 'id'>,
+): Promise<string | null> {
+  if (!useSupabase || !supabase || !userData.username) return null;
+  const fullName = [userData.firstName, userData.lastNames].filter(Boolean).join(' ').trim()
+    || userData.name;
+  const { data, error } = await supabase
+    .from('users')
+    .upsert(
+      {
+        name: fullName,
+        first_name: userData.firstName ?? null,
+        last_names: userData.lastNames ?? null,
+        called_name: userData.calledName ?? null,
+        language: userData.language,
+        username: userData.username,
+        role: 'adventurer',
+      },
+      { onConflict: 'username' },
+    )
+    .select('id')
+    .maybeSingle();
+  if (error || !data) return null;
+  return (data as { id: string }).id;
 }
 
 /** All lessons, ordered alphabetically by lesson_code. */
