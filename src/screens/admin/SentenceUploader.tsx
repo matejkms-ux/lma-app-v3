@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useMemo, useState } from 'react';
 import { upsertSentences } from '../../data/lessonAudio';
 
 interface ParsedRow {
@@ -9,6 +9,7 @@ interface ParsedRow {
 
 function parseInput(text: string): ParsedRow[] {
   return text
+    .replace(/\r\n/g, '\n').replace(/\r/g, '\n')
     .split('\n')
     .map((line) => line.split('\t').map((c) => c.trim()))
     .filter((cols) => cols.length >= 2 && (cols[0] || cols[1]))
@@ -28,9 +29,9 @@ export function SentenceUploader({
   const [status, setStatus] = useState<{ ok: boolean; msg: string } | null>(null);
   const [importing, setImporting] = useState(false);
 
-  const rows = parseInput(text);
+  const rows = useMemo(() => parseInput(text), [text]);
 
-  const handleImport = useCallback(async () => {
+  const handleImport = async () => {
     if (!rows.length || !lessonCode) return;
     setImporting(true);
     setStatus(null);
@@ -54,7 +55,7 @@ export function SentenceUploader({
         msg: `${rows.length} sentence${rows.length === 1 ? '' : 's'} imported for ${lessonCode}.`,
       });
     }
-  }, [rows, lessonCode, language, lessonNr]);
+  };
 
   return (
     <section className="mt-8">
@@ -70,6 +71,20 @@ export function SentenceUploader({
           onChange={(e) => {
             setText(e.target.value);
             setStatus(null);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Tab') {
+              e.preventDefault();
+              const el = e.currentTarget;
+              const start = el.selectionStart;
+              const end = el.selectionEnd;
+              const next = text.slice(0, start) + '\t' + text.slice(end);
+              setText(next);
+              setStatus(null);
+              requestAnimationFrame(() => {
+                el.selectionStart = el.selectionEnd = start + 1;
+              });
+            }
           }}
           placeholder={
             'I went to temple.\tผมไปวัด\tPhŏm bpai wát\nWhy did you go?\tทำไมคุณไป\tTham-mai khun bpai'
