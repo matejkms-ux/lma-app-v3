@@ -35,7 +35,6 @@ export const USERS: User[] = [
   { id: 'u3', name: 'Anamarija', language: 'GERMAN', username: 'ANAMARIJAC2604-de' },
   { id: 'u4', name: 'Jerod', language: 'THAI', username: 'JERODC2604-th' },
   { id: 'u5', name: 'Jason', language: 'JAPANESE' },
-  { id: 'u6', name: 'Trenton', language: 'SPANISH' },
 ];
 
 /** Placeholder sentences — replaced by live data once sentences are imported. */

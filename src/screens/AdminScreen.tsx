@@ -9,6 +9,8 @@ import {
   type LessonAudioRow,
 } from '../data/lessonAudio';
 import { USERS, type User } from '../data/mock';
+import { SentenceUploader } from './admin/SentenceUploader';
+import { RefAudioUploader } from './admin/RefAudioUploader';
 
 // Fixed cohort suffix for this programme cohort.
 const COHORT = 'C2604';
@@ -342,6 +344,14 @@ export function AdminScreen() {
                 {STEPS.filter((s) => states[s].row).length} of 5 steps uploaded for {lessonCode}
               </span>
             </div>
+
+            <RefAudioUploader lessonCode={lessonCode} />
+
+            <SentenceUploader
+              lessonCode={lessonCode}
+              language={selectedUser?.language ?? ''}
+              lessonNr={lessonNr}
+            />
           </>
         )}
       </div>
