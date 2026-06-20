@@ -59,10 +59,13 @@ function LessonRow({ userId, lesson, onOpen }: { userId: string; lesson: Practic
   );
 }
 
-/** Locked lesson — visible but not tappable, with a lock overlay. */
-function LockedLessonRow({ lesson }: { lesson: PracticeLesson }) {
+/** Locked lesson — enterable but visually flagged as locked. */
+function LockedLessonRow({ lesson, onOpen }: { lesson: PracticeLesson; onOpen: () => void }) {
   return (
-    <div className="relative mb-[11px] overflow-hidden rounded-2xl border border-teal/[.12] bg-cream-panel/30 px-4 py-[15px]">
+    <button
+      onClick={onOpen}
+      className="relative mb-[11px] w-full overflow-hidden rounded-2xl border border-teal/[.12] bg-cream-panel/30 px-4 py-[15px] text-left"
+    >
       {/* Dimmed row content */}
       <div className="flex items-center gap-3.5">
         <span className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full border border-teal/[.15]">
@@ -87,7 +90,7 @@ function LockedLessonRow({ lesson }: { lesson: PracticeLesson }) {
           <span className="text-[10px] font-bold tracking-[.1em] text-teal/50">LOCKED</span>
         </div>
       </div>
-    </div>
+    </button>
   );
 }
 
@@ -122,7 +125,7 @@ export function LessonsScreen() {
                   onOpen={() => navigate('/practice', { state: { lessonCode: l.code } })}
                 />
               ) : (
-                <LockedLessonRow key={l.code} lesson={l} />
+                <LockedLessonRow key={l.code} lesson={l} onOpen={() => navigate('/practice', { state: { lessonCode: l.code } })} />
               );
             })}
             <div className="mt-2 flex items-center gap-2 px-1 text-[11px] text-muted">
