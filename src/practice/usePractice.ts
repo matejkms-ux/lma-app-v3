@@ -19,13 +19,15 @@ function pickInitial(completed: Step[], saved: Step | null): Step {
   return STEPS.find((s) => !completed.includes(s)) ?? STEPS[0];
 }
 
-export function usePractice(lesson: PracticeLesson, userId: string) {
+export function usePractice(lesson: PracticeLesson, userId: string, startAt?: Step) {
   // Steps that currently have a clip — used for point totals, not navigation.
   const audioSteps = useMemo(() => STEPS.filter((s) => Boolean(lesson.audio[s])), [lesson]);
 
   const saved = useMemo(() => lessonProgress(userId, lesson.code), [userId, lesson.code]);
   const [completed, setCompleted] = useState<Step[]>(saved.completedSteps);
-  const [step, setStep] = useState<Step>(() => pickInitial(saved.completedSteps, saved.currentStep));
+  const [step, setStep] = useState<Step>(() =>
+    startAt ?? pickInitial(saved.completedSteps, saved.currentStep),
+  );
 
   // Per-step pass counts for this lesson, initialised from the rep log.
   const [passes, setPasses] = useState<Record<Step, number>>(() =>

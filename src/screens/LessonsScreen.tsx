@@ -116,7 +116,7 @@ export function LessonsScreen() {
           <>
             {lessons.map((l, i) => {
               const unlocked =
-                i === 0 || isLessonUnlockComplete(user.id, lessons[i - 1].code);
+                i === 0 || isLessonUnlockComplete(user.id, lessons[i - 1].code, lessons[i - 1].audioStepCount);
 
               if (unlocked) {
                 return (
@@ -124,7 +124,7 @@ export function LessonsScreen() {
                     key={l.code}
                     userId={user.id}
                     lesson={l}
-                    onOpen={() => navigate('/practice', { state: { lessonCode: l.code } })}
+                    onOpen={() => navigate('/practice', { state: { lessonCode: l.code, startAt: 'GRASP' } })}
                   />
                 );
               }

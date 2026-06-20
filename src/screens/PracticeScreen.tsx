@@ -25,7 +25,9 @@ export function PracticeScreen() {
   const location = useLocation();
   const { user } = useSession();
 
-  const stateCode = (location.state as { lessonCode?: string } | null)?.lessonCode;
+  const locationState = location.state as { lessonCode?: string; startAt?: Step } | null;
+  const stateCode = locationState?.lessonCode;
+  const startAt = locationState?.startAt;
 
   const [lesson, setLesson] = useState<PracticeLesson | null>(null);
   const [loadingLesson, setLoadingLesson] = useState(true);
@@ -74,12 +76,12 @@ export function PracticeScreen() {
     );
   }
 
-  return <Player key={lesson.code} lesson={lesson} userId={user.id} />;
+  return <Player key={lesson.code} lesson={lesson} userId={user.id} startAt={startAt} />;
 }
 
-function Player({ lesson, userId }: { lesson: PracticeLesson; userId: string }) {
+function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: string; startAt?: Step }) {
   const navigate = useNavigate();
-  const api = usePractice(lesson, userId);
+  const api = usePractice(lesson, userId, startAt);
   const recorder = useRecorder();
   const cfg = STEP_CONFIG[api.step];
   const [lifetime, setLifetime] = useState(() => lifetimeReps(userId));

@@ -24,9 +24,10 @@ export function HomeScreen() {
   const doneCount = progress ? available.filter((s) => progress.completedSteps.includes(s)).length : 0;
   const currentIdx = Math.min(doneCount, Math.max(0, available.length - 1));
 
-  // Real progress stats
+  // Real progress stats — only lessons with audio count toward "passed"
+  const practicableLessons = lessons.filter((l) => l.audioStepCount > 0);
   const lessonsPassed = user
-    ? lessons.filter((l) => isLessonUnlockComplete(user.id, l.code)).length
+    ? practicableLessons.filter((l) => isLessonUnlockComplete(user.id, l.code, l.audioStepCount)).length
     : 0;
   const allRatedStars = user
     ? lessons.flatMap((l) =>
@@ -117,7 +118,7 @@ export function HomeScreen() {
           <div className="flex-1 rounded-[18px] border border-rule bg-white p-3.5">
             <div className="text-[10px] font-bold tracking-[.1em] text-muted">LESSONS PASSED</div>
             <div className="mt-[3px] font-serif text-lg text-heading">
-              {lessonsPassed} of {lessons.length}
+              {lessonsPassed} of {practicableLessons.length}
             </div>
           </div>
           <div className="flex-1 rounded-[18px] border border-rule bg-white p-3.5">

@@ -122,8 +122,16 @@ export function repsToday(userId: string): number {
     .reduce((sum, e) => sum + e.points, 0);
 }
 
-export function isLessonUnlockComplete(userId: string, code: string): boolean {
-  return STEPS.some(
+export function isLessonUnlockComplete(userId: string, code: string, audioStepCount?: number): boolean {
+  // Lessons with no audio are always passable (nothing to master).
+  if (audioStepCount === 0) return true;
+  const { completedSteps } = lessonProgress(userId, code);
+  // Nothing completed → not done.
+  if (completedSteps.length === 0) return false;
+  // If the expected step count is known, all of them must be in completedSteps.
+  if (audioStepCount !== undefined && completedSteps.length < audioStepCount) return false;
+  // Every completed step must have 2+ plays or 4+ stars.
+  return completedSteps.every(
     (s) => stepPassCount(userId, code, s) >= 2 || (getStepStars(userId, code, s) ?? 0) >= 4,
   );
 }
