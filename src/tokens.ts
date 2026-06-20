@@ -1,0 +1,58 @@
+/**
+ * LMA design tokens — the single source of truth for colour, type and spacing.
+ *
+ * These are the values the design locked (v3 brief §2). Tailwind reads from here
+ * (tailwind.config.js imports this module), and any raw inline style should pull
+ * from `tokens` rather than hard-coding a hex. Coral is the ONLY element that moves
+ * and the single live signal per screen — never decorative.
+ */
+export const colors = {
+  /** Deep emerald — immersive practice & entry grounds. */
+  emerald: '#0A554E',
+  /** Lighter emerald — cards/panels on dark. */
+  emerald2: '#0E635B',
+  /** The single live signal: mic open, recording, +N today, active dot. */
+  coral: '#EF6A47',
+  /** Light ground — home, lesson select, lesson overview, activities. */
+  cream: '#F8F0E2',
+  /** Slightly warmer cream for raised panels on cream. */
+  creamPanel: '#FBF5EA',
+  /** Muted labels on dark + the model (non-live) waveform. */
+  teal: '#8FC0B8',
+  /** Dimmed teal for inactive nav / secondary text on dark. */
+  tealDim: '#5C857D',
+  /** Headings on cream. */
+  heading: '#15403B',
+  /** Muted labels on cream. */
+  muted: '#6F8B85',
+  /** Hairline rules on cream. */
+  rule: '#E2D8C4',
+  /** Hairline between list rows on cream. */
+  ruleSoft: '#EEE5D4',
+  /** Empty/disabled star on cream. */
+  starEmpty: '#D8CDB6',
+  /** Locked iconography on cream. */
+  locked: '#C9BEA8',
+} as const;
+
+export const fonts = {
+  /** Newsreader — "the soul": headlines, the human/emotional register. */
+  serif: "'Newsreader', Georgia, serif",
+  /** Hanken Grotesk — "the method": all UI, structure, labels, data. */
+  sans: "'Hanken Grotesk', system-ui, sans-serif",
+  /** Japanese L2 text. */
+  jp: "'Noto Serif JP', 'Newsreader', serif",
+} as const;
+
+export const radius = {
+  device: '46px',
+  card: '18px',
+  pill: '14px',
+} as const;
+
+/** The five practice steps, in fixed order. */
+export const STEPS = ['GRASP', 'HUM', 'SHADOW', 'READ', 'RECALL'] as const;
+export type Step = (typeof STEPS)[number];
+
+export const tokens = { colors, fonts, radius, STEPS };
+export default tokens;

@@ -1,0 +1,418 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { DeviceFrame } from '../components/DeviceFrame';
+import { StatusBar } from '../components/StatusBar';
+import { StepIndicator } from '../components/StepIndicator';
+import { AudioPlayer } from '../components/AudioPlayer';
+import { PulseDot } from '../components/MicIndicator';
+import { GraspBody, HumBody, ShadowBody, ReadBody } from './practice/StepBodies';
+import { STEP_CONFIG } from '../practice/steps';
+import { usePractice } from '../practice/usePractice';
+import { useRecorder } from '../practice/useRecorder';
+import { useSession } from '../session';
+import {
+  getPracticeLessonWithAudio,
+  lessonsForLanguage,
+  type PracticeLesson,
+} from '../data/content';
+import { getRecording, saveRecording } from '../lib/recordings';
+import { lifetimeReps, addRepEvent, getStepStars, setStepStars } from '../lib/progress';
+import { STEPS, type Step } from '../tokens';
+
+// Temporary: hardcoded sentences for Jerod's Thai lesson until the DB wire-up lands.
+const READ_SENTENCES: Record<string, { l2: string; translit: string }[]> = {
+  'JERODC2604-th-001': [
+    { l2: 'ผมเห็นคุณไปวัด',              translit: 'Phŏm hĕn khun bpai wát' },
+    { l2: 'ทำไมคุณไปวัด',                translit: 'Tham-mai khun bpai wát' },
+    { l2: 'ผมอยากรู้',                   translit: 'Phŏm yàak rúu' },
+    { l2: 'บุญเท่าไหร่ถึงจะพอ',          translit: 'Bun thâo-rài thŭng jà phaaw' },
+    { l2: 'มันพอไหม',                    translit: 'Man phaaw mái' },
+    { l2: 'พระเยซูมาเพื่อให้คุณมีชีวิต', translit: 'Phra Yee-suu maa phûea hâi khun mii chii-wít' },
+    { l2: 'ผมเห็นคุณไปร้าน',             translit: 'Phŏm hĕn khun bpai ráan' },
+    { l2: 'นิพพานคืออะไร',               translit: 'Níp-phaan khuu à-rai' },
+    { l2: 'นิพพานคือการหนีไหม',          translit: 'Níp-phaan khuu gaan nĭi mái' },
+    { l2: 'คุณเชื่อในพระเยซูไหม',        translit: 'Khun chûea nai Phra Yee-suu mái' },
+  ],
+};
+
+export function PracticeScreen() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useSession();
+
+  const stateCode = (location.state as { lessonCode?: string } | null)?.lessonCode;
+
+  const [lesson, setLesson] = useState<PracticeLesson | null>(null);
+  const [loadingLesson, setLoadingLesson] = useState(true);
+
+  useEffect(() => {
+    if (!user) return;
+    const code = stateCode ?? lessonsForLanguage(user.language)[0]?.code;
+    if (!code) {
+      setLoadingLesson(false);
+      return;
+    }
+    void getPracticeLessonWithAudio(code).then((l) => {
+      setLesson(l ?? null);
+      setLoadingLesson(false);
+    });
+  }, [stateCode, user?.language]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (!user) return <Navigate to="/" replace />;
+
+  if (loadingLesson) {
+    return (
+      <DeviceFrame tone="dark">
+        <StatusBar tone="dark" />
+        <div className="flex flex-1 items-center justify-center">
+          <div className="text-sm font-semibold text-teal">Loading…</div>
+        </div>
+      </DeviceFrame>
+    );
+  }
+
+  if (!lesson) {
+    return (
+      <DeviceFrame tone="dark">
+        <StatusBar tone="dark" />
+        <div className="flex flex-1 flex-col items-center justify-center gap-4 px-8 text-center">
+          <div className="font-serif text-2xl italic text-cream">No audio yet</div>
+          <div className="text-sm text-teal">No lessons are loaded for {user.language} yet.</div>
+          <button
+            onClick={() => navigate('/lessons')}
+            className="rounded-full border border-teal/40 px-5 py-2 text-[12px] font-bold tracking-[.08em] text-teal"
+          >
+            ‹ BACK TO LESSONS
+          </button>
+        </div>
+      </DeviceFrame>
+    );
+  }
+
+  return <Player key={lesson.code} lesson={lesson} userId={user.id} />;
+}
+
+function Player({ lesson, userId }: { lesson: PracticeLesson; userId: string }) {
+  const navigate = useNavigate();
+  const api = usePractice(lesson, userId);
+  const recorder = useRecorder();
+  const cfg = STEP_CONFIG[api.step];
+  const [lifetime, setLifetime] = useState(() => lifetimeReps(userId));
+  const [playing, setPlaying] = useState(false);
+  const [stars, setStarsState] = useState<number | null>(null);
+
+  // Stars for all steps — needed to compute unlock status reactively.
+  const [allStars, setAllStars] = useState<Record<Step, number | null>>(() =>
+    Object.fromEntries(STEPS.map((s) => [s, getStepStars(userId, lesson.code, s)])) as Record<Step, number | null>
+  );
+
+  const [flash, setFlash] = useState<number | null>(null);
+  const flashTimer = useRef<number | null>(null);
+
+  const [takeUrl, setTakeUrl] = useState<string | null>(null);
+  const [takePlaying, setTakePlaying] = useState(false);
+  const takeAudioRef = useRef<HTMLAudioElement>(null);
+  const takeUrlRef = useRef<string | null>(null);
+  const setTake = useCallback((blob: Blob | null) => {
+    if (takeUrlRef.current) URL.revokeObjectURL(takeUrlRef.current);
+    const url = blob ? URL.createObjectURL(blob) : null;
+    takeUrlRef.current = url;
+    setTakeUrl(url);
+  }, []);
+
+  useEffect(() => {
+    let alive = true;
+    void getRecording(userId, lesson.code, api.step).then((rec) => {
+      if (alive) setTake(rec ? rec.blob : null);
+    });
+    return () => { alive = false; };
+  }, [userId, lesson.code, api.step, setTake]);
+
+  useEffect(() => {
+    setStarsState(getStepStars(userId, lesson.code, api.step));
+  }, [userId, lesson.code, api.step]);
+
+  useEffect(() => () => {
+    if (takeUrlRef.current) URL.revokeObjectURL(takeUrlRef.current);
+    if (flashTimer.current) window.clearTimeout(flashTimer.current);
+  }, []);
+
+  // A step is unlock-complete when it has no audio (pass-through) OR
+  // the learner has 2+ passes OR 4+ stars on it.
+  const isUnlockComplete = useCallback((s: Step): boolean => {
+    if (!lesson.audio[s]) return true;
+    return (api.passes[s] ?? 0) >= 2 || (allStars[s] ?? 0) >= 4;
+  }, [lesson.audio, api.passes, allStars]);
+
+  // GRASP is always unlocked; every other step requires the previous to be unlock-complete.
+  const isUnlocked = useCallback((s: Step): boolean => {
+    const idx = STEPS.indexOf(s);
+    if (idx <= 0) return true;
+    return isUnlockComplete(STEPS[idx - 1]);
+  }, [isUnlockComplete]);
+
+  const stepDone = api.isCompleted(api.step);
+  const url = api.currentUrl;
+  const hasAudio = Boolean(url);
+  const isCurrentStepUnlocked = isUnlocked(api.step);
+
+  // NEXT is available once the current step is unlock-complete (which unlocks the next).
+  const canAdvance = useMemo(() => isUnlockComplete(api.step), [isUnlockComplete, api.step]);
+
+  useEffect(() => {
+    if (!hasAudio) setPlaying(false);
+  }, [hasAudio]);
+
+  const onPlay = useCallback(() => { void recorder.start(); }, [recorder]);
+  const onStop = useCallback(() => { recorder.cancel(); }, [recorder]);
+
+  const onEnded = useCallback(async () => {
+    const take = await recorder.stop();
+    if (take) {
+      await saveRecording(userId, lesson.code, api.step, take.blob, take.mime);
+      setTake(take.blob);
+    }
+    addRepEvent(userId, lesson.code, api.step, 1);
+    api.bumpPass(api.step);
+    api.completeStep();
+    const newTotal = lifetimeReps(userId);
+    setLifetime(newTotal);
+    setFlash(1);
+    if (flashTimer.current) window.clearTimeout(flashTimer.current);
+    flashTimer.current = window.setTimeout(() => setFlash(null), 1900);
+  }, [recorder, userId, lesson.code, api, setTake]);
+
+  const handleRate = useCallback((n: number) => {
+    setStepStars(userId, lesson.code, api.step, n);
+    setStarsState(n);
+    setAllStars((prev) => ({ ...prev, [api.step]: n }));
+  }, [userId, lesson.code, api.step]);
+
+  const toggleTake = () => {
+    const a = takeAudioRef.current;
+    if (!a) return;
+    if (a.paused) void a.play().catch(() => {});
+    else a.pause();
+  };
+
+  const body = () => {
+    switch (cfg.body) {
+      case 'dualWave': return <ShadowBody />;
+      case 'melody':   return <HumBody />;
+      case 'text': {
+        const sentences = READ_SENTENCES[lesson.code];
+        return sentences ? <ReadBody sentences={sentences} /> : <GraspBody active={playing} />;
+      }
+      default:         return <GraspBody active={playing} />;
+    }
+  };
+
+  // Hint text shown when NEXT is blocked by the unlock rule.
+  const unlockHint = useMemo(() => {
+    if (!hasAudio || canAdvance) return null;
+    const passes = api.passes[api.step] ?? 0;
+    const s = allStars[api.step] ?? 0;
+    if (passes === 0) return null; // first play not done yet — standard "play to end" prompt shows
+    if (passes === 1 && s < 4) return '1 more play or 4★ to unlock next step';
+    if (s < 4) return `${2 - passes} more play${passes === 1 ? '' : 's'} or 4★ to unlock`;
+    return null;
+  }, [hasAudio, canAdvance, api.passes, api.step, allStars]);
+
+  return (
+    <DeviceFrame tone="dark">
+      <StatusBar tone="dark" />
+
+      {flash !== null && (
+        <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center">
+          <div className="animate-pop rounded-[26px] bg-coral px-9 py-6 text-center shadow-2xl">
+            <div className="font-serif text-[52px] font-extrabold leading-none text-cream">+{flash}</div>
+            <div className="mt-1.5 text-[12px] font-bold tracking-[.2em] text-cream/90">REPS EARNED</div>
+          </div>
+        </div>
+      )}
+
+      <div className="flex shrink-0 items-center justify-between px-5 pt-2.5 text-xs text-teal">
+        <button onClick={() => navigate('/lessons')} className="p-1 text-xl" aria-label="Back">
+          ‹
+        </button>
+        <span className="font-semibold tracking-[.04em]">
+          {lesson.code} · {lesson.title}
+        </span>
+        <span className="font-bold">
+          {api.stepIndex + 1}/{api.steps.length}
+        </span>
+      </div>
+
+      <StepIndicator
+        currentIndex={api.stepIndex}
+        isUnlocked={isUnlocked}
+        onGoto={api.goTo}
+      />
+
+      <div className="shrink-0 px-7 pt-4 text-center">
+        <div className="text-[11px] font-bold tracking-[.34em] text-teal">{cfg.ordinal}</div>
+        <div className="mt-1 font-serif text-[40px] font-medium text-cream">{cfg.title}</div>
+        <div className="mx-auto mt-1.5 max-w-[280px] font-serif text-[15px] italic leading-[1.5] text-teal">
+          {cfg.instruction}
+        </div>
+      </div>
+
+      {body()}
+
+      {isCurrentStepUnlocked ? (
+        url ? (
+          <>
+            <div className="mb-2 flex h-5 shrink-0 items-center justify-center gap-2.5">
+              {recorder.status === 'recording' && (
+                <>
+                  <PulseDot />
+                  <span className="text-[10px] font-bold tracking-[.14em] text-coral">{cfg.micLabel}</span>
+                </>
+              )}
+              {recorder.status === 'denied' && (
+                <span className="text-[10px] font-semibold tracking-[.08em] text-teal-dim">
+                  MIC OFF · playback still counts
+                </span>
+              )}
+            </div>
+            <div className="mb-3">
+              <AudioPlayer
+                src={url}
+                onPlay={onPlay}
+                onStop={onStop}
+                onEnded={onEnded}
+                onPlayingChange={setPlaying}
+              />
+            </div>
+          </>
+        ) : (
+          <div className="mb-3 flex shrink-0 flex-col items-center gap-1 px-8 pb-1 text-center">
+            <span className="text-[11px] font-bold tracking-[.16em] text-teal-dim">AUDIO COMING SOON</span>
+            <span className="font-serif text-[13px] italic text-teal-dim">
+              This step's recording isn't loaded yet — you can keep going.
+            </span>
+          </div>
+        )
+      ) : (
+        <div className="mb-3 flex shrink-0 flex-col items-center gap-1 px-8 pb-1 text-center">
+          <span className="text-[11px] font-bold tracking-[.16em] text-teal-dim">STEP LOCKED</span>
+          <span className="font-serif text-[13px] italic text-teal-dim">
+            Complete the previous step to play this one.
+          </span>
+        </div>
+      )}
+
+      <div className="mx-6 shrink-0 border-t border-teal/[.18] pb-3 pt-3.5">
+        <div className="flex items-center gap-2.5">
+          {!isCurrentStepUnlocked ? (
+            <span className="text-[11px] font-bold tracking-[.06em] text-teal-dim">
+              UNLOCK PREVIOUS STEP FIRST
+            </span>
+          ) : !hasAudio ? (
+            <span className="text-[11px] font-bold tracking-[.06em] text-teal-dim">NO REPS HERE YET</span>
+          ) : stepDone ? (
+            <span className="inline-flex items-center gap-[7px] rounded-[20px] border border-teal/40 bg-teal/[.16] px-3 py-[5px]">
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-teal text-[10px] text-emerald">
+                ✓
+              </span>
+              <span className="text-[11px] font-extrabold tracking-[.06em] text-cream">
+                +{lesson.pointsPerStep} REPS · DONE
+              </span>
+            </span>
+          ) : (
+            <span className="text-[11px] font-bold tracking-[.06em] text-teal">
+              PLAY TO THE END FOR +{lesson.pointsPerStep} REPS
+            </span>
+          )}
+          <span className="ml-auto font-serif text-[13px] italic text-teal-dim">
+            {lifetime} reps
+          </span>
+        </div>
+
+        {isCurrentStepUnlocked && unlockHint && (
+          <div className="mt-1.5 text-[10px] font-semibold tracking-[.06em] text-teal/50">
+            {unlockHint}
+          </div>
+        )}
+
+        {isCurrentStepUnlocked && stepDone && hasAudio && (
+          <div className="mt-2.5 flex items-center gap-[5px]">
+            {[1, 2, 3, 4, 5].map((n) => (
+              <button
+                key={n}
+                onClick={() => handleRate(n)}
+                className={`text-[22px] leading-none transition-transform hover:scale-110 active:scale-95 ${
+                  stars !== null && n <= stars ? 'text-coral' : 'text-teal/25'
+                }`}
+              >
+                ★
+              </button>
+            ))}
+            <span className={`ml-1.5 text-[10px] font-bold tracking-[.1em] transition-opacity ${stars !== null ? 'text-coral/70' : 'text-teal/40'}`}>
+              {stars !== null ? `${stars}/5` : 'RATE THIS STEP'}
+            </span>
+          </div>
+        )}
+        {isCurrentStepUnlocked && takeUrl && (
+          <>
+            <audio
+              ref={takeAudioRef}
+              src={takeUrl}
+              onPlay={() => setTakePlaying(true)}
+              onPause={() => setTakePlaying(false)}
+              onEnded={() => setTakePlaying(false)}
+            />
+            <button
+              onClick={toggleTake}
+              className="mt-2.5 inline-flex items-center gap-2 rounded-full border border-coral/50 px-3 py-1.5 text-[11px] font-bold tracking-[.07em] text-coral"
+            >
+              <span className="text-[9px]">{takePlaying ? '❚❚' : '▶'}</span>
+              {takePlaying ? 'PAUSE TAKE' : 'HEAR YOUR TAKE'}
+            </button>
+          </>
+        )}
+      </div>
+
+      <div className="flex shrink-0 items-center justify-between gap-2 px-6 pb-5 pt-1">
+        <button
+          onClick={api.prev}
+          disabled={api.isFirst}
+          className="rounded-full border border-teal/30 px-4 py-1.5 text-[11px] font-bold tracking-[.08em] text-teal disabled:opacity-30"
+        >
+          ‹ PREV
+        </button>
+        <div className="flex gap-1.5">
+          {api.steps.map((s) => (
+            <span
+              key={s}
+              className={`h-1.5 w-1.5 rounded-full ${
+                s === api.step ? 'bg-coral'
+                : !isUnlocked(s) ? 'bg-teal/[.12]'
+                : api.isCompleted(s) ? 'bg-teal'
+                : 'bg-teal/30'
+              }`}
+              aria-label={s}
+            />
+          ))}
+        </div>
+        {api.isLast ? (
+          <button
+            onClick={() => navigate('/home')}
+            disabled={!api.allDone}
+            className="rounded-full border border-teal/30 px-4 py-1.5 text-[11px] font-bold tracking-[.08em] text-teal disabled:opacity-30"
+          >
+            {api.allDone ? 'FINISH ✓' : 'FINISH'}
+          </button>
+        ) : (
+          <button
+            onClick={api.next}
+            disabled={!canAdvance}
+            className="rounded-full border border-teal/30 px-4 py-1.5 text-[11px] font-bold tracking-[.08em] text-teal disabled:opacity-30"
+          >
+            NEXT ›
+          </button>
+        )}
+      </div>
+    </DeviceFrame>
+  );
+}

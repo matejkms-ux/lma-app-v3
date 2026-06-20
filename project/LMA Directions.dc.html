@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Hanken+Grotesk:wght@400;500;600;700&family=Spectral:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    html, body { margin: 0; padding: 0; }
+    * { box-sizing: border-box; }
+    @keyframes lmaBreath { 0%,100% { transform: scale(.85); opacity: .55; } 50% { transform: scale(1.15); opacity: 1; } }
+    @keyframes lmaRingOut { 0% { transform: scale(.7); opacity: .6; } 100% { transform: scale(2.4); opacity: 0; } }
+    @keyframes lmaEqA { 0%,100% { transform: scaleY(.35); } 50% { transform: scaleY(1); } }
+    @keyframes lmaEqB { 0%,100% { transform: scaleY(.6); } 40% { transform: scaleY(.25); } 70% { transform: scaleY(.95); } }
+    @keyframes lmaEmber { 0%,100% { opacity: .7; transform: scale(1); } 50% { opacity: 1; transform: scale(1.25); } }
+    @keyframes lmaNeedle { 0%,100% { transform: rotate(-22deg); } 50% { transform: rotate(26deg); } }
+    @keyframes lmaScan { 0% { left: -20%; } 100% { left: 120%; } }
+  </style>
+</helmet>
+<div style="width: max-content; min-width: 100%; min-height: 100vh; box-sizing: border-box; padding: 56px; background: #14110F; font-family: 'Hanken Grotesk', sans-serif;">
+
+  <div style="margin-bottom: 12px; max-width: 820px;">
+    <div style="font-family:'Space Mono', monospace; color: #C9A86A; font-size: 12px; letter-spacing: 3px; text-transform: uppercase;">LMA · Three visual directions</div>
+    <div style="font-family:'Cormorant Garamond', serif; color:#F2EBDD; font-size: 44px; font-weight: 600; line-height: 1.02; margin-top: 8px;">Same method, three feels</div>
+    <div style="color: #A89F8F; font-size: 13px; line-height: 1.7; margin-top: 12px; font-family:'Hanken Grotesk',sans-serif;">Method is locked across all three: <b style="color:#C9A86A; color:#C9A86A;">GRASP → HUM → SHADOW → READ → RECALL</b>, 10 sentences flowing through every step in order. GRASP / HUM / SHADOW are <b style="color:#C9A86A;">audio-only — nothing to read</b> (ears before eyes). Text first appears in READ, with an optional transliteration toggle there. Each step is <b style="color:#C9A86A;">gated</b>: clear all 10 (4★ or 3 attempts each) to unlock the next. Mic records live while audio plays · forward-only · every take = <b style="color:#C9A86A;">+1 rep</b> (the hero metric). Only the visual / experiential treatment changes below.</div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- DIRECTION 1 · QUIET LUXURY / EDITORIAL -->
+  <!-- ============================================================ -->
+  <div style="margin: 40px 0 18px; max-width:820px;">
+    <div style="display:flex; align-items:baseline; gap:12px;">
+      <div style="font-family:'Cormorant Garamond',serif; color:#C9A86A; font-size:30px; font-weight:600;">Direction 1</div>
+      <div style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:12px; letter-spacing:2px; text-transform:uppercase;">Quiet luxury · editorial</div>
+    </div>
+    <div style="color:#A89F8F; font-size:12.5px; line-height:1.65; margin-top:5px;">Maximum restraint — one idea per screen, generous negative space, large refined serif. Recording is a soft <b style="color:#C9A86A;">breathing dot</b>, never a chunky block. Feels like a premium meditation app: calm, confident, expensive.</div>
+  </div>
+
+  <div style="display:flex; gap:36px; align-items:flex-start; margin-bottom:24px;">
+
+    <!-- D1 · ENTRY -->
+    <div style="flex:none; width:300px;">
+      <div style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:11px; letter-spacing:1px; margin-bottom:10px;">ENTRY · name select</div>
+      <div style="width:300px; height:630px; background:#1A1714; border:1px solid rgba(201,168,106,.16); border-radius:38px; overflow:hidden; display:flex; flex-direction:column; position:relative;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 26px 0; color:#6E6657; font-size:10px; font-family:'Hanken Grotesk',sans-serif;"><span>9:41</span><span>● ● ● ▮</span></div>
+
+        <div style="padding:54px 30px 0; text-align:center;">
+          <div style="font-family:'Space Mono',monospace; color:#C9A86A; font-size:11px; letter-spacing:5px;">L · M · A</div>
+          <div style="font-family:'Cormorant Garamond',serif; color:#F2EBDD; font-size:34px; font-weight:500; line-height:1.12; margin-top:26px;">Good evening.</div>
+          <div style="color:#A89F8F; font-size:13px; margin-top:10px; font-family:'Hanken Grotesk',sans-serif;">Select your name to begin.</div>
+        </div>
+
+        <!-- a calm vertical list, not a grid -->
+        <div style="flex:1; overflow-y:auto; padding:40px 30px 30px;">
+          <div style="padding:17px 0; border-bottom:1px solid rgba(201,168,106,.14); display:flex; justify-content:space-between; align-items:baseline;">
+            <span style="font-family:'Cormorant Garamond',serif; color:#F2EBDD; font-size:23px;">Marcus</span>
+            <span style="font-family:'Space Mono',monospace; color:#C9A86A; font-size:10px; letter-spacing:1px;">DEUTSCH</span>
+          </div>
+          <div style="padding:17px 0; border-bottom:1px solid rgba(201,168,106,.14); display:flex; justify-content:space-between; align-items:baseline;">
+            <span style="font-family:'Cormorant Garamond',serif; color:#A89F8F; font-size:23px;">Priya</span>
+            <span style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:10px; letter-spacing:1px;">РУССКИЙ</span>
+          </div>
+          <div style="padding:17px 0; border-bottom:1px solid rgba(201,168,106,.14); display:flex; justify-content:space-between; align-items:baseline;">
+            <span style="font-family:'Cormorant Garamond',serif; color:#A89F8F; font-size:23px;">Tomás</span>
+            <span style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:10px; letter-spacing:1px;">ESPAÑOL</span>
+          </div>
+          <div style="padding:17px 0; border-bottom:1px solid rgba(201,168,106,.14); display:flex; justify-content:space-between; align-items:baseline;">
+            <span style="font-family:'Cormorant Garamond',serif; color:#A89F8F; font-size:23px;">Ngozi</span>
+            <span style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:10px; letter-spacing:1px;">FRANÇAIS</span>
+          </div>
+          <div style="padding:17px 0; border-bottom:1px solid rgba(201,168,106,.14); display:flex; justify-content:space-between; align-items:baseline;">
+            <span style="font-family:'Cormorant Garamond',serif; color:#A89F8F; font-size:23px;">Daniel</span>
+            <span style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:10px; letter-spacing:1px;">한국어</span>
+          </div>
+          <div style="padding:17px 0; display:flex; justify-content:space-between; align-items:baseline;">
+            <span style="font-family:'Cormorant Garamond',serif; color:#A89F8F; font-size:23px;">Aisha</span>
+            <span style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:10px; letter-spacing:1px;">DEUTSCH</span>
+          </div>
+          <div style="text-align:center; color:#6E6657; font-size:11px; padding-top:22px; font-family:'Hanken Grotesk',sans-serif;">34 more</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- D1 · DASHBOARD -->
+    <div style="flex:none; width:300px;">
+      <div style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:11px; letter-spacing:1px; margin-bottom:10px;">DASHBOARD</div>
+      <div style="width:300px; height:630px; background:#1A1714; border:1px solid rgba(201,168,106,.16); border-radius:38px; overflow:hidden; display:flex; flex-direction:column; position:relative;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 26px 0; color:#6E6657; font-size:10px;"><span>9:41</span><span>● ● ● ▮</span></div>
+
+        <div style="flex:1; overflow-y:auto; padding:30px 28px 90px;">
+          <div style="color:#A89F8F; font-size:12px;">Marcus · Deutsch</div>
+
+          <!-- ONE hero element: reps, set in space -->
+          <div style="margin-top:48px; text-align:center;">
+            <div style="font-family:'Cormorant Garamond',serif; color:#C9A86A; font-size:84px; font-weight:500; line-height:.9;">1,248</div>
+            <div style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:10px; letter-spacing:3px; text-transform:uppercase; margin-top:10px;">reps gathered</div>
+          </div>
+
+          <div style="margin-top:54px; height:1px; background:rgba(201,168,106,.14);"></div>
+
+          <!-- quiet detail rows -->
+          <div style="display:flex; justify-content:space-between; padding:16px 0; border-bottom:1px solid rgba(201,168,106,.1);">
+            <span style="color:#A89F8F; font-size:12px;">Today</span>
+            <span style="font-family:'Cormorant Garamond',serif; color:#F2EBDD; font-size:17px;">Lesson 4 · At the market</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:16px 0; border-bottom:1px solid rgba(201,168,106,.1);">
+            <span style="color:#A89F8F; font-size:12px;">Step</span>
+            <span style="font-family:'Cormorant Garamond',serif; color:#F2EBDD; font-size:17px;">Shadow · 7 of 10 cleared</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:16px 0; border-bottom:1px solid rgba(201,168,106,.1);">
+            <span style="color:#A89F8F; font-size:12px;">Companion</span>
+            <span style="font-family:'Cormorant Garamond',serif; color:#F2EBDD; font-size:17px;">Lena</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:16px 0; border-bottom:1px solid rgba(201,168,106,.1);">
+            <span style="color:#A89F8F; font-size:12px;">Guide</span>
+            <span style="font-family:'Cormorant Garamond',serif; color:#F2EBDD; font-size:17px;">Anya K.</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:16px 0;">
+            <span style="color:#A89F8F; font-size:12px;">Next session</span>
+            <span style="font-family:'Cormorant Garamond',serif; color:#F2EBDD; font-size:17px;">Thu · 4:00</span>
+          </div>
+          <div style="color:#6E6657; font-size:11px; margin-top:6px;">Day 11 of your 28-day Adventure</div>
+        </div>
+
+        <div style="position:absolute; left:0; right:0; bottom:0; padding:0 28px 30px; background:linear-gradient(transparent,#1A1714 34%);">
+          <div style="border:1px solid rgba(201,168,106,.5); color:#C9A86A; text-align:center; font-family:'Cormorant Garamond',serif; font-size:19px; padding:15px; border-radius:30px; letter-spacing:.5px;">Continue practice</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- D1 · SHADOW (listening, no text) -->
+    <div style="flex:none; width:300px;">
+      <div style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:11px; letter-spacing:1px; margin-bottom:10px;">SHADOW · audio only, no text</div>
+      <div style="width:300px; height:630px; background:#1A1714; border:1px solid rgba(201,168,106,.16); border-radius:38px; overflow:hidden; display:flex; flex-direction:column; position:relative;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 26px 0; color:#6E6657; font-size:10px;"><span>9:41</span><span>● ● ● ▮</span></div>
+
+        <!-- minimal step indicator: 5 hairline ticks -->
+        <div style="padding:22px 30px 0;">
+          <div style="display:flex; gap:7px; align-items:center;">
+            <span style="flex:1; height:2px; background:#C9A86A;"></span>
+            <span style="flex:1; height:2px; background:#C9A86A;"></span>
+            <span style="flex:1; height:2px; background:#C9A86A;"></span>
+            <span style="flex:1; height:2px; background:rgba(201,168,106,.2);"></span>
+            <span style="flex:1; height:2px; background:rgba(201,168,106,.2);"></span>
+          </div>
+          <div style="text-align:center; margin-top:26px;">
+            <div style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:10px; letter-spacing:4px;">STEP THREE</div>
+            <div style="font-family:'Cormorant Garamond',serif; color:#F2EBDD; font-size:40px; font-weight:500; margin-top:6px;">Shadow</div>
+            <div style="color:#A89F8F; font-size:13px; margin-top:8px; line-height:1.5;">Speak with the voice.<br>Eyes closed if you like.</div>
+          </div>
+        </div>
+
+        <!-- the screen's single object: a breathing orb. NO text to read. -->
+        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:30px;">
+          <div style="position:relative; width:150px; height:150px; display:flex; align-items:center; justify-content:center;">
+            <span style="position:absolute; width:150px; height:150px; border-radius:50%; border:1px solid rgba(201,168,106,.35); animation:lmaRingOut 3.4s infinite ease-out;"></span>
+            <span style="position:absolute; width:150px; height:150px; border-radius:50%; border:1px solid rgba(201,168,106,.25); animation:lmaRingOut 3.4s infinite ease-out 1.7s;"></span>
+            <span style="width:96px; height:96px; border-radius:50%; background:radial-gradient(circle at 50% 40%, rgba(216,188,130,.9), rgba(201,168,106,.25)); animation:lmaBreath 3.4s infinite ease-in-out;"></span>
+          </div>
+          <!-- breathing-dot record indicator: subtle -->
+          <div style="display:flex; align-items:center; gap:9px;">
+            <span style="width:7px; height:7px; border-radius:50%; background:#C8694A; animation:lmaBreath 2s infinite ease-in-out;"></span>
+            <span style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:10px; letter-spacing:2px;">listening to you</span>
+          </div>
+        </div>
+
+        <!-- forward-only progress + gate, understated -->
+        <div style="padding:0 30px 30px;">
+          <div style="height:2px; background:rgba(201,168,106,.16); border-radius:2px; overflow:hidden; margin-bottom:18px;"><div style="width:46%; height:100%; background:#C9A86A;"></div></div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-family:'Cormorant Garamond',serif; color:#C9A86A; font-size:26px; line-height:.9;">+1</div>
+              <div style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:9px; letter-spacing:1px;">REP · TAKE 3</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="color:#A89F8F; font-size:11px;">to unlock READ</div>
+              <div style="font-family:'Cormorant Garamond',serif; color:#F2EBDD; font-size:17px;">7 of 10 cleared</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- D1 · READ (text appears) -->
+    <div style="flex:none; width:300px;">
+      <div style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:11px; letter-spacing:1px; margin-bottom:10px;">READ · text appears + translit toggle</div>
+      <div style="width:300px; height:630px; background:#1A1714; border:1px solid rgba(201,168,106,.16); border-radius:38px; overflow:hidden; display:flex; flex-direction:column; position:relative;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 26px 0; color:#6E6657; font-size:10px;"><span>9:41</span><span>● ● ● ▮</span></div>
+
+        <div style="padding:22px 30px 0;">
+          <div style="display:flex; gap:7px; align-items:center;">
+            <span style="flex:1; height:2px; background:#C9A86A;"></span>
+            <span style="flex:1; height:2px; background:#C9A86A;"></span>
+            <span style="flex:1; height:2px; background:#C9A86A;"></span>
+            <span style="flex:1; height:2px; background:#C9A86A;"></span>
+            <span style="flex:1; height:2px; background:rgba(201,168,106,.2);"></span>
+          </div>
+          <div style="text-align:center; margin-top:26px;">
+            <div style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:10px; letter-spacing:4px;">STEP FOUR</div>
+            <div style="font-family:'Cormorant Garamond',serif; color:#F2EBDD; font-size:40px; font-weight:500; margin-top:6px;">Read</div>
+            <div style="color:#A89F8F; font-size:13px; margin-top:8px;">Now you may see the words.</div>
+          </div>
+        </div>
+
+        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:0 32px;">
+          <!-- the text, finally. set like a quotation. -->
+          <div style="font-family:'Cormorant Garamond',serif; color:#F2EBDD; font-size:34px; font-weight:500; line-height:1.18; text-align:center;">Wo ist das Brot, bitte?</div>
+          <div style="color:#A89F8F; font-size:14px; margin-top:14px; text-align:center; font-style:italic;">Where is the bread, please?</div>
+
+          <!-- transliteration: revealed via toggle, only here -->
+          <div style="margin-top:30px; width:100%;">
+            <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
+              <span style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:10px; letter-spacing:1px;">TRANSLITERATION</span>
+              <span style="width:34px; height:18px; border-radius:10px; background:rgba(201,168,106,.5); position:relative; display:inline-block;"><span style="position:absolute; right:2px; top:2px; width:14px; height:14px; border-radius:50%; background:#F2EBDD;"></span></span>
+            </div>
+            <div style="text-align:center; color:#C9A86A; font-size:14px; margin-top:12px; font-family:'Hanken Grotesk',sans-serif;">voh ist dass broht, BIT-tuh</div>
+          </div>
+        </div>
+
+        <div style="padding:0 30px 30px;">
+          <div style="height:2px; background:rgba(201,168,106,.16); border-radius:2px; overflow:hidden; margin-bottom:16px;"><div style="width:70%; height:100%; background:#C9A86A;"></div></div>
+          <div style="display:flex; align-items:center; gap:14px;">
+            <span style="width:7px; height:7px; border-radius:50%; background:#C8694A; animation:lmaBreath 2s infinite ease-in-out;"></span>
+            <span style="flex:1; font-family:'Space Mono',monospace; color:#A89F8F; font-size:9px; letter-spacing:1px;">RECORDING · FORWARD ONLY</span>
+            <span style="font-family:'Cormorant Garamond',serif; color:#C9A86A; font-size:22px;">+1</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="flex:none; width:200px; align-self:center; color:#A89F8F; font-size:12.5px; line-height:1.7;">
+      Every surface is finished — hairline rules, no boxes. The listening steps give you <b style="color:#C9A86A;">nothing to read</b>: just a breathing orb and your own voice. Text arrives in READ like a reveal.
+    </div>
+
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- DIRECTION 2 · EXPEDITION / JOURNEY -->
+  <!-- ============================================================ -->
+  <div style="margin: 52px 0 18px; max-width:820px;">
+    <div style="display:flex; align-items:baseline; gap:12px;">
+      <div style="font-family:'Spectral',serif; color:#C9A86A; font-size:30px; font-weight:600;">Direction 2</div>
+      <div style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:12px; letter-spacing:2px; text-transform:uppercase;">The expedition · journey</div>
+    </div>
+    <div style="color:#A89F8F; font-size:12.5px; line-height:1.65; margin-top:5px;">Leans into the LMA adventure metaphor: a <b style="color:#C9A86A;">visible trail</b> through the 5 steps and across lessons. Progress feels like moving through a landscape. Warm, narrative, motivating — premium gold-on-dark, the ember accent for live mic, never childish.</div>
+  </div>
+
+  <div style="display:flex; gap:36px; align-items:flex-start; margin-bottom:24px;">
+
+    <!-- D2 · ENTRY -->
+    <div style="flex:none; width:300px;">
+      <div style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:11px; letter-spacing:1px; margin-bottom:10px;">ENTRY · choose your traveller</div>
+      <div style="width:300px; height:630px; background:#1A1714; border:1px solid rgba(201,168,106,.18); border-radius:38px; overflow:hidden; display:flex; flex-direction:column; position:relative;">
+        <div style="position:absolute; inset:0; background:radial-gradient(130% 80% at 50% -10%, rgba(201,168,106,.12), transparent 55%);"></div>
+        <div style="position:relative; display:flex; justify-content:space-between; align-items:center; padding:16px 26px 0; color:#6E6657; font-size:10px;"><span>9:41</span><span>● ● ● ▮</span></div>
+
+        <div style="position:relative; padding:34px 28px 8px; text-align:center;">
+          <div style="font-family:'Space Mono',monospace; color:#C9A86A; font-size:11px; letter-spacing:4px;">L M A · EXPEDITIONS</div>
+          <div style="font-family:'Spectral',serif; color:#F2EBDD; font-size:30px; font-weight:600; line-height:1.1; margin-top:14px;">Who travels<br>today?</div>
+        </div>
+
+        <div style="position:relative; flex:1; overflow-y:auto; padding:18px 22px 26px;">
+          <!-- traveller cards w/ trail dot + miles -->
+          <div style="display:flex; align-items:center; gap:13px; background:rgba(201,168,106,.07); border:1px solid rgba(201,168,106,.4); border-radius:16px; padding:13px; margin-bottom:11px;">
+            <span style="width:40px; height:40px; border-radius:50%; background:radial-gradient(circle at 40% 35%, #C9A86A, #6E5836); flex:none; display:flex; align-items:center; justify-content:center; font-family:'Spectral',serif; color:#1A1714; font-size:18px; font-weight:600;">M</span>
+            <div style="flex:1;"><div style="font-family:'Spectral',serif; color:#F2EBDD; font-size:18px;">Marcus</div><div style="color:#A89F8F; font-size:10px; font-family:'Space Mono',monospace;">DEUTSCH · DAY 11 / 28</div></div>
+            <span style="color:#C9A86A; font-size:16px;">›</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:13px; border:1px solid rgba(168,159,143,.3); border-radius:16px; padding:13px; margin-bottom:11px;">
+            <span style="width:40px; height:40px; border-radius:50%; background:#24201B; flex:none; display:flex; align-items:center; justify-content:center; font-family:'Spectral',serif; color:#A89F8F; font-size:18px;">P</span>
+            <div style="flex:1;"><div style="font-family:'Spectral',serif; color:#A89F8F; font-size:18px;">Priya</div><div style="color:#A89F8F; font-size:10px; font-family:'Space Mono',monospace;">РУССКИЙ · DAY 4 / 28</div></div>
+            <span style="color:#6E6657; font-size:16px;">›</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:13px; border:1px solid rgba(168,159,143,.3); border-radius:16px; padding:13px; margin-bottom:11px;">
+            <span style="width:40px; height:40px; border-radius:50%; background:#24201B; flex:none; display:flex; align-items:center; justify-content:center; font-family:'Spectral',serif; color:#A89F8F; font-size:18px;">T</span>
+            <div style="flex:1;"><div style="font-family:'Spectral',serif; color:#A89F8F; font-size:18px;">Tomás</div><div style="color:#A89F8F; font-size:10px; font-family:'Space Mono',monospace;">ESPAÑOL · WK 6 / 12</div></div>
+            <span style="color:#6E6657; font-size:16px;">›</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:13px; border:1px solid rgba(168,159,143,.3); border-radius:16px; padding:13px; margin-bottom:11px;">
+            <span style="width:40px; height:40px; border-radius:50%; background:#24201B; flex:none; display:flex; align-items:center; justify-content:center; font-family:'Spectral',serif; color:#A89F8F; font-size:18px;">N</span>
+            <div style="flex:1;"><div style="font-family:'Spectral',serif; color:#A89F8F; font-size:18px;">Ngozi</div><div style="color:#A89F8F; font-size:10px; font-family:'Space Mono',monospace;">FRANÇAIS · DAY 2 / 28</div></div>
+            <span style="color:#6E6657; font-size:16px;">›</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:13px; border:1px solid rgba(168,159,143,.3); border-radius:16px; padding:13px;">
+            <span style="width:40px; height:40px; border-radius:50%; background:#24201B; flex:none; display:flex; align-items:center; justify-content:center; font-family:'Spectral',serif; color:#A89F8F; font-size:18px;">D</span>
+            <div style="flex:1;"><div style="font-family:'Spectral',serif; color:#A89F8F; font-size:18px;">Daniel</div><div style="color:#A89F8F; font-size:10px; font-family:'Space Mono',monospace;">한국어 · WK 9 / 12</div></div>
+            <span style="color:#6E6657; font-size:16px;">›</span>
+          </div>
+          <div style="text-align:center; color:#6E6657; font-size:11px; padding-top:18px;">35 travellers in all</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- D2 · DASHBOARD (the trail) -->
+    <div style="flex:none; width:300px;">
+      <div style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:11px; letter-spacing:1px; margin-bottom:10px;">DASHBOARD · the trail</div>
+      <div style="width:300px; height:630px; background:#1A1714; border:1px solid rgba(201,168,106,.18); border-radius:38px; overflow:hidden; display:flex; flex-direction:column; position:relative;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 26px 0; color:#6E6657; font-size:10px;"><span>9:41</span><span>● ● ● ▮</span></div>
+
+        <div style="flex:1; overflow-y:auto; padding:18px 26px 92px;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+              <div style="font-family:'Spectral',serif; color:#F2EBDD; font-size:22px; line-height:1.1;">Marcus’s<br>German Expedition</div>
+              <div style="color:#A89F8F; font-size:11px; margin-top:5px; font-family:'Space Mono',monospace;">DAY 11 / 28 · GUIDE ANYA</div>
+            </div>
+          </div>
+
+          <!-- reps hero, framed as distance travelled -->
+          <div style="margin-top:18px; border:1px solid rgba(201,168,106,.4); background:rgba(201,168,106,.07); border-radius:18px; padding:16px; text-align:center; position:relative; overflow:hidden;">
+            <div style="font-family:'Spectral',serif; color:#C9A86A; font-size:52px; font-weight:600; line-height:.95;">1,248</div>
+            <div style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:10px; letter-spacing:2px;">REPS ALONG THE WAY · +35 TODAY</div>
+          </div>
+
+          <!-- THE TRAIL through the 5 steps of today's lesson -->
+          <div style="margin-top:18px;">
+            <div style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:10px; letter-spacing:2px; margin-bottom:6px;">LESSON 4 · AT THE MARKET</div>
+            <div style="position:relative; padding:8px 0;">
+              <svg viewBox="0 0 250 150" style="width:100%; height:150px; display:block;">
+                <path d="M20 20 C 90 10, 60 55, 130 55 S 200 95, 110 100 S 60 135, 230 135" fill="none" stroke="rgba(201,168,106,.25)" stroke-width="2.5" stroke-dasharray="2 6" stroke-linecap="round"/>
+                <path d="M20 20 C 90 10, 60 55, 130 55 S 200 95, 110 100" fill="none" stroke="#C9A86A" stroke-width="2.5" stroke-linecap="round"/>
+                <!-- milestones -->
+                <circle cx="20" cy="20" r="7" fill="#C9A86A"/><circle cx="130" cy="55" r="7" fill="#C9A86A"/>
+                <circle cx="110" cy="100" r="9" fill="#1A1714" stroke="#C9A86A" stroke-width="2.5"/>
+                <circle cx="110" cy="100" r="3.5" fill="#C9A86A"/>
+                <circle cx="180" cy="118" r="7" fill="none" stroke="rgba(168,159,143,.5)" stroke-width="2"/>
+                <circle cx="230" cy="135" r="7" fill="none" stroke="rgba(168,159,143,.5)" stroke-width="2"/>
+              </svg>
+              <!-- step labels -->
+              <div style="display:flex; justify-content:space-between; font-family:'Space Mono',monospace; font-size:8px; margin-top:2px;">
+                <span style="color:#C9A86A;">GRASP</span><span style="color:#C9A86A;">HUM</span><span style="color:#C9A86A;">SHADOW</span><span style="color:#6E6657;">READ</span><span style="color:#6E6657;">RECALL</span>
+              </div>
+            </div>
+            <div style="text-align:center; color:#A89F8F; font-size:12px; margin-top:6px; font-family:'Spectral',serif;">You’re shadowing · 7 of 10 cleared to reach READ</div>
+          </div>
+
+          <!-- companion strip -->
+          <div style="margin-top:16px; display:flex; gap:10px; color:#A89F8F; font-size:10px;">
+            <div style="flex:1; border:1px solid rgba(168,159,143,.3); border-radius:13px; padding:10px;"><div style="font-family:'Space Mono',monospace; font-size:8px; letter-spacing:1px;">COMPANION</div><div style="font-family:'Spectral',serif; color:#F2EBDD; font-size:15px; margin-top:2px;">Lena</div></div>
+            <div style="flex:1; border:1px solid rgba(168,159,143,.3); border-radius:13px; padding:10px;"><div style="font-family:'Space Mono',monospace; font-size:8px; letter-spacing:1px;">CAMP · NEXT</div><div style="font-family:'Spectral',serif; color:#F2EBDD; font-size:15px; margin-top:2px;">Thu · 4pm</div></div>
+          </div>
+        </div>
+
+        <div style="position:absolute; left:0; right:0; bottom:0; height:60px; background:#100E0C; border-top:1px solid rgba(201,168,106,.18); display:flex; align-items:center; justify-content:space-around; padding-bottom:4px;">
+          <div style="display:flex; flex-direction:column; align-items:center; gap:3px; color:#C9A86A;"><span style="font-size:13px;">⛰</span><span style="font-size:9px; font-family:'Space Mono',monospace;">Trail</span></div>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:3px; color:#6E6657;"><span style="font-size:13px;">◉</span><span style="font-size:9px; font-family:'Space Mono',monospace;">Practice</span></div>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:3px; color:#6E6657;"><span style="font-size:13px;">❖</span><span style="font-size:9px; font-family:'Space Mono',monospace;">Journey</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- D2 · GRASP (listening, no text) -->
+    <div style="flex:none; width:300px;">
+      <div style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:11px; letter-spacing:1px; margin-bottom:10px;">GRASP · audio only, no text</div>
+      <div style="width:300px; height:630px; background:#1A1714; border:1px solid rgba(201,168,106,.18); border-radius:38px; overflow:hidden; display:flex; flex-direction:column; position:relative;">
+        <div style="position:absolute; inset:0; background:radial-gradient(120% 60% at 50% 8%, rgba(201,168,106,.1), transparent 50%);"></div>
+        <div style="position:relative; display:flex; justify-content:space-between; align-items:center; padding:16px 26px 0; color:#6E6657; font-size:10px;"><span>9:41</span><span>● ● ● ▮</span></div>
+
+        <!-- trail-style step tracker at top -->
+        <div style="position:relative; padding:20px 26px 0;">
+          <div style="display:flex; align-items:center;">
+            <span style="width:16px; height:16px; border-radius:50%; background:#C9A86A; display:flex; align-items:center; justify-content:center; font-size:9px; color:#1A1714;">●</span>
+            <span style="flex:1; height:2px; background:#C9A86A;"></span>
+            <span style="width:10px; height:10px; border-radius:50%; background:#6E6657;"></span>
+            <span style="flex:1; height:2px; background:rgba(168,159,143,.3);"></span>
+            <span style="width:10px; height:10px; border-radius:50%; background:#322D26;"></span>
+            <span style="flex:1; height:2px; background:rgba(168,159,143,.3);"></span>
+            <span style="width:10px; height:10px; border-radius:50%; background:#322D26;"></span>
+            <span style="flex:1; height:2px; background:rgba(168,159,143,.3);"></span>
+            <span style="width:10px; height:10px; border-radius:50%; background:#322D26;"></span>
+          </div>
+          <div style="text-align:center; margin-top:22px;">
+            <div style="font-family:'Space Mono',monospace; color:#C9A86A; font-size:10px; letter-spacing:4px;">FIRST CAMP</div>
+            <div style="font-family:'Spectral',serif; color:#F2EBDD; font-size:34px; font-weight:600; margin-top:5px;">Grasp</div>
+            <div style="color:#A89F8F; font-size:12.5px; margin-top:7px; line-height:1.5; padding:0 18px;">Just listen. Let the meaning arrive on its own.</div>
+          </div>
+        </div>
+
+        <!-- listening scene: NO text. an ember by the path. -->
+        <div style="position:relative; flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:26px;">
+          <div style="position:relative; width:130px; height:130px; display:flex; align-items:center; justify-content:center;">
+            <span style="position:absolute; width:130px; height:130px; border-radius:50%; border:1px solid rgba(201,168,106,.3); animation:lmaRingOut 3s infinite ease-out;"></span>
+            <span style="width:78px; height:78px; border-radius:50%; background:radial-gradient(circle at 50% 45%, #D8BC82, #7A6238); box-shadow:0 0 40px rgba(201,168,106,.4); animation:lmaEmber 2.6s infinite ease-in-out;"></span>
+          </div>
+          <div style="display:flex; align-items:center; gap:9px;">
+            <span style="width:8px; height:8px; border-radius:50%; background:#C8694A; animation:lmaEmber 1.6s infinite ease-in-out;"></span>
+            <span style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:10px; letter-spacing:1px;">MIC OPEN WHILE YOU LISTEN</span>
+          </div>
+        </div>
+
+        <!-- play + gate -->
+        <div style="position:relative; padding:0 26px 26px;">
+          <div style="display:flex; align-items:center; gap:13px; margin-bottom:14px;">
+            <span style="width:48px; height:48px; border-radius:50%; background:#C9A86A; color:#1A1714; display:flex; align-items:center; justify-content:center; font-size:16px; flex:none;">▶</span>
+            <div style="flex:1;">
+              <div style="height:4px; background:rgba(168,159,143,.25); border-radius:3px; overflow:hidden;"><div style="width:40%; height:100%; background:#C9A86A;"></div></div>
+              <div style="color:#6E6657; font-size:9px; margin-top:5px; font-family:'Space Mono',monospace;">FORWARD ONLY · NO GOING BACK</div>
+            </div>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid rgba(201,168,106,.16); padding-top:12px;">
+            <span style="font-family:'Spectral',serif; color:#C9A86A; font-size:20px;">Sentence 8 / 10</span>
+            <span style="color:#A89F8F; font-size:12px;">●●●● <span style="color:#322D26;">— +1 rep</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- D2 · READ (text appears) -->
+    <div style="flex:none; width:300px;">
+      <div style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:11px; letter-spacing:1px; margin-bottom:10px;">READ · text appears + translit toggle</div>
+      <div style="width:300px; height:630px; background:#1A1714; border:1px solid rgba(201,168,106,.18); border-radius:38px; overflow:hidden; display:flex; flex-direction:column; position:relative;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 26px 0; color:#6E6657; font-size:10px;"><span>9:41</span><span>● ● ● ▮</span></div>
+
+        <div style="padding:20px 26px 0;">
+          <div style="display:flex; align-items:center;">
+            <span style="width:10px; height:10px; border-radius:50%; background:#C9A86A;"></span>
+            <span style="flex:1; height:2px; background:#C9A86A;"></span>
+            <span style="width:10px; height:10px; border-radius:50%; background:#C9A86A;"></span>
+            <span style="flex:1; height:2px; background:#C9A86A;"></span>
+            <span style="width:10px; height:10px; border-radius:50%; background:#C9A86A;"></span>
+            <span style="flex:1; height:2px; background:#C9A86A;"></span>
+            <span style="width:16px; height:16px; border-radius:50%; background:#C9A86A; display:flex; align-items:center; justify-content:center; font-size:9px; color:#1A1714;">●</span>
+            <span style="flex:1; height:2px; background:rgba(168,159,143,.3);"></span>
+            <span style="width:10px; height:10px; border-radius:50%; background:#322D26;"></span>
+          </div>
+          <div style="text-align:center; margin-top:22px;">
+            <div style="font-family:'Space Mono',monospace; color:#C9A86A; font-size:10px; letter-spacing:4px;">THE CLEARING</div>
+            <div style="font-family:'Spectral',serif; color:#F2EBDD; font-size:34px; font-weight:600; margin-top:5px;">Read</div>
+            <div style="color:#A89F8F; font-size:12.5px; margin-top:7px;">The words come into view at last.</div>
+          </div>
+        </div>
+
+        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:0 28px;">
+          <div style="border:1px solid rgba(201,168,106,.35); background:rgba(201,168,106,.06); border-radius:18px; padding:24px 20px; width:100%; text-align:center;">
+            <div style="font-family:'Spectral',serif; color:#F2EBDD; font-size:28px; font-weight:600; line-height:1.2;">Wo ist das Brot, bitte?</div>
+            <div style="color:#A89F8F; font-size:13px; margin-top:10px; font-style:italic;">Where is the bread, please?</div>
+            <div style="height:1px; background:rgba(201,168,106,.18); margin:18px 0;"></div>
+            <div style="display:flex; align-items:center; justify-content:center; gap:9px;">
+              <span style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:9px; letter-spacing:1px;">SHOW TRANSLITERATION</span>
+              <span style="width:32px; height:17px; border-radius:10px; background:rgba(168,159,143,.4); position:relative; display:inline-block;"><span style="position:absolute; left:2px; top:2px; width:13px; height:13px; border-radius:50%; background:#A89F8F;"></span></span>
+            </div>
+            <div style="color:#6E6657; font-size:11px; margin-top:9px;">Flip on if the script is still new</div>
+          </div>
+        </div>
+
+        <div style="padding:0 26px 26px;">
+          <div style="height:4px; background:rgba(168,159,143,.25); border-radius:3px; overflow:hidden; margin-bottom:14px;"><div style="width:66%; height:100%; background:#C9A86A;"></div></div>
+          <div style="display:flex; align-items:center; gap:11px;">
+            <span style="width:8px; height:8px; border-radius:50%; background:#C8694A; animation:lmaEmber 1.6s infinite ease-in-out;"></span>
+            <span style="flex:1; font-family:'Space Mono',monospace; color:#A89F8F; font-size:9px; letter-spacing:1px;">READING ALOUD · MIC OPEN</span>
+            <span style="font-family:'Spectral',serif; color:#C9A86A; font-size:18px;">Sentence 6 / 10</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="flex:none; width:200px; align-self:center; color:#A89F8F; font-size:12.5px; line-height:1.7;">
+      The <b style="color:#C9A86A;">trail</b> appears twice — across the lesson’s 5 steps (top of practice) and the whole journey (dashboard). You always see where you are and what’s over the next ridge.
+    </div>
+
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- DIRECTION 3 · FOCUSED PRACTICE INSTRUMENT -->
+  <!-- ============================================================ -->
+  <div style="margin: 52px 0 18px; max-width:820px;">
+    <div style="display:flex; align-items:baseline; gap:12px;">
+      <div style="font-family:'Space Grotesk',sans-serif; color:#C9A86A; font-size:30px; font-weight:700;">Direction 3</div>
+      <div style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:12px; letter-spacing:2px; text-transform:uppercase;">Focused practice instrument</div>
+    </div>
+    <div style="color:#A89F8F; font-size:12.5px; line-height:1.65; margin-top:5px;">A precision tool for the ear — high-end audio hardware, a musician’s app. The <b style="color:#C9A86A;">audio and recording state are the stars</b>: refined waveforms, a calibrated step-gate, the 4★ threshold shown as an elegant meter. Tactile, immediate, satisfying.</div>
+  </div>
+
+  <div style="display:flex; gap:36px; align-items:flex-start; margin-bottom:24px;">
+
+    <!-- D3 · ENTRY -->
+    <div style="flex:none; width:300px;">
+      <div style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:11px; letter-spacing:1px; margin-bottom:10px;">ENTRY · select operator</div>
+      <div style="width:300px; height:630px; background:#1A1714; border:1px solid rgba(201,168,106,.18); border-radius:38px; overflow:hidden; display:flex; flex-direction:column; position:relative;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 26px 0; color:#6E6657; font-size:10px; font-family:'Space Mono',monospace;"><span>9:41</span><span>● ● ● ▮</span></div>
+
+        <div style="padding:30px 26px 6px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="width:9px; height:9px; border-radius:50%; background:#C8694A; box-shadow:0 0 8px #C8694A;"></span>
+            <span style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:10px; letter-spacing:3px;">LMA · STUDIO READY</span>
+          </div>
+          <div style="font-family:'Space Grotesk',sans-serif; color:#F2EBDD; font-size:27px; font-weight:700; line-height:1.1; margin-top:16px;">Select profile</div>
+          <div style="color:#A89F8F; font-size:12px; margin-top:4px; font-family:'Space Mono',monospace;">TAP TO LOAD SESSION</div>
+        </div>
+
+        <div style="flex:1; overflow-y:auto; padding:18px 22px 26px;">
+          <!-- operator rows w/ level meters -->
+          <div style="border:1px solid rgba(201,168,106,.45); background:rgba(201,168,106,.06); border-radius:14px; padding:13px; margin-bottom:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-family:'Space Grotesk',sans-serif; color:#F2EBDD; font-size:17px; font-weight:600;">Marcus</span>
+              <span style="font-family:'Space Mono',monospace; color:#C9A86A; font-size:10px;">DE</span>
+            </div>
+            <div style="display:flex; gap:2px; align-items:flex-end; height:13px; margin-top:9px;">
+              <i style="flex:1; height:50%; background:#C9A86A;"></i><i style="flex:1; height:80%; background:#C9A86A;"></i><i style="flex:1; height:65%; background:#C9A86A;"></i><i style="flex:1; height:100%; background:#C9A86A;"></i><i style="flex:1; height:40%; background:#C9A86A;"></i><i style="flex:1; height:70%; background:#463F35;"></i><i style="flex:1; height:55%; background:#463F35;"></i><i style="flex:1; height:30%; background:#463F35;"></i>
+            </div>
+          </div>
+          <div style="border:1px solid rgba(168,159,143,.3); border-radius:14px; padding:13px; margin-bottom:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;"><span style="font-family:'Space Grotesk',sans-serif; color:#A89F8F; font-size:17px;">Priya</span><span style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:10px;">RU</span></div>
+            <div style="display:flex; gap:2px; align-items:flex-end; height:13px; margin-top:9px;"><i style="flex:1; height:40%; background:#322D26;"></i><i style="flex:1; height:60%; background:#322D26;"></i><i style="flex:1; height:45%; background:#322D26;"></i><i style="flex:1; height:30%; background:#322D26;"></i><i style="flex:1; height:55%; background:#322D26;"></i><i style="flex:1; height:35%; background:#322D26;"></i><i style="flex:1; height:50%; background:#322D26;"></i><i style="flex:1; height:25%; background:#322D26;"></i></div>
+          </div>
+          <div style="border:1px solid rgba(168,159,143,.3); border-radius:14px; padding:13px; margin-bottom:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;"><span style="font-family:'Space Grotesk',sans-serif; color:#A89F8F; font-size:17px;">Tomás</span><span style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:10px;">ES</span></div>
+            <div style="display:flex; gap:2px; align-items:flex-end; height:13px; margin-top:9px;"><i style="flex:1; height:50%; background:#322D26;"></i><i style="flex:1; height:35%; background:#322D26;"></i><i style="flex:1; height:60%; background:#322D26;"></i><i style="flex:1; height:45%; background:#322D26;"></i><i style="flex:1; height:30%; background:#322D26;"></i><i style="flex:1; height:55%; background:#322D26;"></i><i style="flex:1; height:40%; background:#322D26;"></i><i style="flex:1; height:50%; background:#322D26;"></i></div>
+          </div>
+          <div style="border:1px solid rgba(168,159,143,.3); border-radius:14px; padding:13px; margin-bottom:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;"><span style="font-family:'Space Grotesk',sans-serif; color:#A89F8F; font-size:17px;">Ngozi</span><span style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:10px;">FR</span></div>
+            <div style="display:flex; gap:2px; align-items:flex-end; height:13px; margin-top:9px;"><i style="flex:1; height:30%; background:#322D26;"></i><i style="flex:1; height:50%; background:#322D26;"></i><i style="flex:1; height:40%; background:#322D26;"></i><i style="flex:1; height:60%; background:#322D26;"></i><i style="flex:1; height:35%; background:#322D26;"></i><i style="flex:1; height:45%; background:#322D26;"></i><i style="flex:1; height:55%; background:#322D26;"></i><i style="flex:1; height:30%; background:#322D26;"></i></div>
+          </div>
+          <div style="border:1px solid rgba(168,159,143,.3); border-radius:14px; padding:13px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;"><span style="font-family:'Space Grotesk',sans-serif; color:#A89F8F; font-size:17px;">Daniel</span><span style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:10px;">KO</span></div>
+            <div style="display:flex; gap:2px; align-items:flex-end; height:13px; margin-top:9px;"><i style="flex:1; height:45%; background:#322D26;"></i><i style="flex:1; height:30%; background:#322D26;"></i><i style="flex:1; height:55%; background:#322D26;"></i><i style="flex:1; height:40%; background:#322D26;"></i><i style="flex:1; height:60%; background:#322D26;"></i><i style="flex:1; height:35%; background:#322D26;"></i><i style="flex:1; height:50%; background:#322D26;"></i><i style="flex:1; height:40%; background:#322D26;"></i></div>
+          </div>
+          <div style="text-align:center; color:#6E6657; font-size:11px; padding-top:18px; font-family:'Space Mono',monospace;">+ 35 PROFILES</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- D3 · DASHBOARD (console) -->
+    <div style="flex:none; width:300px;">
+      <div style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:11px; letter-spacing:1px; margin-bottom:10px;">DASHBOARD · the console</div>
+      <div style="width:300px; height:630px; background:#1A1714; border:1px solid rgba(201,168,106,.18); border-radius:38px; overflow:hidden; display:flex; flex-direction:column; position:relative;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 26px 0; color:#6E6657; font-size:10px; font-family:'Space Mono',monospace;"><span>9:41</span><span>● ● ● ▮</span></div>
+
+        <div style="flex:1; overflow-y:auto; padding:18px 24px 92px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-family:'Space Grotesk',sans-serif; color:#F2EBDD; font-size:20px; font-weight:700;">Marcus</span>
+            <span style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:10px;">DE · DAY 11/28</span>
+          </div>
+
+          <!-- reps hero as a big LED readout -->
+          <div style="margin-top:16px; border:1px solid rgba(201,168,106,.35); border-radius:16px; padding:18px 16px; background:linear-gradient(180deg, rgba(201,168,106,.07), transparent);">
+            <div style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:9px; letter-spacing:3px;">TOTAL REPS</div>
+            <div style="font-family:'Space Grotesk',sans-serif; color:#C9A86A; font-size:50px; font-weight:700; line-height:1; letter-spacing:1px; margin-top:2px;">1,248</div>
+            <div style="display:flex; gap:2px; align-items:flex-end; height:18px; margin-top:8px;">
+              <i style="flex:1; height:30%; background:#C9A86A;"></i><i style="flex:1; height:55%; background:#C9A86A;"></i><i style="flex:1; height:40%; background:#C9A86A;"></i><i style="flex:1; height:70%; background:#C9A86A;"></i><i style="flex:1; height:50%; background:#C9A86A;"></i><i style="flex:1; height:85%; background:#C9A86A;"></i><i style="flex:1; height:65%; background:#C9A86A;"></i><i style="flex:1; height:100%; background:#C9A86A;"></i><i style="flex:1; height:45%; background:#463F35;"></i><i style="flex:1; height:60%; background:#463F35;"></i><i style="flex:1; height:35%; background:#463F35;"></i>
+            </div>
+            <div style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:9px; margin-top:7px;">+35 TODAY</div>
+          </div>
+
+          <!-- current step gate meter -->
+          <div style="margin-top:14px; border:1px solid rgba(168,159,143,.3); border-radius:14px; padding:14px;">
+            <div style="display:flex; justify-content:space-between; align-items:baseline;">
+              <span style="font-family:'Space Grotesk',sans-serif; color:#F2EBDD; font-size:14px; font-weight:600;">Lesson 4 · Shadow</span>
+              <span style="font-family:'Space Mono',monospace; color:#C9A86A; font-size:11px;">7/10</span>
+            </div>
+            <!-- segmented gate: 10 sentences -->
+            <div style="display:flex; gap:3px; margin-top:10px;">
+              <i style="flex:1; height:6px; background:#C9A86A; border-radius:1px;"></i><i style="flex:1; height:6px; background:#C9A86A; border-radius:1px;"></i><i style="flex:1; height:6px; background:#C9A86A; border-radius:1px;"></i><i style="flex:1; height:6px; background:#C9A86A; border-radius:1px;"></i><i style="flex:1; height:6px; background:#C9A86A; border-radius:1px;"></i><i style="flex:1; height:6px; background:#C9A86A; border-radius:1px;"></i><i style="flex:1; height:6px; background:#C9A86A; border-radius:1px;"></i><i style="flex:1; height:6px; background:#322D26; border-radius:1px;"></i><i style="flex:1; height:6px; background:#322D26; border-radius:1px;"></i><i style="flex:1; height:6px; background:#322D26; border-radius:1px;"></i>
+            </div>
+            <div style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:9px; margin-top:8px;">CLEAR ALL 10 @ 4★ TO UNLOCK READ</div>
+          </div>
+
+          <!-- 5-step rack -->
+          <div style="margin-top:14px; display:flex; gap:5px;">
+            <div style="flex:1; text-align:center; border:1px solid rgba(201,168,106,.3); border-radius:8px; padding:8px 2px;"><div style="color:#C9A86A; font-size:11px;">✓</div><div style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:7px; margin-top:3px;">GRASP</div></div>
+            <div style="flex:1; text-align:center; border:1px solid rgba(201,168,106,.3); border-radius:8px; padding:8px 2px;"><div style="color:#C9A86A; font-size:11px;">✓</div><div style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:7px; margin-top:3px;">HUM</div></div>
+            <div style="flex:1; text-align:center; border:1px solid #C9A86A; background:rgba(201,168,106,.12); border-radius:8px; padding:8px 2px;"><div style="color:#C9A86A; font-size:11px;">●</div><div style="font-family:'Space Mono',monospace; color:#C9A86A; font-size:7px; margin-top:3px;">SHDW</div></div>
+            <div style="flex:1; text-align:center; border:1px solid rgba(168,159,143,.25); border-radius:8px; padding:8px 2px; opacity:.5;"><div style="color:#A89F8F; font-size:11px;">🔒</div><div style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:7px; margin-top:3px;">READ</div></div>
+            <div style="flex:1; text-align:center; border:1px solid rgba(168,159,143,.25); border-radius:8px; padding:8px 2px; opacity:.5;"><div style="color:#A89F8F; font-size:11px;">🔒</div><div style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:7px; margin-top:3px;">RCLL</div></div>
+          </div>
+
+          <div style="margin-top:14px; display:flex; gap:10px; font-family:'Space Mono',monospace; font-size:9px; color:#A89F8F;">
+            <div style="flex:1; border:1px solid rgba(168,159,143,.25); border-radius:10px; padding:9px;"><div style="letter-spacing:1px;">COMPANION</div><div style="font-family:'Space Grotesk',sans-serif; color:#F2EBDD; font-size:14px; margin-top:2px;">Lena</div></div>
+            <div style="flex:1; border:1px solid rgba(168,159,143,.25); border-radius:10px; padding:9px;"><div style="letter-spacing:1px;">SESSION</div><div style="font-family:'Space Grotesk',sans-serif; color:#F2EBDD; font-size:14px; margin-top:2px;">Thu 4pm</div></div>
+          </div>
+        </div>
+
+        <div style="position:absolute; left:0; right:0; bottom:0; height:60px; background:#100E0C; border-top:1px solid rgba(201,168,106,.18); display:flex; align-items:center; justify-content:space-around; padding-bottom:4px; font-family:'Space Mono',monospace;">
+          <div style="display:flex; flex-direction:column; align-items:center; gap:3px; color:#C9A86A;"><span style="width:15px; height:15px; border:1.5px solid #C9A86A; border-radius:3px;"></span><span style="font-size:9px;">HOME</span></div>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:3px; color:#6E6657;"><span style="width:15px; height:15px; border:1.5px solid #6E6657; border-radius:50%;"></span><span style="font-size:9px;">PRACTICE</span></div>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:3px; color:#6E6657;"><span style="width:15px; height:15px; border:1.5px solid #6E6657;"></span><span style="font-size:9px;">ACTIVITY</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- D3 · HUM (listening, no text) -->
+    <div style="flex:none; width:300px;">
+      <div style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:11px; letter-spacing:1px; margin-bottom:10px;">HUM · audio only, no text</div>
+      <div style="width:300px; height:630px; background:#1A1714; border:1px solid rgba(201,168,106,.18); border-radius:38px; overflow:hidden; display:flex; flex-direction:column; position:relative;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 26px 0; color:#6E6657; font-size:10px; font-family:'Space Mono',monospace;"><span>9:41</span><span>● ● ● ▮</span></div>
+
+        <div style="padding:18px 24px 0;">
+          <!-- step rack mini -->
+          <div style="display:flex; gap:4px;">
+            <span style="flex:1; height:4px; background:#C9A86A; border-radius:2px;"></span>
+            <span style="flex:2; height:4px; background:#C9A86A; border-radius:2px;"></span>
+            <span style="flex:1; height:4px; background:#322D26; border-radius:2px;"></span>
+            <span style="flex:1; height:4px; background:#322D26; border-radius:2px;"></span>
+            <span style="flex:1; height:4px; background:#322D26; border-radius:2px;"></span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:baseline; margin-top:16px;">
+            <div>
+              <div style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:10px; letter-spacing:3px;">STEP 02 / 05</div>
+              <div style="font-family:'Space Grotesk',sans-serif; color:#F2EBDD; font-size:30px; font-weight:700; margin-top:2px;">Hum</div>
+            </div>
+            <div style="text-align:right; font-family:'Space Mono',monospace; color:#A89F8F; font-size:10px;">SENTENCE<br><span style="color:#C9A86A; font-size:16px; font-family:'Space Grotesk',sans-serif;">08/10</span></div>
+          </div>
+          <div style="color:#A89F8F; font-size:12px; margin-top:6px;">Match the melody — no words, just the shape of the sound.</div>
+        </div>
+
+        <!-- the instrument: dual precision waveform. NO text. -->
+        <div style="flex:1; display:flex; flex-direction:column; justify-content:center; gap:20px; padding:0 24px;">
+          <div style="border:1px solid rgba(201,168,106,.25); border-radius:14px; padding:16px 14px; background:rgba(201,168,106,.03);">
+            <div style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:9px; letter-spacing:2px; margin-bottom:12px;">MODEL</div>
+            <div style="display:flex; gap:2px; align-items:center; height:46px;">
+              <i style="flex:1; height:30%; background:#A89F8F; border-radius:1px;"></i><i style="flex:1; height:65%; background:#A89F8F; border-radius:1px;"></i><i style="flex:1; height:45%; background:#A89F8F; border-radius:1px;"></i><i style="flex:1; height:90%; background:#A89F8F; border-radius:1px;"></i><i style="flex:1; height:70%; background:#A89F8F; border-radius:1px;"></i><i style="flex:1; height:100%; background:#A89F8F; border-radius:1px;"></i><i style="flex:1; height:55%; background:#A89F8F; border-radius:1px;"></i><i style="flex:1; height:80%; background:#A89F8F; border-radius:1px;"></i><i style="flex:1; height:40%; background:#A89F8F; border-radius:1px;"></i><i style="flex:1; height:60%; background:#A89F8F; border-radius:1px;"></i><i style="flex:1; height:35%; background:#A89F8F; border-radius:1px;"></i><i style="flex:1; height:75%; background:#A89F8F; border-radius:1px;"></i><i style="flex:1; height:50%; background:#A89F8F; border-radius:1px;"></i><i style="flex:1; height:85%; background:#A89F8F; border-radius:1px;"></i>
+            </div>
+          </div>
+
+          <div style="border:1px solid rgba(200,105,74,.4); border-radius:14px; padding:16px 14px; background:rgba(200,105,74,.04);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+              <span style="font-family:'Space Mono',monospace; color:#C8694A; font-size:9px; letter-spacing:2px;">● YOUR VOICE · LIVE</span>
+              <span style="font-family:'Space Mono',monospace; color:#C8694A; font-size:9px;">REC</span>
+            </div>
+            <div style="display:flex; gap:2px; align-items:center; height:46px;">
+              <i style="flex:1; background:#C8694A; border-radius:1px; height:100%; transform-origin:center; animation:lmaEqA .7s infinite;"></i><i style="flex:1; background:#C8694A; border-radius:1px; height:100%; animation:lmaEqB .9s infinite;"></i><i style="flex:1; background:#C8694A; border-radius:1px; height:100%; animation:lmaEqA .8s infinite .1s;"></i><i style="flex:1; background:#C8694A; border-radius:1px; height:100%; animation:lmaEqB .7s infinite .2s;"></i><i style="flex:1; background:#C8694A; border-radius:1px; height:100%; animation:lmaEqA 1s infinite .15s;"></i><i style="flex:1; background:#C8694A; border-radius:1px; height:100%; animation:lmaEqB .85s infinite .25s;"></i><i style="flex:1; background:#C8694A; border-radius:1px; height:100%; animation:lmaEqA .75s infinite .3s;"></i><i style="flex:1; background:#C8694A; border-radius:1px; height:100%; animation:lmaEqB .95s infinite .1s;"></i><i style="flex:1; background:#C8694A; border-radius:1px; height:100%; animation:lmaEqA .8s infinite .2s;"></i><i style="flex:1; background:#C8694A; border-radius:1px; height:100%; animation:lmaEqB .7s infinite .35s;"></i><i style="flex:1; background:#C8694A; border-radius:1px; height:100%; animation:lmaEqA .9s infinite .05s;"></i><i style="flex:1; background:#C8694A; border-radius:1px; height:100%; animation:lmaEqB .8s infinite .3s;"></i><i style="flex:1; background:#C8694A; border-radius:1px; height:100%; animation:lmaEqA .85s infinite .25s;"></i><i style="flex:1; background:#C8694A; border-radius:1px; height:100%; animation:lmaEqB .75s infinite .15s;"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- transport + 4-star gate meter -->
+        <div style="padding:0 24px 26px;">
+          <div style="display:flex; align-items:center; gap:13px; margin-bottom:14px;">
+            <span style="width:50px; height:50px; border-radius:14px; background:#C9A86A; color:#1A1714; display:flex; align-items:center; justify-content:center; font-size:17px; flex:none;">❚❚</span>
+            <div style="flex:1;">
+              <div style="height:5px; background:#322D26; border-radius:3px; overflow:hidden;"><div style="width:52%; height:100%; background:#C9A86A;"></div></div>
+              <div style="display:flex; justify-content:space-between; font-family:'Space Mono',monospace; color:#6E6657; font-size:8px; margin-top:5px;"><span>0:04</span><span>FWD-ONLY</span><span>0:08</span></div>
+            </div>
+          </div>
+          <!-- this sentence's score toward 4★ gate -->
+          <div style="display:flex; align-items:center; justify-content:space-between; border-top:1px solid rgba(201,168,106,.14); padding-top:12px;">
+            <div style="display:flex; align-items:center; gap:7px;">
+              <span style="color:#C9A86A; font-size:14px; letter-spacing:1px;">★★★<span style="color:#322D26;">★</span></span>
+              <span style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:9px;">3.0 · NEED 4.0</span>
+            </div>
+            <span style="font-family:'Space Grotesk',sans-serif; color:#C9A86A; font-size:22px; font-weight:700;">+1</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- D3 · READ (text appears) -->
+    <div style="flex:none; width:300px;">
+      <div style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:11px; letter-spacing:1px; margin-bottom:10px;">READ · text appears + translit toggle</div>
+      <div style="width:300px; height:630px; background:#1A1714; border:1px solid rgba(201,168,106,.18); border-radius:38px; overflow:hidden; display:flex; flex-direction:column; position:relative;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 26px 0; color:#6E6657; font-size:10px; font-family:'Space Mono',monospace;"><span>9:41</span><span>● ● ● ▮</span></div>
+
+        <div style="padding:18px 24px 0;">
+          <div style="display:flex; gap:4px;">
+            <span style="flex:1; height:4px; background:#C9A86A; border-radius:2px;"></span>
+            <span style="flex:1; height:4px; background:#C9A86A; border-radius:2px;"></span>
+            <span style="flex:1; height:4px; background:#C9A86A; border-radius:2px;"></span>
+            <span style="flex:2; height:4px; background:#C9A86A; border-radius:2px;"></span>
+            <span style="flex:1; height:4px; background:#322D26; border-radius:2px;"></span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:baseline; margin-top:16px;">
+            <div>
+              <div style="font-family:'Space Mono',monospace; color:#A89F8F; font-size:10px; letter-spacing:3px;">STEP 04 / 05</div>
+              <div style="font-family:'Space Grotesk',sans-serif; color:#F2EBDD; font-size:30px; font-weight:700; margin-top:2px;">Read</div>
+            </div>
+            <div style="text-align:right; font-family:'Space Mono',monospace; color:#A89F8F; font-size:10px;">SENTENCE<br><span style="color:#C9A86A; font-size:16px; font-family:'Space Grotesk',sans-serif;">06/10</span></div>
+          </div>
+          <div style="color:#A89F8F; font-size:12px; margin-top:6px; font-family:'Space Mono',monospace;">TEXT UNLOCKED · READ AS YOU SPEAK</div>
+        </div>
+
+        <div style="flex:1; display:flex; flex-direction:column; justify-content:center; gap:16px; padding:0 24px;">
+          <!-- text panel, like a tuner display -->
+          <div style="border:1px solid rgba(201,168,106,.4); border-radius:16px; padding:22px 18px; background:linear-gradient(180deg, rgba(201,168,106,.07), transparent); text-align:center;">
+            <div style="font-family:'Space Grotesk',sans-serif; color:#F2EBDD; font-size:25px; font-weight:600; line-height:1.25;">Wo ist das Brot, bitte?</div>
+            <div style="color:#A89F8F; font-size:12px; margin-top:10px; font-family:'Space Mono',monospace;">WHERE IS THE BREAD, PLEASE?</div>
+          </div>
+
+          <!-- translit toggle, hardware-switch style, only here -->
+          <div style="border:1px solid rgba(168,159,143,.3); border-radius:14px; padding:13px 15px; display:flex; align-items:center; justify-content:space-between;">
+            <div>
+              <div style="font-family:'Space Mono',monospace; color:#F2EBDD; font-size:11px; letter-spacing:1px;">TRANSLITERATION</div>
+              <div style="color:#A89F8F; font-size:10px; margin-top:2px;">voh ist dass broht, BIT-tuh</div>
+            </div>
+            <span style="width:40px; height:22px; border-radius:6px; background:#C9A86A; position:relative; display:inline-block; flex:none;"><span style="position:absolute; right:3px; top:3px; width:16px; height:16px; border-radius:4px; background:#1A1714;"></span></span>
+          </div>
+
+          <!-- live mic readout -->
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="width:8px; height:8px; border-radius:50%; background:#C8694A; box-shadow:0 0 8px #C8694A; flex:none;"></span>
+            <div style="flex:1; display:flex; gap:2px; align-items:center; height:20px;">
+              <i style="flex:1; background:#C8694A; height:100%; border-radius:1px; animation:lmaEqA .7s infinite;"></i><i style="flex:1; background:#C8694A; height:100%; border-radius:1px; animation:lmaEqB .8s infinite .1s;"></i><i style="flex:1; background:#C8694A; height:100%; border-radius:1px; animation:lmaEqA .9s infinite .2s;"></i><i style="flex:1; background:#C8694A; height:100%; border-radius:1px; animation:lmaEqB .75s infinite .15s;"></i><i style="flex:1; background:#C8694A; height:100%; border-radius:1px; animation:lmaEqA .85s infinite .25s;"></i><i style="flex:1; background:#C8694A; height:100%; border-radius:1px; animation:lmaEqB .8s infinite .3s;"></i><i style="flex:1; background:#C8694A; height:100%; border-radius:1px; animation:lmaEqA .7s infinite .05s;"></i><i style="flex:1; background:#C8694A; height:100%; border-radius:1px; animation:lmaEqB .9s infinite .2s;"></i>
+            </div>
+            <span style="font-family:'Space Mono',monospace; color:#C8694A; font-size:9px;">REC</span>
+          </div>
+        </div>
+
+        <div style="padding:0 24px 26px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; border-top:1px solid rgba(201,168,106,.14); padding-top:12px;">
+            <div style="display:flex; align-items:center; gap:7px;">
+              <span style="color:#C9A86A; font-size:14px; letter-spacing:1px;">★★★★<span style="color:#322D26;">★</span></span>
+              <span style="font-family:'Space Mono',monospace; color:#C8694A; font-size:9px;">4.0 · GATE MET</span>
+            </div>
+            <span style="font-family:'Space Grotesk',sans-serif; color:#C9A86A; font-size:22px; font-weight:700;">+1</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="flex:none; width:200px; align-self:center; color:#A89F8F; font-size:12.5px; line-height:1.7;">
+      The <b style="color:#C9A86A;">waveforms are the interface</b> — model vs. your live take. The 4★ gate is a calibrated meter, and the 10-sentence step gate reads like a channel strip. Green = live mic, gold = your earned reps.
+    </div>
+
+  </div>
+
+  <!-- DIRECTIONS -->
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:&quot;100%&quot;}}"></script>
+</body>
+</html>

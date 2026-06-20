@@ -1,0 +1,85 @@
+import { createClient } from '@supabase/supabase-js';
+import type { Step } from '../tokens';
+
+const url = import.meta.env.VITE_SUPABASE_URL as string;
+const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+
+// Direct client — always initialised when env vars are present.
+export const adminClient = url && anonKey ? createClient(url, anonKey) : null;
+
+export const AUDIO_BUCKET = 'lesson-audio';
+
+export interface LessonAudioRow {
+  lesson_code: string;
+  step: Step;
+  audio_url: string;
+  file_name: string | null;
+  updated_at: string;
+}
+
+/** Fetch all uploaded step audio for a lesson. */
+export async function getLessonAudio(lessonCode: string): Promise<Record<Step, LessonAudioRow> | null> {
+  if (!adminClient) return null;
+  const { data, error } = await adminClient
+    .from('lesson_audio')
+    .select('lesson_code, step, audio_url, file_name, updated_at')
+    .eq('lesson_code', lessonCode);
+  if (error || !data) return null;
+  return Object.fromEntries(data.map((r) => [r.step, r])) as Record<Step, LessonAudioRow>;
+}
+
+/** Upload an MP3 file to storage and upsert the URL into lesson_audio. */
+export async function uploadStepAudio(
+  lessonCode: string,
+  step: Step,
+  file: File,
+  onProgress?: (pct: number) => void,
+): Promise<{ url: string } | { error: string }> {
+  if (!adminClient) return { error: 'Supabase not configured' };
+
+  const ext = file.name.split('.').pop() ?? 'mp3';
+  const objectPath = `${lessonCode}/${step}.${ext}`;
+
+  // Signal start
+  onProgress?.(5);
+
+  const { error: upErr } = await adminClient.storage
+    .from(AUDIO_BUCKET)
+    .upload(objectPath, file, { contentType: file.type || 'audio/mpeg', upsert: true });
+
+  if (upErr) return { error: upErr.message };
+  onProgress?.(70);
+
+  const { data: pub } = adminClient.storage.from(AUDIO_BUCKET).getPublicUrl(objectPath);
+  const audioUrl = pub.publicUrl;
+
+  const { error: dbErr } = await adminClient.from('lesson_audio').upsert(
+    {
+      lesson_code: lessonCode,
+      step,
+      audio_url: audioUrl,
+      file_name: file.name,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: 'lesson_code,step' },
+  );
+
+  if (dbErr) return { error: dbErr.message };
+  onProgress?.(100);
+  return { url: audioUrl };
+}
+
+/** Remove a step's audio from storage and delete the DB row. */
+export async function deleteStepAudio(lessonCode: string, step: Step): Promise<{ error?: string }> {
+  if (!adminClient) return { error: 'Supabase not configured' };
+
+  await adminClient.storage.from(AUDIO_BUCKET).remove([`${lessonCode}/${step}.mp3`]);
+
+  const { error } = await adminClient
+    .from('lesson_audio')
+    .delete()
+    .eq('lesson_code', lessonCode)
+    .eq('step', step);
+
+  return error ? { error: error.message } : {};
+}

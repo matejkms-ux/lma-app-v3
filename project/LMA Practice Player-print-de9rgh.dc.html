@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style data-omelette-print-defaults>
+@media print {
+  @page { margin: 0; }
+  body { padding: 0.5in; box-sizing: border-box; }
+  h1, h2, h3, h4, h5, h6 { break-after: avoid; }
+  figure, table, pre, blockquote, img, svg, tr, [class~="card" i] { break-inside: avoid; }
+  img, svg { max-width: 100%; }
+  p { orphans: 3; widows: 3; }
+}
+</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500;1,6..72,600&family=Noto+Serif+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    html, body { margin: 0; padding: 0; }
+    * { box-sizing: border-box; }
+    /* Coral is the ONLY element that ever moves. */
+    @keyframes lmaPulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(2.3); opacity: 0; } }
+    @keyframes lmaDot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .5; transform: scale(.82); } }
+    @keyframes lmaBar { 0%, 100% { transform: scaleY(.3); } 50% { transform: scaleY(1); } }
+  </style>
+</helmet>
+<div style="width: max-content; min-width: 100%; min-height: 100vh; box-sizing: border-box; padding: 60px; background: #E4DBC9; font-family: 'Hanken Grotesk', sans-serif;">
+
+  <!-- ===================== HEADER ===================== -->
+  <div style="max-width: 900px; margin-bottom: 14px;">
+    <div style="font-family: 'Hanken Grotesk', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: .24em; text-transform: uppercase; color: #0A554E;">LMA · The Language Acquisition Method</div>
+    <div style="font-family: 'Newsreader', serif; font-size: 48px; font-weight: 500; line-height: 1.02; color: #15403B; margin-top: 12px; letter-spacing: -.015em;">The practice player</div>
+    <div style="font-family: 'Newsreader', serif; font-style: italic; font-size: 22px; color: #0A554E; margin-top: 2px;">Acquire it — don't study it.</div>
+    <div style="font-family: 'Hanken Grotesk', sans-serif; font-size: 13.5px; line-height: 1.75; color: #6F8B85; margin-top: 16px; max-width: 780px;">Full hi-fi screen set, mobile-first. Five steps in a fixed order — <b style="color:#15403B;">GRASP → HUM → SHADOW → READ → RECALL</b> — and the same ten sentences flow through each in turn. The first three steps are audio-only (ears before eyes); written text first appears in READ, with a transliteration the adventurer can flip on. Coral is the one live signal on any screen — and the only thing that ever moves.</div>
+
+    <!-- legend -->
+    <div style="display:flex; gap:22px; flex-wrap:wrap; margin-top:22px; align-items:center;">
+      <div style="display:flex; align-items:center; gap:9px;"><span style="width:26px; height:26px; border-radius:7px; background:#0A554E; display:inline-block;"></span><span style="font-size:11px; color:#6F8B85; font-weight:600;">Emerald<br>ground</span></div>
+      <div style="display:flex; align-items:center; gap:9px;"><span style="width:26px; height:26px; border-radius:7px; background:#0E635B; display:inline-block;"></span><span style="font-size:11px; color:#6F8B85; font-weight:600;">Panel</span></div>
+      <div style="display:flex; align-items:center; gap:9px;"><span style="width:26px; height:26px; border-radius:7px; background:#EF6A47; display:inline-block;"></span><span style="font-size:11px; color:#6F8B85; font-weight:600;">Coral<br>(live only)</span></div>
+      <div style="display:flex; align-items:center; gap:9px;"><span style="width:26px; height:26px; border-radius:7px; background:#F8F0E2; border:1px solid #E2D8C4; display:inline-block;"></span><span style="font-size:11px; color:#6F8B85; font-weight:600;">Cream<br>pages</span></div>
+      <div style="display:flex; align-items:center; gap:9px;"><span style="width:26px; height:26px; border-radius:7px; background:#8FC0B8; display:inline-block;"></span><span style="font-size:11px; color:#6F8B85; font-weight:600;">Teal<br>quiet label</span></div>
+      <div style="width:1px; height:34px; background:#CFC3AC;"></div>
+      <div style="font-size:12px; color:#6F8B85; line-height:1.5;"><span style="font-family:'Newsreader',serif; font-style:italic; font-size:18px; color:#15403B;">Newsreader</span> — the soul &nbsp;·&nbsp; <span style="font-family:'Hanken Grotesk',sans-serif; font-weight:700; color:#15403B;">Hanken Grotesk</span> — the method</div>
+    </div>
+  </div>
+
+  <!-- ===================== SECTION A · ENTRY & HOME ===================== -->
+  <div style="margin: 50px 0 20px;">
+    <div style="font-family:'Newsreader',serif; font-size:27px; color:#15403B; font-weight:500;">Arrival &amp; home</div>
+    <div style="font-family:'Hanken Grotesk',sans-serif; font-size:12.5px; color:#6F8B85; margin-top:2px;">No passwords. Choose your name, land in your adventure, pick up where you left off.</div>
+  </div>
+
+  <div style="display:flex; gap:46px; align-items:flex-start; margin-bottom:8px;">
+
+    <!-- ============ 01 · ENTRY / NAME SELECT (emerald, no nav) ============ -->
+    <div style="flex:none; width:360px;">
+      <div style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:#15403B; margin-bottom:13px;">01 · Entry — name select</div>
+      <div style="width:360px; height:760px; border-radius:46px; overflow:hidden; position:relative; background:#0A554E; box-shadow:0 28px 54px -18px rgba(7,42,38,.55), 0 6px 16px rgba(7,42,38,.25); border:1px solid rgba(143,192,184,.18);">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:18px 28px 0; font-family:'Hanken Grotesk',sans-serif; font-size:13px; font-weight:600; color:#8FC0B8;"><span>9:41</span><span style="display:flex; gap:5px; align-items:center;"><span style="width:5px; height:5px; border-radius:50%; background:#8FC0B8;"></span><span style="width:5px; height:5px; border-radius:50%; background:#8FC0B8;"></span><span style="width:18px; height:10px; border:1.4px solid #8FC0B8; border-radius:3px;"></span></span></div>
+
+        <div style="padding:44px 32px 4px;">
+          <div style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.42em; color:#8FC0B8;">L · M · A</div>
+          <div style="font-family:'Newsreader',serif; font-style:italic; font-weight:500; color:#F8F0E2; font-size:38px; line-height:1.05; margin-top:22px;">Welcome back,<br>adventurer.</div>
+          <div style="font-family:'Hanken Grotesk',sans-serif; color:#8FC0B8; font-size:14px; margin-top:12px;">Choose your name to enter.</div>
+        </div>
+
+        <!-- search -->
+        <div style="margin:24px 28px 6px; display:flex; align-items:center; gap:11px; background:rgba(143,192,184,.1); border:1px solid rgba(143,192,184,.28); border-radius:14px; padding:13px 16px;">
+          <span style="width:14px; height:14px; border:1.8px solid #8FC0B8; border-radius:50%; position:relative; flex:none;"><span style="position:absolute; width:6px; height:1.8px; background:#8FC0B8; transform:rotate(45deg); right:-4px; bottom:0;"></span></span>
+          <span style="font-family:'Hanken Grotesk',sans-serif; color:#8FC0B8; font-size:13px;">Find your name</span>
+        </div>
+
+        <!-- roster -->
+        <div style="position:absolute; left:0; right:0; bottom:0; top:330px; overflow-y:auto; padding:6px 28px 30px;">
+          <!-- row -->
+          <div style="display:flex; align-items:center; gap:15px; padding:15px 0; border-bottom:1px solid rgba(143,192,184,.16);">
+            <span style="width:46px; height:46px; border-radius:50%; background:#0E635B; flex:none; display:flex; align-items:center; justify-content:center; font-family:'Newsreader',serif; color:#8FC0B8; font-size:20px;">C</span>
+            <div style="flex:1;"><div style="font-family:'Newsreader',serif; color:#F8F0E2; font-size:23px; line-height:1;">Charles</div></div>
+            <span style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:600; letter-spacing:.12em; color:#8FC0B8;">JAPANESE</span>
+            <span style="color:#8FC0B8; font-size:18px; opacity:.7;">›</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:15px; padding:15px 0; border-bottom:1px solid rgba(143,192,184,.16);">
+            <span style="width:46px; height:46px; border-radius:50%; background:#0E635B; flex:none; display:flex; align-items:center; justify-content:center; font-family:'Newsreader',serif; color:#8FC0B8; font-size:20px;">T</span>
+            <div style="flex:1;"><div style="font-family:'Newsreader',serif; color:#F8F0E2; font-size:23px; line-height:1;">Tom</div></div>
+            <span style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:600; letter-spacing:.12em; color:#8FC0B8;">KHMER</span>
+            <span style="color:#8FC0B8; font-size:18px; opacity:.7;">›</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:15px; padding:15px 0; border-bottom:1px solid rgba(143,192,184,.16);">
+            <span style="width:46px; height:46px; border-radius:50%; background:#0E635B; flex:none; display:flex; align-items:center; justify-content:center; font-family:'Newsreader',serif; color:#8FC0B8; font-size:20px;">A</span>
+            <div style="flex:1;"><div style="font-family:'Newsreader',serif; color:#F8F0E2; font-size:23px; line-height:1;">Anamarija</div></div>
+            <span style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:600; letter-spacing:.12em; color:#8FC0B8;">GERMAN</span>
+            <span style="color:#8FC0B8; font-size:18px; opacity:.7;">›</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:15px; padding:15px 0; border-bottom:1px solid rgba(143,192,184,.16);">
+            <span style="width:46px; height:46px; border-radius:50%; background:#0E635B; flex:none; display:flex; align-items:center; justify-content:center; font-family:'Newsreader',serif; color:#8FC0B8; font-size:20px;">J</span>
+            <div style="flex:1;"><div style="font-family:'Newsreader',serif; color:#F8F0E2; font-size:23px; line-height:1;">Jerod</div></div>
+            <span style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:600; letter-spacing:.12em; color:#8FC0B8;">THAI</span>
+            <span style="color:#8FC0B8; font-size:18px; opacity:.7;">›</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:15px; padding:15px 0; border-bottom:1px solid rgba(143,192,184,.16);">
+            <span style="width:46px; height:46px; border-radius:50%; background:#0E635B; flex:none; display:flex; align-items:center; justify-content:center; font-family:'Newsreader',serif; color:#8FC0B8; font-size:20px;">J</span>
+            <div style="flex:1;"><div style="font-family:'Newsreader',serif; color:#F8F0E2; font-size:23px; line-height:1;">Jason</div></div>
+            <span style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:600; letter-spacing:.12em; color:#8FC0B8;">JAPANESE</span>
+            <span style="color:#8FC0B8; font-size:18px; opacity:.7;">›</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:15px; padding:15px 0;">
+            <span style="width:46px; height:46px; border-radius:50%; background:#0E635B; flex:none; display:flex; align-items:center; justify-content:center; font-family:'Newsreader',serif; color:#8FC0B8; font-size:20px;">T</span>
+            <div style="flex:1;"><div style="font-family:'Newsreader',serif; color:#F8F0E2; font-size:23px; line-height:1;">Trenton</div></div>
+            <span style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:600; letter-spacing:.12em; color:#8FC0B8;">SPANISH</span>
+            <span style="color:#8FC0B8; font-size:18px; opacity:.7;">›</span>
+          </div>
+        </div>
+        <div style="position:absolute; bottom:9px; left:50%; transform:translateX(-50%); width:120px; height:5px; border-radius:3px; background:rgba(248,240,226,.32);"></div>
+      </div>
+    </div>
+
+    <!-- ============ 02 · HOME / DASHBOARD (cream) ============ -->
+    <div style="flex:none; width:360px;">
+      <div style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:#15403B; margin-bottom:13px;">02 · Home — the adventure</div>
+      <div style="width:360px; height:760px; border-radius:46px; overflow:hidden; position:relative; background:#F8F0E2; box-shadow:0 28px 54px -18px rgba(7,42,38,.4), 0 6px 16px rgba(7,42,38,.16); border:1px solid #E2D8C4;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:18px 28px 0; font-family:'Hanken Grotesk',sans-serif; font-size:13px; font-weight:600; color:#6F8B85;"><span>9:41</span><span style="display:flex; gap:5px; align-items:center;"><span style="width:5px; height:5px; border-radius:50%; background:#6F8B85;"></span><span style="width:5px; height:5px; border-radius:50%; background:#6F8B85;"></span><span style="width:18px; height:10px; border:1.4px solid #6F8B85; border-radius:3px;"></span></span></div>
+
+        <div style="position:absolute; left:0; right:0; top:48px; bottom:92px; overflow-y:auto; padding:18px 28px 24px;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+              <div style="font-family:'Hanken Grotesk',sans-serif; font-size:12px; font-weight:600; letter-spacing:.04em; color:#6F8B85;">DAY 9 OF 28 · JAPANESE</div>
+              <div style="font-family:'Newsreader',serif; font-style:italic; font-weight:500; color:#15403B; font-size:34px; line-height:1.06; margin-top:7px;">Welcome back,<br>Charles.</div>
+            </div>
+            <span style="width:42px; height:42px; border-radius:50%; background:#0A554E; flex:none; display:flex; align-items:center; justify-content:center; font-family:'Newsreader',serif; color:#8FC0B8; font-size:18px;">C</span>
+          </div>
+
+          <!-- hero metric -->
+          <div style="margin-top:26px; border:1px solid #E2D8C4; border-radius:22px; padding:24px 22px; background:#FBF5EA;">
+            <div style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.18em; color:#6F8B85;">REPS GATHERED</div>
+            <div style="display:flex; align-items:baseline; gap:12px; margin-top:6px;">
+              <div style="font-family:'Hanken Grotesk',sans-serif; font-size:64px; font-weight:800; line-height:.9; color:#0A554E; letter-spacing:-.02em;">312</div>
+              <div style="font-family:'Hanken Grotesk',sans-serif; font-size:14px; font-weight:700; color:#EF6A47;">+24 today</div>
+            </div>
+            <div style="font-family:'Newsreader',serif; font-style:italic; font-size:15px; color:#6F8B85; margin-top:8px;">Every take is a rep. The reps are the road.</div>
+          </div>
+
+          <!-- current lesson + step -->
+          <div style="margin-top:16px; border:1px solid #E2D8C4; border-radius:20px; padding:18px 20px; background:#fff;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.1em; color:#6F8B85;">CONTINUE · LMPI-003</span>
+              <span style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:600; color:#6F8B85;">7 / 10</span>
+            </div>
+            <div style="font-family:'Newsreader',serif; color:#15403B; font-size:23px; margin-top:5px;">At the market</div>
+            <!-- 5 step mini -->
+            <div style="display:flex; gap:5px; margin-top:14px;">
+              <div style="flex:1; height:5px; border-radius:3px; background:#0A554E;"></div>
+              <div style="flex:1; height:5px; border-radius:3px; background:#0A554E;"></div>
+              <div style="flex:1; height:5px; border-radius:3px; background:#0A554E;"></div>
+              <div style="flex:1; height:5px; border-radius:3px; background:#E2D8C4;"></div>
+              <div style="flex:1; height:5px; border-radius:3px; background:#E2D8C4;"></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-top:9px; font-family:'Hanken Grotesk',sans-serif; font-size:9.5px; font-weight:600; letter-spacing:.04em;">
+              <span style="color:#6F8B85;">GRASP</span><span style="color:#6F8B85;">HUM</span><span style="color:#15403B; font-weight:800;">SHADOW</span><span style="color:#C9BEA8;">READ</span><span style="color:#C9BEA8;">RECALL</span>
+            </div>
+          </div>
+
+          <!-- app-produced stats -->
+          <div style="margin-top:16px; display:flex; gap:12px;">
+            <div style="flex:1; border:1px solid #E2D8C4; border-radius:16px; padding:14px;"><div style="font-family:'Hanken Grotesk',sans-serif; font-size:10px; font-weight:700; letter-spacing:.1em; color:#6F8B85;">LESSONS PASSED</div><div style="font-family:'Newsreader',serif; color:#15403B; font-size:18px; margin-top:3px;">2 of 6</div></div>
+            <div style="flex:1; border:1px solid #E2D8C4; border-radius:16px; padding:14px;"><div style="font-family:'Hanken Grotesk',sans-serif; font-size:10px; font-weight:700; letter-spacing:.1em; color:#6F8B85;">AVG GRADE</div><div style="font-family:'Newsreader',serif; color:#15403B; font-size:18px; margin-top:3px;">4.5★ self</div></div>
+          </div>
+        </div>
+
+        <!-- CTA above nav -->
+        <div style="position:absolute; left:0; right:0; bottom:92px; padding:0 28px 14px; background:linear-gradient(transparent, #F8F0E2 36%);">
+          <div style="background:#0A554E; color:#F8F0E2; text-align:center; font-family:'Hanken Grotesk',sans-serif; font-weight:700; font-size:15px; padding:16px; border-radius:15px; letter-spacing:.01em;">Continue practice →</div>
+        </div>
+
+        <!-- bottom nav -->
+        <div style="position:absolute; left:0; right:0; bottom:0; background:#0A554E; padding:13px 0 24px; display:flex; align-items:flex-start; justify-content:space-around; border-top:1px solid rgba(143,192,184,.2);">
+          <div style="display:flex; flex-direction:column; align-items:center; gap:6px; color:#F8F0E2;"><span style="width:20px; height:20px; border:1.8px solid currentColor; border-radius:6px;"></span><span style="font-family:'Hanken Grotesk',sans-serif; font-size:10px; font-weight:700;">Home</span></div>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:6px; color:#5C857D;"><span style="width:20px; height:20px; border:1.8px solid currentColor; border-radius:50%;"></span><span style="font-family:'Hanken Grotesk',sans-serif; font-size:10px; font-weight:600;">Practice</span></div>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:6px; color:#5C857D;"><span style="display:flex; align-items:flex-end; gap:2.5px; width:20px; height:20px;"><i style="width:4px; height:9px; background:currentColor; border-radius:1px;"></i><i style="width:4px; height:15px; background:currentColor; border-radius:1px;"></i><i style="width:4px; height:20px; background:currentColor; border-radius:1px;"></i></span><span style="font-family:'Hanken Grotesk',sans-serif; font-size:10px; font-weight:600;">Activities</span></div>
+          <div style="position:absolute; bottom:9px; left:50%; transform:translateX(-50%); width:120px; height:5px; border-radius:3px; background:rgba(248,240,226,.45);"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 03 · LESSON SELECT (cream) ============ -->
+    <div style="flex:none; width:360px;">
+      <div style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:#15403B; margin-bottom:13px;">03 · Lesson select</div>
+      <div style="width:360px; height:760px; border-radius:46px; overflow:hidden; position:relative; background:#F8F0E2; box-shadow:0 28px 54px -18px rgba(7,42,38,.4), 0 6px 16px rgba(7,42,38,.16); border:1px solid #E2D8C4;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:18px 28px 0; font-family:'Hanken Grotesk',sans-serif; font-size:13px; font-weight:600; color:#6F8B85;"><span>9:41</span><span style="display:flex; gap:5px; align-items:center;"><span style="width:5px; height:5px; border-radius:50%; background:#6F8B85;"></span><span style="width:5px; height:5px; border-radius:50%; background:#6F8B85;"></span><span style="width:18px; height:10px; border:1.4px solid #6F8B85; border-radius:3px;"></span></span></div>
+
+        <div style="padding:20px 28px 8px;">
+          <div style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.16em; color:#6F8B85;">JAPANESE · LMPI SERIES</div>
+          <div style="font-family:'Newsreader',serif; font-style:italic; color:#15403B; font-size:32px; margin-top:5px;">Your lessons</div>
+        </div>
+
+        <div style="position:absolute; left:0; right:0; top:120px; bottom:92px; overflow-y:auto; padding:6px 24px 20px;">
+          <!-- done -->
+          <div style="display:flex; align-items:center; gap:14px; border:1px solid #E2D8C4; border-radius:16px; padding:15px 16px; margin-bottom:11px; background:#fff;">
+            <span style="width:30px; height:30px; border-radius:50%; background:#0A554E; color:#F8F0E2; flex:none; display:flex; align-items:center; justify-content:center; font-size:13px;">✓</span>
+            <div style="flex:1;"><div style="font-family:'Hanken Grotesk',sans-serif; font-size:10.5px; font-weight:700; letter-spacing:.08em; color:#6F8B85;">LMPI-001</div><div style="font-family:'Newsreader',serif; color:#15403B; font-size:19px; line-height:1.1;">First arrivals</div></div>
+            <div style="text-align:right;"><div style="color:#0A554E; font-size:13px; letter-spacing:1px;">★★★★★</div><div style="font-family:'Hanken Grotesk',sans-serif; font-size:10px; color:#6F8B85; margin-top:2px;">Passed · 4.7</div></div>
+          </div>
+          <div style="display:flex; align-items:center; gap:14px; border:1px solid #E2D8C4; border-radius:16px; padding:15px 16px; margin-bottom:11px; background:#fff;">
+            <span style="width:30px; height:30px; border-radius:50%; background:#0A554E; color:#F8F0E2; flex:none; display:flex; align-items:center; justify-content:center; font-size:13px;">✓</span>
+            <div style="flex:1;"><div style="font-family:'Hanken Grotesk',sans-serif; font-size:10.5px; font-weight:700; letter-spacing:.08em; color:#6F8B85;">LMPI-002</div><div style="font-family:'Newsreader',serif; color:#15403B; font-size:19px; line-height:1.1;">Numbers &amp; prices</div></div>
+            <div style="text-align:right;"><div style="color:#0A554E; font-size:13px; letter-spacing:1px;">★★★★<span style="color:#E2D8C4;">★</span></div><div style="font-family:'Hanken Grotesk',sans-serif; font-size:10px; color:#6F8B85; margin-top:2px;">Passed · 4.5</div></div>
+          </div>
+          <!-- in progress (coral) -->
+          <div style="display:flex; align-items:center; gap:14px; border:1.5px solid #0A554E; border-radius:16px; padding:15px 16px; margin-bottom:11px; background:#FBF5EA;">
+            <span style="position:relative; width:30px; height:30px; flex:none; display:flex; align-items:center; justify-content:center;"><span style="position:absolute; inset:0; border-radius:50%; background:rgba(239,106,71,.3); animation:lmaPulse 2s infinite ease-out;"></span><span style="position:relative; width:13px; height:13px; border-radius:50%; background:#EF6A47;"></span></span>
+            <div style="flex:1;"><div style="font-family:'Hanken Grotesk',sans-serif; font-size:10.5px; font-weight:700; letter-spacing:.08em; color:#EF6A47;">LMPI-003 · IN PROGRESS</div><div style="font-family:'Newsreader',serif; color:#15403B; font-size:19px; line-height:1.1;">At the market</div></div>
+            <div style="text-align:right;"><div style="font-family:'Hanken Grotesk',sans-serif; font-size:14px; font-weight:800; color:#0A554E;">7/10</div><div style="font-family:'Hanken Grotesk',sans-serif; font-size:10px; color:#6F8B85; margin-top:2px;">Shadow</div></div>
+          </div>
+          <!-- locked -->
+          <div style="display:flex; align-items:center; gap:14px; border:1px solid #E2D8C4; border-radius:16px; padding:15px 16px; margin-bottom:11px; opacity:.6;">
+            <span style="width:30px; height:30px; border-radius:50%; border:1.5px solid #C9BEA8; flex:none; display:flex; align-items:center; justify-content:center; color:#A9A089; font-size:12px;">🔒</span>
+            <div style="flex:1;"><div style="font-family:'Hanken Grotesk',sans-serif; font-size:10.5px; font-weight:700; letter-spacing:.08em; color:#6F8B85;">LMPI-004</div><div style="font-family:'Newsreader',serif; color:#15403B; font-size:19px; line-height:1.1;">At a café</div></div>
+            <div style="font-family:'Hanken Grotesk',sans-serif; font-size:10px; color:#6F8B85;">Locked</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:14px; border:1px solid #E2D8C4; border-radius:16px; padding:15px 16px; margin-bottom:11px; opacity:.6;">
+            <span style="width:30px; height:30px; border-radius:50%; border:1.5px solid #C9BEA8; flex:none; display:flex; align-items:center; justify-content:center; color:#A9A089; font-size:12px;">🔒</span>
+            <div style="flex:1;"><div style="font-family:'Hanken Grotesk',sans-serif; font-size:10.5px; font-weight:700; letter-spacing:.08em; color:#6F8B85;">LMPI-005</div><div style="font-family:'Newsreader',serif; color:#15403B; font-size:19px; line-height:1.1;">Getting around</div></div>
+            <div style="font-family:'Hanken Grotesk',sans-serif; font-size:10px; color:#6F8B85;">Locked</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:14px; border:1px solid #E2D8C4; border-radius:16px; padding:15px 16px; opacity:.6;">
+            <span style="width:30px; height:30px; border-radius:50%; border:1.5px solid #C9BEA8; flex:none; display:flex; align-items:center; justify-content:center; color:#A9A089; font-size:12px;">🔒</span>
+            <div style="flex:1;"><div style="font-family:'Hanken Grotesk',sans-serif; font-size:10.5px; font-weight:700; letter-spacing:.08em; color:#6F8B85;">LMPI-006</div><div style="font-family:'Newsreader',serif; color:#15403B; font-size:19px; line-height:1.1;">Making plans</div></div>
+            <div style="font-family:'Hanken Grotesk',sans-serif; font-size:10px; color:#6F8B85;">Locked</div>
+          </div>
+        </div>
+
+        <div style="position:absolute; left:0; right:0; bottom:0; background:#0A554E; padding:13px 0 24px; display:flex; align-items:flex-start; justify-content:space-around; border-top:1px solid rgba(143,192,184,.2);">
+          <div style="display:flex; flex-direction:column; align-items:center; gap:6px; color:#5C857D;"><span style="width:20px; height:20px; border:1.8px solid currentColor; border-radius:6px;"></span><span style="font-family:'Hanken Grotesk',sans-serif; font-size:10px; font-weight:600;">Home</span></div>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:6px; color:#F8F0E2;"><span style="width:20px; height:20px; border:1.8px solid currentColor; border-radius:50%;"></span><span style="font-family:'Hanken Grotesk',sans-serif; font-size:10px; font-weight:700;">Practice</span></div>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:6px; color:#5C857D;"><span style="display:flex; align-items:flex-end; gap:2.5px; width:20px; height:20px;"><i style="width:4px; height:9px; background:currentColor; border-radius:1px;"></i><i style="width:4px; height:15px; background:currentColor; border-radius:1px;"></i><i style="width:4px; height:20px; background:currentColor; border-radius:1px;"></i></span><span style="font-family:'Hanken Grotesk',sans-serif; font-size:10px; font-weight:600;">Activities</span></div>
+          <div style="position:absolute; bottom:9px; left:50%; transform:translateX(-50%); width:120px; height:5px; border-radius:3px; background:rgba(248,240,226,.45);"></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="flex:none; width:230px; align-self:center; color:#6F8B85; font-family:'Newsreader',serif; font-style:italic; font-size:17px; line-height:1.6;">Entry is pre-login, so it carries <span style="color:#15403B;">no bottom nav</span>. The Home / Practice / Activities bar appears only once you're in.</div>
+  </div>
+
+  <!-- ===================== SECTION B · THE FIVE STEPS ===================== -->
+  <div style="margin: 56px 0 20px;">
+    <div style="font-family:'Newsreader',serif; font-size:27px; color:#15403B; font-weight:500;">The five steps</div>
+    <div style="font-family:'Hanken Grotesk',sans-serif; font-size:12.5px; color:#6F8B85; margin-top:2px;">Same chassis, felt differently. GRASP · HUM · SHADOW are audio-only; READ reveals the text; RECALL produces from memory. Gate per sentence: one auto-scored 4★ take passes, else three self-rated reps.</div>
+  </div>
+
+  <div style="display:flex; gap:46px; align-items:flex-start; margin-bottom:8px;">
+
+    <!-- ============ 04 · GRASP (emerald, listen, no text, no mic) ============ -->
+    <div style="flex:none; width:360px;">
+      <div style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:#15403B; margin-bottom:13px;">04 · Grasp — listen for meaning</div>
+      <div style="width:360px; height:760px; border-radius:46px; overflow:hidden; position:relative; background:#0A554E; box-shadow:0 28px 54px -18px rgba(7,42,38,.55), 0 6px 16px rgba(7,42,38,.25); border:1px solid rgba(143,192,184,.18); display:flex; flex-direction:column;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:18px 28px 0; font-family:'Hanken Grotesk',sans-serif; font-size:13px; font-weight:600; color:#8FC0B8;"><span>9:41</span><span style="display:flex; gap:5px; align-items:center;"><span style="width:5px; height:5px; border-radius:50%; background:#8FC0B8;"></span><span style="width:5px; height:5px; border-radius:50%; background:#8FC0B8;"></span><span style="width:18px; height:10px; border:1.4px solid #8FC0B8; border-radius:3px;"></span></span></div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 24px 0; font-family:'Hanken Grotesk',sans-serif; font-size:12px; color:#8FC0B8;">
+          <span style="font-size:18px;">‹</span>
+          <span style="font-weight:600; letter-spacing:.04em;">LMPI-003 · At the market</span>
+          <span style="font-weight:700;">7/10</span>
+        </div>
+
+        <!-- 5 step indicator -->
+        <div style="display:flex; gap:6px; padding:18px 26px 0;">
+          <div style="flex:1; text-align:center;"><div style="height:5px; border-radius:3px; background:#F8F0E2;"></div><div style="font-family:'Hanken Grotesk',sans-serif; font-size:9px; font-weight:800; letter-spacing:.04em; margin-top:7px; color:#F8F0E2;">GRASP</div></div>
+          <div style="flex:1; text-align:center;"><div style="height:5px; border-radius:3px; background:rgba(143,192,184,.22);"></div><div style="font-family:'Hanken Grotesk',sans-serif; font-size:9px; font-weight:600; letter-spacing:.04em; margin-top:7px; color:rgba(143,192,184,.5);">HUM</div></div>
+          <div style="flex:1; text-align:center;"><div style="height:5px; border-radius:3px; background:rgba(143,192,184,.22);"></div><div style="font-family:'Hanken Grotesk',sans-serif; font-size:9px; font-weight:600; letter-spacing:.04em; margin-top:7px; color:rgba(143,192,184,.5);">SHADOW</div></div>
+          <div style="flex:1; text-align:center;"><div style="height:5px; border-radius:3px; background:rgba(143,192,184,.22);"></div><div style="font-family:'Hanken Grotesk',sans-serif; font-size:9px; font-weight:600; letter-spacing:.04em; margin-top:7px; color:rgba(143,192,184,.5);">READ</div></div>
+          <div style="flex:1; text-align:center;"><div style="height:5px; border-radius:3px; background:rgba(143,192,184,.22);"></div><div style="font-family:'Hanken Grotesk',sans-serif; font-size:9px; font-weight:600; letter-spacing:.04em; margin-top:7px; color:rgba(143,192,184,.5);">RECALL</div></div>
+        </div>
+
+        <div style="text-align:center; padding:26px 32px 0;">
+          <div style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.34em; color:#8FC0B8;">STEP ONE</div>
+          <div style="font-family:'Newsreader',serif; color:#F8F0E2; font-size:44px; font-weight:500; margin-top:4px;">Grasp</div>
+          <div style="font-family:'Newsreader',serif; font-style:italic; color:#8FC0B8; font-size:16px; margin-top:8px; line-height:1.45;">Just listen. Let the meaning<br>arrive — nothing to read yet.</div>
+        </div>
+
+        <!-- listening orb: static, no coral -->
+        <div style="flex:1; display:flex; align-items:center; justify-content:center;">
+          <div style="position:relative; width:170px; height:170px; display:flex; align-items:center; justify-content:center;">
+            <span style="position:absolute; width:170px; height:170px; border-radius:50%; border:1px solid rgba(143,192,184,.25);"></span>
+            <span style="position:absolute; width:128px; height:128px; border-radius:50%; border:1px solid rgba(143,192,184,.35);"></span>
+            <span style="width:92px; height:92px; border-radius:50%; background:radial-gradient(circle at 50% 42%, rgba(143,192,184,.55), rgba(14,99,91,.6)); display:flex; align-items:center; justify-content:center;"><span style="display:flex; gap:3px; align-items:center; height:26px;"><i style="width:3px; height:40%; background:#F8F0E2; border-radius:2px;"></i><i style="width:3px; height:75%; background:#F8F0E2; border-radius:2px;"></i><i style="width:3px; height:100%; background:#F8F0E2; border-radius:2px;"></i><i style="width:3px; height:60%; background:#F8F0E2; border-radius:2px;"></i><i style="width:3px; height:85%; background:#F8F0E2; border-radius:2px;"></i></span></span>
+          </div>
+        </div>
+
+        <!-- player (forward only) -->
+        <div style="padding:0 26px;">
+          <div style="display:flex; align-items:center; gap:16px;">
+            <div style="width:56px; height:56px; border-radius:50%; background:#F8F0E2; color:#0A554E; flex:none; display:flex; align-items:center; justify-content:center; font-size:17px;">▶</div>
+            <div style="flex:1;">
+              <div style="height:5px; border-radius:3px; background:rgba(143,192,184,.22); overflow:hidden;"><div style="width:34%; height:100%; background:#8FC0B8; border-radius:3px;"></div></div>
+              <div style="display:flex; justify-content:space-between; margin-top:8px; font-family:'Hanken Grotesk',sans-serif; font-size:10px; font-weight:700; letter-spacing:.1em; color:#5C857D;"><span>0:03</span><span>FORWARD ONLY</span><span>0:09</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- self-assess + gate -->
+        <div style="margin:18px 26px 0; padding-top:16px; border-top:1px solid rgba(143,192,184,.18);">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <span style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.08em; color:#8FC0B8;">DID THE MEANING LAND?</span>
+            <span style="font-size:19px; letter-spacing:2px; color:#F8F0E2;">★★★<span style="color:rgba(143,192,184,.3);">★★</span></span>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px; margin-top:14px; padding-bottom:22px;">
+            <span style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.06em; color:#8FC0B8;">REP 1 OF 3</span>
+            <span style="display:flex; gap:6px;"><span style="width:8px; height:8px; border-radius:50%; background:#8FC0B8;"></span><span style="width:8px; height:8px; border-radius:50%; background:rgba(143,192,184,.28);"></span><span style="width:8px; height:8px; border-radius:50%; background:rgba(143,192,184,.28);"></span></span>
+            <span style="margin-left:auto; font-family:'Newsreader',serif; font-style:italic; font-size:13px; color:#5C857D;">no mic — self-rated</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 05 · HUM (emerald, melody, no text, coral mic) ============ -->
+    <div style="flex:none; width:360px;">
+      <div style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:#15403B; margin-bottom:13px;">05 · Hum — match the melody</div>
+      <div style="width:360px; height:760px; border-radius:46px; overflow:hidden; position:relative; background:#0A554E; box-shadow:0 28px 54px -18px rgba(7,42,38,.55), 0 6px 16px rgba(7,42,38,.25); border:1px solid rgba(143,192,184,.18); display:flex; flex-direction:column;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:18px 28px 0; font-family:'Hanken Grotesk',sans-serif; font-size:13px; font-weight:600; color:#8FC0B8;"><span>9:41</span><span style="display:flex; gap:5px; align-items:center;"><span style="width:5px; height:5px; border-radius:50%; background:#8FC0B8;"></span><span style="width:5px; height:5px; border-radius:50%; background:#8FC0B8;"></span><span style="width:18px; height:10px; border:1.4px solid #8FC0B8; border-radius:3px;"></span></span></div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 24px 0; font-family:'Hanken Grotesk',sans-serif; font-size:12px; color:#8FC0B8;"><span style="font-size:18px;">‹</span><span style="font-weight:600; letter-spacing:.04em;">LMPI-003 · At the market</span><span style="font-weight:700;">7/10</span></div>
+
+        <div style="display:flex; gap:6px; padding:18px 26px 0;">
+          <div style="flex:1; text-align:center;"><div style="height:5px; border-radius:3px; background:#8FC0B8;"></div><div style="font-family:'Hanken Grotesk',sans-serif; font-size:9px; font-weight:600; letter-spacing:.04em; margin-top:7px; color:#8FC0B8;">GRASP</div></div>
+          <div style="flex:1; text-align:center;"><div style="height:5px; border-radius:3px; background:#F8F0E2;"></div><div style="font-family:'Hanken Grotesk',sans-serif; font-size:9px; font-weight:800; letter-spacing:.04em; margin-top:7px; color:#F8F0E2;">HUM</div></div>
+          <div style="flex:1; text-align:center;"><div style="height:5px; border-radius:3px; background:rgba(143,192,184,.22);"></div><div style="font-family:'Hanken Grotesk',sans-serif; font-size:9px; font-weight:600; letter-spacing:.04em; margin-top:7px; color:rgba(143,192,184,.5);">SHADOW</div></div>
+          <div style="flex:1; text-align:center;"><div style="height:5px; border-radius:3px; background:rgba(143,192,184,.22);"></div><div style="font-family:'Hanken Grotesk',sans-serif; font-size:9px; font-weight:600; letter-spacing:.04em; margin-top:7px; color:rgba(143,192,184,.5);">READ</div></div>
+          <div style="flex:1; text-align:center;"><div style="height:5px; border-radius:3px; background:rgba(143,192,184,.22);"></div><div style="font-family:'Hanken Grotesk',sans-serif; font-size:9px; font-weight:600; letter-spacing:.04em; margin-top:7px; color:rgba(143,192,184,.5);">RECALL</div></div>
+        </div>
+
+        <div style="text-align:center; padding:22px 32px 0;">
+          <div style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.34em; color:#8FC0B8;">STEP TWO</div>
+          <div style="font-family:'Newsreader',serif; color:#F8F0E2; font-size:44px; font-weight:500; margin-top:4px;">Hum</div>
+          <div style="font-family:'Newsreader',serif; font-style:italic; color:#8FC0B8; font-size:16px; margin-top:8px; line-height:1.45;">Match the melody — the shape<br>of the sound, no words.</div>
+        </div>
+
+        <!-- melody contour (model, static) + your hum (coral) -->
+        <div style="flex:1; display:flex; flex-direction:column; justify-content:center; gap:16px; padding:0 26px;">
+          <div>
+            <div style="font-family:'Hanken Grotesk',sans-serif; font-size:9.5px; font-weight:700; letter-spacing:.16em; color:#8FC0B8; margin-bottom:8px;">MODEL MELODY</div>
+            <svg viewBox="0 0 300 60" style="width:100%; height:54px; display:block;"><path d="M4 44 C 40 44, 50 14, 86 16 S 140 46, 168 30 S 220 6, 252 22 S 288 40, 296 30" fill="none" stroke="#8FC0B8" stroke-width="2.5" stroke-linecap="round"/></svg>
+          </div>
+          <div style="border:1px solid rgba(239,106,71,.4); border-radius:16px; padding:14px; background:rgba(239,106,71,.08);">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:11px;">
+              <span style="position:relative; width:11px; height:11px; flex:none;"><span style="position:absolute; inset:0; border-radius:50%; background:rgba(239,106,71,.5); animation:lmaPulse 1.9s infinite ease-out;"></span><span style="position:absolute; inset:2px; border-radius:50%; background:#EF6A47;"></span></span>
+              <span style="font-family:'Hanken Grotesk',sans-serif; font-size:10px; font-weight:700; letter-spacing:.14em; color:#EF6A47;">YOUR HUM · MIC OPEN</span>
+            </div>
+            <div style="display:flex; gap:3px; align-items:center; height:40px;">
+              <i style="flex:1; background:#EF6A47; border-radius:2px; height:100%; transform-origin:center; animation:lmaBar .7s infinite ease-in-out;"></i><i style="flex:1; background:#EF6A47; border-radius:2px; height:100%; transform-origin:center; animation:lmaBar .9s infinite ease-in-out .1s;"></i><i style="flex:1; background:#EF6A47; border-radius:2px; height:100%; transform-origin:center; animation:lmaBar .8s infinite ease-in-out .2s;"></i><i style="flex:1; background:#EF6A47; border-radius:2px; height:100%; transform-origin:center; animation:lmaBar 1s infinite ease-in-out .15s;"></i><i style="flex:1; background:#EF6A47; border-radius:2px; height:100%; transform-origin:center; animation:lmaBar .75s infinite ease-in-out .25s;"></i><i style="flex:1; background:#EF6A47; border-radius:2px; height:100%; transform-origin:center; animation:lmaBar .85s infinite ease-in-out .05s;"></i><i style="flex:1; background:#EF6A47; border-radius:2px; height:100%; transform-origin:center; animation:lmaBar .95s infinite ease-in-out .3s;"></i><i style="flex:1; background:#EF6A47; border-radius:2px; height:100%; transform-origin:center; animation:lmaBar .7s infinite ease-in-out .2s;"></i><i style="flex:1; background:#EF6A47; border-radius:2px; height:100%; transform-origin:center; animation:lmaBar .9s infinite ease-in-out .1s;"></i><i style="flex:1; background:#EF6A47; border-radius:2px; height:100%; transform-origin:center; animation:lmaBar .8s infinite ease-in-out .25s;"></i><i style="flex:1; background:#EF6A47; border-radius:2px; height:100%; transform-origin:center; animation:lmaBar 1s infinite ease-in-out .35s;"></i><i style="flex:1; background:#EF6A47; border-radius:2px; height:100%; transform-origin:center; animation:lmaBar .78s infinite ease-in-out .12s;"></i><i style="flex:1; background:#EF6A47; border-radius:2px; height:100%; transform-origin:center; animation:lmaBar .88s infinite ease-in-out .28s;"></i>
+            </div>
+          </div>
+        </div>
+
+        <div style="padding:0 26px;">
+          <div style="display:flex; align-items:center; gap:16px;">
+            <div style="width:56px; height:56px; border-radius:50%; background:#F8F0E2; color:#0A554E; flex:none; display:flex; align-items:center; justify-content:center; font-size:14px; letter-spacing:1px;">❚❚</div>
+            <div style="flex:1;">
+              <div style="height:5px; border-radius:3px; background:rgba(143,192,184,.22); overflow:hidden;"><div style="width:52%; height:100%; background:#8FC0B8; border-radius:3px;"></div></div>
+              <div style="display:flex; justify-content:space-between; margin-top:8px; font-family:'Hanken Grotesk',sans-serif; font-size:10px; font-weight:700; letter-spacing:.1em; color:#5C857D;"><span>0:05</span><span>FORWARD ONLY</span><span>0:09</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin:18px 26px 0; padding-top:16px; border-top:1px solid rgba(143,192,184,.18);">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <span style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.08em; color:#8FC0B8;">RATE THIS TAKE</span>
+            <span style="font-size:19px; letter-spacing:2px; color:#F8F0E2;">★★★★<span style="color:rgba(143,192,184,.3);">★</span></span>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px; margin-top:14px; padding-bottom:22px;">
+            <span style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.06em; color:#8FC0B8;">REP 2 OF 3</span>
+            <span style="display:flex; gap:6px;"><span style="width:8px; height:8px; border-radius:50%; background:#8FC0B8;"></span><span style="width:8px; height:8px; border-radius:50%; background:#8FC0B8;"></span><span style="width:8px; height:8px; border-radius:50%; background:rgba(143,192,184,.28);"></span></span>
+            <span style="margin-left:auto; font-family:'Newsreader',serif; font-style:italic; font-size:13px; color:#5C857D;">auto: 3★ this take</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 06 · SHADOW (emerald, speak along, no text, coral mic) ============ -->
+    <div style="flex:none; width:360px;">
+      <div style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:#15403B; margin-bottom:13px;">06 · Shadow — speak along</div>
+      <div style="width:360px; height:760px; border-radius:46px; overflow:hidden; position:relative; background:#0A554E; box-shadow:0 28px 54px -18px rgba(7,42,38,.55), 0 6px 16px rgba(7,42,38,.25); border:1px solid rgba(143,192,184,.18); display:flex; flex-direction:column;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:18px 28px 0; font-family:'Hanken Grotesk',sans-serif; font-size:13px; font-weight:600; color:#8FC0B8;"><span>9:41</span><span style="display:flex; gap:5px; align-items:center;"><span style="width:5px; height:5px; border-radius:50%; background:#8FC0B8;"></span><span style="width:5px; height:5px; border-radius:50%; background:#8FC0B8;"></span><span style="width:18px; height:10px; border:1.4px solid #8FC0B8; border-radius:3px;"></span></span></div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 24px 0; font-family:'Hanken Grotesk',sans-serif; font-size:12px; color:#8FC0B8;"><span style="font-size:18px;">‹</span><span style="font-weight:600; letter-spacing:.04em;">LMPI-003 · At the market</span><span style="font-weight:700;">7/10</span></div>
+
+        <div style="display:flex; gap:6px; padding:18px 26px 0;">
+          <div style="flex:1; text-align:center;"><div style="height:5px; border-radius:3px; background:#8FC0B8;"></div><div style="font-family:'Hanken Grotesk',sans-serif; font-size:9px; font-weight:600; letter-spacing:.04em; margin-top:7px; color:#8FC0B8;">GRASP</div></div>
+          <div style="flex:1; text-align:center;"><div style="height:5px; border-radius:3px; background:#8FC0B8;"></div><div style="font-family:'Hanken Grotesk',sans-serif; font-size:9px; font-weight:600; letter-spacing:.04em; margin-top:7px; color:#8FC0B8;">HUM</div></div>
+          <div style="flex:1; text-align:center;"><div style="height:5px; border-radius:3px; background:#F8F0E2;"></div><div style="font-family:'Hanken Grotesk',sans-serif; font-size:9px; font-weight:800; letter-spacing:.04em; margin-top:7px; color:#F8F0E2;">SHADOW</div></div>
+          <div style="flex:1; text-align:center;"><div style="height:5px; border-radius:3px; background:rgba(143,192,184,.22);"></div><div style="font-family:'Hanken Grotesk',sans-serif; font-size:9px; font-weight:600; letter-spacing:.04em; margin-top:7px; color:rgba(143,192,184,.5);">READ</div></div>
+          <div style="flex:1; text-align:center;"><div style="height:5px; border-radius:3px; background:rgba(143,192,184,.22);"></div><div style="font-family:'Hanken Grotesk',sans-serif; font-size:9px; font-weight:600; letter-spacing:.04em; margin-top:7px; color:rgba(143,192,184,.5);">RECALL</div></div>
+        </div>
+
+        <div style="text-align:center; padding:22px 32px 0;">
+          <div style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.34em; color:#8FC0B8;">STEP THREE</div>
+          <div style="font-family:'Newsreader',serif; color:#F8F0E2; font-size:44px; font-weight:500; margin-top:4px;">Shadow</div>
+          <div style="font-family:'Newsreader',serif; font-style:italic; color:#8FC0B8; font-size:16px; margin-top:8px; line-height:1.45;">Speak at the same time.<br>Don't wait — ride the voice.</div>
+        </div>
+
+        <!-- dual waveform: model static teal + your voice coral -->
+        <div style="flex:1; display:flex; flex-direction:column; justify-content:center; gap:14px; padding:0 26px;">
+          <div style="border:1px solid rgba(143,192,184,.22); border-radius:16px; padding:14px;">
+            <div style="font-family:'Hanken Grotesk',sans-serif; font-size:9.5px; font-weight:700; letter-spacing:.16em; color:#8FC0B8; margin-bottom:10px;">MODEL VOICE</div>
+            <div style="display:flex; gap:3px; align-items:center; height:38px;">
+              <i style="flex:1; height:35%; background:#8FC0B8; border-radius:2px;"></i><i style="flex:1; height:65%; background:#8FC0B8; border-radius:2px;"></i><i style="flex:1; height:50%; background:#8FC0B8; border-radius:2px;"></i><i style="flex:1; height:90%; background:#8FC0B8; border-radius:2px;"></i><i style="flex:1; height:70%; background:#8FC0B8; border-radius:2px;"></i><i style="flex:1; height:100%; background:#8FC0B8; border-radius:2px;"></i><i style="flex:1; height:55%; background:#8FC0B8; border-radius:2px;"></i><i style="flex:1; height:80%; background:#8FC0B8; border-radius:2px;"></i><i style="flex:1; height:40%; background:#8FC0B8; border-radius:2px;"></i><i style="flex:1; height:72%; background:#8FC0B8; border-radius:2px;"></i><i style="flex:1; height:48%; background:#8FC0B8; border-radius:2px;"></i><i style="flex:1; height:85%; background:#8FC0B8; border-radius:2px;"></i><i style="flex:1; height:60%; background:#8FC0B8; border-radius:2px;"></i>
+            </div>
+          </div>
+          <div style="border:1px solid rgba(239,106,71,.4); border-radius:16px; padding:14px; background:rgba(239,106,71,.08);">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+              <span style="position:relative; width:11px; height:11px; flex:none;"><span style="position:absolute; inset:0; border-radius:50%; background:rgba(239,106,71,.5); animation:lmaPulse 1.9s infinite ease-out;"></span><span style="position:absolute; inset:2px; border-radius:50%; background:#EF6A47;"></span></span>
+              <span style="font-family:'Hanken Grotesk',sans-serif; font-size:10px; font-weight:700; letter-spacing:.14em; color:#EF6A47;">YOUR VOICE · RECORDING</span>
+            </div>
+            <div style="display:flex; gap:3px; align-items:center; height:38px;">
+              <i style="flex:1; background:#EF6A47; border-radius:2px; height:100%; transform-origin:center; animation:lmaBar .7s infinite ease-in-out;"></i><i style="flex:1; background:#EF6A47; border-radius:2px; height:100%; transform-origin:center; animation:lmaBar .9s infinite ease-in-out .12s;"></i><i style="flex:1; background:#EF6A47; border-radius:2px; height:100%; transform-origin:center; animation:lmaBar .8s infinite ease-in-out .2s;"></i><i style="flex:1; background:#EF6A47; border-radius:2px; height:100%; transform-origin:center; animation:lmaBar 1s infinite ease-in-out .08s;"></i><i style="flex:1; background:#EF6A47; border-radius:2px; height:100%; transform-origin:center; animation:lmaBar .75s infinite ease-in-out .25s;"></i><i style="flex:1; background:#EF6A47; border-radius:2px; height:100%; transform-origin:center; animation:lmaBar .85s infinite ease-in-out .15s;"></i><i style="flex:1; background:#EF6A47; border-radius:2px; height:100%; transform-origin:center; animation:lmaBar .95s infinite ease-in-out .3s;"></i><i style="flex:1; background:#EF6A47; border-radius:2px; height:100%; transform-origin:center; animation:lmaBar .7s infinite ease-in-out .18s;"></i><i style="flex:1; background:#EF6A47; border-radius:2px; height:100%; transform-origin:center; animation:lmaBar .9s infinite ease-in-out .05s;"></i><i style="flex:1; background:#EF6A47; border-radius:2px; height:100%; transform-origin:center; animation:lmaBar .82s infinite ease-in-out .22s;"></i><i style="flex:1; background:#EF6A47; border-radius:2px; height:100%; transform-origin:center; animation:lmaBar 1s infinite ease-in-out .32s;"></i><i style="flex:1; background:#EF6A47; border-radius:2px; height:100%; transform-origin:center; animation:lmaBar .78s infinite ease-in-out .1s;"></i><i style="flex:1; background:#EF6A47; border-radius:2px; height:100%; transform-origin:center; animation:lmaBar .88s infinite ease-in-out .26s;"></i>
+            </div>
+          </div>
+        </div>
+
+        <div style="padding:0 26px;">
+          <div style="display:flex; align-items:center; gap:16px;">
+            <div style="width:56px; height:56px; border-radius:50%; background:#F8F0E2; color:#0A554E; flex:none; display:flex; align-items:center; justify-content:center; font-size:14px; letter-spacing:1px;">❚❚</div>
+            <div style="flex:1;">
+              <div style="height:5px; border-radius:3px; background:rgba(143,192,184,.22); overflow:hidden;"><div style="width:60%; height:100%; background:#8FC0B8; border-radius:3px;"></div></div>
+              <div style="display:flex; justify-content:space-between; margin-top:8px; font-family:'Hanken Grotesk',sans-serif; font-size:10px; font-weight:700; letter-spacing:.1em; color:#5C857D;"><span>0:06</span><span>FORWARD ONLY</span><span>0:09</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin:18px 26px 0; padding-top:16px; border-top:1px solid rgba(143,192,184,.18);">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <span style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.08em; color:#8FC0B8;">RATE THIS TAKE</span>
+            <span style="font-size:19px; letter-spacing:2px; color:#F8F0E2;">★★★<span style="color:rgba(143,192,184,.3);">★★</span></span>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px; margin-top:14px; padding-bottom:22px;">
+            <span style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.06em; color:#8FC0B8;">REP 2 OF 3</span>
+            <span style="display:flex; gap:6px;"><span style="width:8px; height:8px; border-radius:50%; background:#8FC0B8;"></span><span style="width:8px; height:8px; border-radius:50%; background:#8FC0B8;"></span><span style="width:8px; height:8px; border-radius:50%; background:rgba(143,192,184,.28);"></span></span>
+            <span style="margin-left:auto; font-family:'Newsreader',serif; font-style:italic; font-size:13px; color:#5C857D;">one more rep to pass</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 07 · READ (emerald, text appears + translit toggle) ============ -->
+    <div style="flex:none; width:360px;">
+      <div style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:#15403B; margin-bottom:13px;">07 · Read — the words appear</div>
+      <div style="width:360px; height:760px; border-radius:46px; overflow:hidden; position:relative; background:#0A554E; box-shadow:0 28px 54px -18px rgba(7,42,38,.55), 0 6px 16px rgba(7,42,38,.25); border:1px solid rgba(143,192,184,.18); display:flex; flex-direction:column;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:18px 28px 0; font-family:'Hanken Grotesk',sans-serif; font-size:13px; font-weight:600; color:#8FC0B8;"><span>9:41</span><span style="display:flex; gap:5px; align-items:center;"><span style="width:5px; height:5px; border-radius:50%; background:#8FC0B8;"></span><span style="width:5px; height:5px; border-radius:50%; background:#8FC0B8;"></span><span style="width:18px; height:10px; border:1.4px solid #8FC0B8; border-radius:3px;"></span></span></div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 24px 0; font-family:'Hanken Grotesk',sans-serif; font-size:12px; color:#8FC0B8;"><span style="font-size:18px;">‹</span><span style="font-weight:600; letter-spacing:.04em;">LMPI-003 · At the market</span><span style="font-weight:700;">7/10</span></div>
+
+        <div style="display:flex; gap:6px; padding:18px 26px 0;">
+          <div style="flex:1; text-align:center;"><div style="height:5px; border-radius:3px; background:#8FC0B8;"></div><div style="font-family:'Hanken Grotesk',sans-serif; font-size:9px; font-weight:600; letter-spacing:.04em; margin-top:7px; color:#8FC0B8;">GRASP</div></div>
+          <div style="flex:1; text-align:center;"><div style="height:5px; border-radius:3px; background:#8FC0B8;"></div><div style="font-family:'Hanken Grotesk',sans-serif; font-size:9px; font-weight:600; letter-spacing:.04em; margin-top:7px; color:#8FC0B8;">HUM</div></div>
+          <div style="flex:1; text-align:center;"><div style="height:5px; border-radius:3px; background:#8FC0B8;"></div><div style="font-family:'Hanken Grotesk',sans-serif; font-size:9px; font-weight:600; letter-spacing:.04em; margin-top:7px; color:#8FC0B8;">SHADOW</div></div>
+          <div style="flex:1; text-align:center;"><div style="height:5px; border-radius:3px; background:#F8F0E2;"></div><div style="font-family:'Hanken Grotesk',sans-serif; font-size:9px; font-weight:800; letter-spacing:.04em; margin-top:7px; color:#F8F0E2;">READ</div></div>
+          <div style="flex:1; text-align:center;"><div style="height:5px; border-radius:3px; background:rgba(143,192,184,.22);"></div><div style="font-family:'Hanken Grotesk',sans-serif; font-size:9px; font-weight:600; letter-spacing:.04em; margin-top:7px; color:rgba(143,192,184,.5);">RECALL</div></div>
+        </div>
+
+        <div style="text-align:center; padding:20px 32px 0;">
+          <div style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.34em; color:#8FC0B8;">STEP FOUR</div>
+          <div style="font-family:'Newsreader',serif; color:#F8F0E2; font-size:44px; font-weight:500; margin-top:4px;">Read</div>
+          <div style="font-family:'Newsreader',serif; font-style:italic; color:#8FC0B8; font-size:16px; margin-top:6px;">Now the words appear. Read aloud.</div>
+        </div>
+
+        <!-- the sentence -->
+        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:0 30px;">
+          <div style="font-family:'Noto Serif JP','Newsreader',serif; color:#F8F0E2; font-size:34px; font-weight:500; line-height:1.3; text-align:center;">パンはどこですか？</div>
+          <div style="font-family:'Newsreader',serif; font-style:italic; color:#8FC0B8; font-size:16px; margin-top:14px; text-align:center;">Where is the bread, please?</div>
+
+          <!-- transliteration toggle (ON) -->
+          <div style="margin-top:26px; width:100%; border:1px solid rgba(143,192,184,.25); border-radius:16px; padding:14px 16px;">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+              <span style="font-family:'Hanken Grotesk',sans-serif; font-size:10.5px; font-weight:700; letter-spacing:.12em; color:#8FC0B8;">TRANSLITERATION</span>
+              <span style="width:40px; height:22px; border-radius:12px; background:#8FC0B8; position:relative; display:inline-block; flex:none;"><span style="position:absolute; right:2px; top:2px; width:18px; height:18px; border-radius:50%; background:#0A554E;"></span></span>
+            </div>
+            <div style="font-family:'Hanken Grotesk',sans-serif; color:#F8F0E2; font-size:17px; font-weight:500; margin-top:10px; text-align:center;">Pan wa doko desu ka?</div>
+          </div>
+        </div>
+
+        <!-- coral mic mini -->
+        <div style="display:flex; align-items:center; gap:11px; padding:0 26px 12px;">
+          <span style="position:relative; width:11px; height:11px; flex:none;"><span style="position:absolute; inset:0; border-radius:50%; background:rgba(239,106,71,.5); animation:lmaPulse 1.9s infinite ease-out;"></span><span style="position:absolute; inset:2px; border-radius:50%; background:#EF6A47;"></span></span>
+          <span style="font-family:'Hanken Grotesk',sans-serif; font-size:10px; font-weight:700; letter-spacing:.12em; color:#EF6A47;">READING ALOUD · MIC OPEN</span>
+          <span style="margin-left:auto; display:flex; gap:2.5px; align-items:center; height:18px;"><i style="width:3px; background:#EF6A47; height:100%; border-radius:2px; transform-origin:center; animation:lmaBar .7s infinite ease-in-out;"></i><i style="width:3px; background:#EF6A47; height:100%; border-radius:2px; transform-origin:center; animation:lmaBar .9s infinite ease-in-out .1s;"></i><i style="width:3px; background:#EF6A47; height:100%; border-radius:2px; transform-origin:center; animation:lmaBar .8s infinite ease-in-out .2s;"></i><i style="width:3px; background:#EF6A47; height:100%; border-radius:2px; transform-origin:center; animation:lmaBar 1s infinite ease-in-out .15s;"></i><i style="width:3px; background:#EF6A47; height:100%; border-radius:2px; transform-origin:center; animation:lmaBar .76s infinite ease-in-out .26s;"></i></span>
+        </div>
+
+        <div style="padding:0 26px;">
+          <div style="display:flex; align-items:center; gap:16px;">
+            <div style="width:56px; height:56px; border-radius:50%; background:#F8F0E2; color:#0A554E; flex:none; display:flex; align-items:center; justify-content:center; font-size:14px; letter-spacing:1px;">❚❚</div>
+            <div style="flex:1;">
+              <div style="height:5px; border-radius:3px; background:rgba(143,192,184,.22); overflow:hidden;"><div style="width:74%; height:100%; background:#8FC0B8; border-radius:3px;"></div></div>
+              <div style="display:flex; justify-content:space-between; margin-top:8px; font-family:'Hanken Grotesk',sans-serif; font-size:10px; font-weight:700; letter-spacing:.1em; color:#5C857D;"><span>0:07</span><span>FORWARD ONLY</span><span>0:09</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- gate: 4 star auto pass -->
+        <div style="margin:18px 26px 0; padding-top:16px; border-top:1px solid rgba(143,192,184,.18);">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <span style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.08em; color:#8FC0B8;">YOUR TAKE</span>
+            <span style="font-size:19px; letter-spacing:2px; color:#F8F0E2;">★★★★<span style="color:rgba(143,192,184,.3);">★</span></span>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px; margin-top:14px; padding-bottom:22px;">
+            <span style="display:inline-flex; align-items:center; gap:7px; background:rgba(143,192,184,.16); border:1px solid rgba(143,192,184,.4); border-radius:20px; padding:6px 12px;"><span style="width:16px; height:16px; border-radius:50%; background:#8FC0B8; color:#0A554E; display:flex; align-items:center; justify-content:center; font-size:10px;">✓</span><span style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:800; letter-spacing:.06em; color:#F8F0E2;">4★ — PASSED</span></span>
+            <span style="margin-left:auto; font-family:'Newsreader',serif; font-style:italic; font-size:13px; color:#5C857D;">on to sentence 8 →</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 08 · RECALL (emerald, prompt only, model after take) ============ -->
+    <div style="flex:none; width:360px;">
+      <div style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:#15403B; margin-bottom:13px;">08 · Recall — from memory</div>
+      <div style="width:360px; height:760px; border-radius:46px; overflow:hidden; position:relative; background:#0A554E; box-shadow:0 28px 54px -18px rgba(7,42,38,.55), 0 6px 16px rgba(7,42,38,.25); border:1px solid rgba(143,192,184,.18); display:flex; flex-direction:column;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:18px 28px 0; font-family:'Hanken Grotesk',sans-serif; font-size:13px; font-weight:600; color:#8FC0B8;"><span>9:41</span><span style="display:flex; gap:5px; align-items:center;"><span style="width:5px; height:5px; border-radius:50%; background:#8FC0B8;"></span><span style="width:5px; height:5px; border-radius:50%; background:#8FC0B8;"></span><span style="width:18px; height:10px; border:1.4px solid #8FC0B8; border-radius:3px;"></span></span></div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 24px 0; font-family:'Hanken Grotesk',sans-serif; font-size:12px; color:#8FC0B8;"><span style="font-size:18px;">‹</span><span style="font-weight:600; letter-spacing:.04em;">LMPI-003 · At the market</span><span style="font-weight:700;">7/10</span></div>
+
+        <div style="display:flex; gap:6px; padding:18px 26px 0;">
+          <div style="flex:1; text-align:center;"><div style="height:5px; border-radius:3px; background:#8FC0B8;"></div><div style="font-family:'Hanken Grotesk',sans-serif; font-size:9px; font-weight:600; letter-spacing:.04em; margin-top:7px; color:#8FC0B8;">GRASP</div></div>
+          <div style="flex:1; text-align:center;"><div style="height:5px; border-radius:3px; background:#8FC0B8;"></div><div style="font-family:'Hanken Grotesk',sans-serif; font-size:9px; font-weight:600; letter-spacing:.04em; margin-top:7px; color:#8FC0B8;">HUM</div></div>
+          <div style="flex:1; text-align:center;"><div style="height:5px; border-radius:3px; background:#8FC0B8;"></div><div style="font-family:'Hanken Grotesk',sans-serif; font-size:9px; font-weight:600; letter-spacing:.04em; margin-top:7px; color:#8FC0B8;">SHADOW</div></div>
+          <div style="flex:1; text-align:center;"><div style="height:5px; border-radius:3px; background:#8FC0B8;"></div><div style="font-family:'Hanken Grotesk',sans-serif; font-size:9px; font-weight:600; letter-spacing:.04em; margin-top:7px; color:#8FC0B8;">READ</div></div>
+          <div style="flex:1; text-align:center;"><div style="height:5px; border-radius:3px; background:#F8F0E2;"></div><div style="font-family:'Hanken Grotesk',sans-serif; font-size:9px; font-weight:800; letter-spacing:.04em; margin-top:7px; color:#F8F0E2;">RECALL</div></div>
+        </div>
+
+        <div style="text-align:center; padding:20px 32px 0;">
+          <div style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.34em; color:#8FC0B8;">STEP FIVE</div>
+          <div style="font-family:'Newsreader',serif; color:#F8F0E2; font-size:44px; font-weight:500; margin-top:4px;">Recall</div>
+          <div style="font-family:'Newsreader',serif; font-style:italic; color:#8FC0B8; font-size:16px; margin-top:6px;">From memory. Say it before you reveal.</div>
+        </div>
+
+        <div style="flex:1; display:flex; flex-direction:column; justify-content:center; gap:13px; padding:0 28px;">
+          <!-- prompt: audio cue only, no written L1 -->
+          <div style="text-align:center;">
+            <div style="font-family:'Hanken Grotesk',sans-serif; font-size:10.5px; font-weight:700; letter-spacing:.16em; color:#8FC0B8;">SAY IN JAPANESE</div>
+            <div style="margin-top:13px; display:inline-flex; align-items:center; gap:12px; border:1px solid rgba(143,192,184,.3); border-radius:30px; padding:9px 20px 9px 10px;">
+              <span style="width:40px; height:40px; border-radius:50%; background:#F8F0E2; color:#0A554E; flex:none; display:flex; align-items:center; justify-content:center; font-size:15px;">▶</span>
+              <span style="font-family:'Newsreader',serif; font-style:italic; color:#F8F0E2; font-size:18px;">Play the cue</span>
+            </div>
+          </div>
+          <!-- model hidden until take -->
+          <div style="border:1px dashed rgba(143,192,184,.4); border-radius:14px; padding:14px; text-align:center; position:relative; overflow:hidden;">
+            <div style="font-family:'Noto Serif JP','Newsreader',serif; color:rgba(143,192,184,.18); font-size:21px; filter:blur(7px);">パンはどこですか？</div>
+            <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; gap:8px; font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:600; letter-spacing:.06em; color:#8FC0B8;"><span>🔒</span> Hidden until your take</div>
+          </div>
+          <!-- reveal control · locked until the take is recorded -->
+          <div style="display:flex; align-items:center; justify-content:center; gap:10px; border:1px solid rgba(143,192,184,.25); border-radius:14px; padding:11px; opacity:.5;">
+            <span style="width:28px; height:28px; border-radius:50%; border:1.5px solid #5C857D; color:#5C857D; flex:none; display:flex; align-items:center; justify-content:center; font-size:11px;">▶</span>
+            <span style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.08em; color:#8FC0B8;">REVEAL MODEL AUDIO</span>
+            <span style="font-size:11px;">🔒</span>
+          </div>
+        </div>
+
+        <!-- coral live-mic record state -->
+        <div style="padding:0 26px 10px;">
+          <div style="display:flex; align-items:center; gap:13px; border:1px solid rgba(239,106,71,.4); border-radius:16px; padding:12px 14px; background:rgba(239,106,71,.08);">
+            <div style="position:relative; width:40px; height:40px; flex:none; display:flex; align-items:center; justify-content:center;">
+              <span style="position:absolute; inset:0; border-radius:50%; border:2px solid #EF6A47; animation:lmaPulse 1.8s infinite ease-out;"></span>
+              <span style="width:34px; height:34px; border-radius:50%; background:#EF6A47; display:flex; align-items:center; justify-content:center;"><span style="width:13px; height:13px; border-radius:4px; background:#F8F0E2;"></span></span>
+            </div>
+            <span style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.1em; color:#EF6A47;">RECORDING YOUR TAKE — SAY IT NOW</span>
+          </div>
+        </div>
+
+        <!-- self-assess + gate -->
+        <div style="margin:0 26px 0; padding-top:14px; border-top:1px solid rgba(143,192,184,.18);">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <span style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.08em; color:#8FC0B8;">RATE YOUR TAKE</span>
+            <span style="font-size:19px; letter-spacing:2px; color:rgba(143,192,184,.4);">★★★★★</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px; margin-top:13px; padding-bottom:20px;">
+            <span style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.06em; color:#8FC0B8;">REP 1 OF 3</span>
+            <span style="display:flex; gap:6px;"><span style="width:8px; height:8px; border-radius:50%; background:#8FC0B8;"></span><span style="width:8px; height:8px; border-radius:50%; background:rgba(143,192,184,.28);"></span><span style="width:8px; height:8px; border-radius:50%; background:rgba(143,192,184,.28);"></span></span>
+            <span style="margin-left:auto; font-family:'Newsreader',serif; font-style:italic; font-size:13px; color:#5C857D;">reveal after you speak</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="flex:none; width:230px; align-self:center; color:#6F8B85; font-family:'Newsreader',serif; font-style:italic; font-size:17px; line-height:1.6;">The gate is always visible: a single <span style="color:#15403B;">4★</span> take passes at once, otherwise <span style="color:#15403B;">three self-rated reps</span>. Without a mic, every step falls back to the three-rep path.</div>
+  </div>
+
+  <!-- ===================== SECTION C · REVIEW & PROGRESS ===================== -->
+  <div style="margin: 56px 0 20px;">
+    <div style="font-family:'Newsreader',serif; font-size:27px; color:#15403B; font-weight:500;">Review &amp; progress</div>
+    <div style="font-family:'Hanken Grotesk',sans-serif; font-size:12.5px; color:#6F8B85; margin-top:2px;">Where the ten sentences stand, and the long view of the adventure.</div>
+  </div>
+
+  <div style="display:flex; gap:46px; align-items:flex-start; margin-bottom:8px;">
+
+    <!-- ============ 09 · LESSON OVERVIEW & GRADES (cream) ============ -->
+    <div style="flex:none; width:360px;">
+      <div style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:#15403B; margin-bottom:13px;">09 · Lesson overview &amp; grades</div>
+      <div style="width:360px; height:760px; border-radius:46px; overflow:hidden; position:relative; background:#F8F0E2; box-shadow:0 28px 54px -18px rgba(7,42,38,.4), 0 6px 16px rgba(7,42,38,.16); border:1px solid #E2D8C4;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:18px 28px 0; font-family:'Hanken Grotesk',sans-serif; font-size:13px; font-weight:600; color:#6F8B85;"><span>9:41</span><span style="display:flex; gap:5px; align-items:center;"><span style="width:5px; height:5px; border-radius:50%; background:#6F8B85;"></span><span style="width:5px; height:5px; border-radius:50%; background:#6F8B85;"></span><span style="width:18px; height:10px; border:1.4px solid #6F8B85; border-radius:3px;"></span></span></div>
+
+        <div style="padding:18px 28px 4px;">
+          <div style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.12em; color:#6F8B85;">LMPI-003 · JAPANESE</div>
+          <div style="font-family:'Newsreader',serif; font-style:italic; color:#15403B; font-size:30px; margin-top:4px;">At the market</div>
+        </div>
+
+        <!-- summary strip -->
+        <div style="display:flex; gap:10px; padding:14px 24px 6px;">
+          <div style="flex:1; border:1px solid #E2D8C4; border-radius:14px; padding:12px 8px; text-align:center; background:#fff;"><div style="font-family:'Hanken Grotesk',sans-serif; font-size:23px; font-weight:800; color:#0A554E; line-height:1;">6/10</div><div style="font-family:'Hanken Grotesk',sans-serif; font-size:9px; font-weight:600; letter-spacing:.06em; color:#6F8B85; margin-top:4px;">PASSED</div></div>
+          <div style="flex:1; border:1px solid #E2D8C4; border-radius:14px; padding:12px 8px; text-align:center; background:#fff;"><div style="font-family:'Hanken Grotesk',sans-serif; font-size:23px; font-weight:800; color:#0A554E; line-height:1;">4.2★</div><div style="font-family:'Hanken Grotesk',sans-serif; font-size:9px; font-weight:600; letter-spacing:.06em; color:#6F8B85; margin-top:4px;">AVG SELF</div></div>
+          <div style="flex:1; border:1px solid #E2D8C4; border-radius:14px; padding:12px 8px; text-align:center; background:#fff;"><div style="font-family:'Hanken Grotesk',sans-serif; font-size:23px; font-weight:800; color:#0A554E; line-height:1;">74</div><div style="font-family:'Hanken Grotesk',sans-serif; font-size:9px; font-weight:600; letter-spacing:.06em; color:#6F8B85; margin-top:4px;">REPS</div></div>
+        </div>
+
+        <div style="position:absolute; left:0; right:0; top:208px; bottom:92px; overflow-y:auto; padding:6px 24px 16px;">
+          <!-- done rows -->
+          <div style="display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid #EEE5D4;"><span style="width:22px; height:22px; border-radius:50%; background:#0A554E; color:#F8F0E2; font-size:11px; flex:none; display:flex; align-items:center; justify-content:center;">✓</span><div style="flex:1;"><div style="font-family:'Noto Serif JP','Newsreader',serif; color:#15403B; font-size:15px;">いらっしゃいませ。</div><div style="font-family:'Hanken Grotesk',sans-serif; color:#6F8B85; font-size:10px;">Welcome!</div></div><span style="color:#0A554E; font-size:11px; letter-spacing:.5px;">★★★★★</span></div>
+          <div style="display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid #EEE5D4;"><span style="width:22px; height:22px; border-radius:50%; background:#0A554E; color:#F8F0E2; font-size:11px; flex:none; display:flex; align-items:center; justify-content:center;">✓</span><div style="flex:1;"><div style="font-family:'Noto Serif JP','Newsreader',serif; color:#15403B; font-size:15px;">これはいくらですか？</div><div style="font-family:'Hanken Grotesk',sans-serif; color:#6F8B85; font-size:10px;" data-comment-anchor="2517cc45e6-div">How much is this?</div></div><span style="color:#0A554E; font-size:11px; letter-spacing:.5px;">★★★★<span style="color:#D8CDB6;">★</span></span></div>
+          <div style="display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid #EEE5D4;"><span style="width:22px; height:22px; border-radius:50%; background:#0A554E; color:#F8F0E2; font-size:11px; flex:none; display:flex; align-items:center; justify-content:center;">✓</span><div style="flex:1;"><div style="font-family:'Noto Serif JP','Newsreader',serif; color:#15403B; font-size:15px;">ふたつください。</div><div style="font-family:'Hanken Grotesk',sans-serif; color:#6F8B85; font-size:10px;">Two, please.</div></div><span style="color:#0A554E; font-size:11px; letter-spacing:.5px;">★★★★★</span></div>
+          <div style="display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid #EEE5D4;"><span style="width:22px; height:22px; border-radius:50%; background:#0A554E; color:#F8F0E2; font-size:11px; flex:none; display:flex; align-items:center; justify-content:center;">✓</span><div style="flex:1;"><div style="font-family:'Noto Serif JP','Newsreader',serif; color:#15403B; font-size:15px;">牛乳はありますか？</div><div style="font-family:'Hanken Grotesk',sans-serif; color:#6F8B85; font-size:10px;">Do you have milk?</div></div><span style="color:#0A554E; font-size:11px; letter-spacing:.5px;">★★★★<span style="color:#D8CDB6;">★</span></span></div>
+          <div style="display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid #EEE5D4;"><span style="width:22px; height:22px; border-radius:50%; background:#0A554E; color:#F8F0E2; font-size:11px; flex:none; display:flex; align-items:center; justify-content:center;">✓</span><div style="flex:1;"><div style="font-family:'Noto Serif JP','Newsreader',serif; color:#15403B; font-size:15px;">ちょっと高いですね。</div><div style="font-family:'Hanken Grotesk',sans-serif; color:#6F8B85; font-size:10px;">That's a bit pricey.</div></div><span style="color:#0A554E; font-size:11px; letter-spacing:.5px;">★★★<span style="color:#D8CDB6;">★★</span></span></div>
+          <div style="display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid #EEE5D4;"><span style="width:22px; height:22px; border-radius:50%; background:#0A554E; color:#F8F0E2; font-size:11px; flex:none; display:flex; align-items:center; justify-content:center;">✓</span><div style="flex:1;"><div style="font-family:'Noto Serif JP','Newsreader',serif; color:#15403B; font-size:15px;">これをください。</div><div style="font-family:'Hanken Grotesk',sans-serif; color:#6F8B85; font-size:10px;">I'll take this.</div></div><span style="color:#0A554E; font-size:11px; letter-spacing:.5px;">★★★★<span style="color:#D8CDB6;">★</span></span></div>
+          <!-- in progress (coral) -->
+          <div style="display:flex; align-items:center; gap:12px; padding:13px 12px; margin:6px -12px; border-radius:12px; background:#FBF1E9;"><span style="position:relative; width:22px; height:22px; flex:none; display:flex; align-items:center; justify-content:center;"><span style="position:absolute; inset:0; border-radius:50%; background:rgba(239,106,71,.28); animation:lmaPulse 2s infinite ease-out;"></span><span style="position:relative; width:11px; height:11px; border-radius:50%; background:#EF6A47;"></span></span><div style="flex:1;"><div style="font-family:'Noto Serif JP','Newsreader',serif; color:#15403B; font-size:15px;">パンはどこですか？</div><div style="font-family:'Hanken Grotesk',sans-serif; color:#EF6A47; font-size:10px; font-weight:700;">In progress · Shadow 3/5</div></div><span style="color:#C9BEA8; font-size:11px; letter-spacing:.5px;">— — — — —</span></div>
+          <!-- locked -->
+          <div style="display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid #EEE5D4; opacity:.55;"><span style="width:22px; height:22px; border-radius:50%; border:1.5px solid #C9BEA8; flex:none; display:flex; align-items:center; justify-content:center; font-size:10px;">🔒</span><div style="flex:1;"><div style="font-family:'Noto Serif JP','Newsreader',serif; color:#15403B; font-size:15px;">袋をください。</div><div style="font-family:'Hanken Grotesk',sans-serif; color:#6F8B85; font-size:10px;">A bag, please.</div></div><span style="color:#D8CDB6; font-size:11px; letter-spacing:.5px;">★★★★★</span></div>
+          <div style="display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid #EEE5D4; opacity:.55;"><span style="width:22px; height:22px; border-radius:50%; border:1.5px solid #C9BEA8; flex:none; display:flex; align-items:center; justify-content:center; font-size:10px;">🔒</span><div style="flex:1;"><div style="font-family:'Noto Serif JP','Newsreader',serif; color:#15403B; font-size:15px;">ありがとうございます。</div><div style="font-family:'Hanken Grotesk',sans-serif; color:#6F8B85; font-size:10px;">Thank you very much.</div></div><span style="color:#D8CDB6; font-size:11px; letter-spacing:.5px;">★★★★★</span></div>
+          <div style="display:flex; align-items:center; gap:12px; padding:11px 0; opacity:.55;"><span style="width:22px; height:22px; border-radius:50%; border:1.5px solid #C9BEA8; flex:none; display:flex; align-items:center; justify-content:center; font-size:10px;">🔒</span><div style="flex:1;"><div style="font-family:'Noto Serif JP','Newsreader',serif; color:#15403B; font-size:15px;">また来ます。</div><div style="font-family:'Hanken Grotesk',sans-serif; color:#6F8B85; font-size:10px;">I'll come again.</div></div><span style="color:#D8CDB6; font-size:11px; letter-spacing:.5px;">★★★★★</span></div>
+        </div>
+
+        <div style="position:absolute; left:0; right:0; bottom:0; background:#0A554E; padding:13px 0 24px; display:flex; align-items:flex-start; justify-content:space-around; border-top:1px solid rgba(143,192,184,.2);">
+          <div style="display:flex; flex-direction:column; align-items:center; gap:6px; color:#5C857D;"><span style="width:20px; height:20px; border:1.8px solid currentColor; border-radius:6px;"></span><span style="font-family:'Hanken Grotesk',sans-serif; font-size:10px; font-weight:600;">Home</span></div>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:6px; color:#F8F0E2;"><span style="width:20px; height:20px; border:1.8px solid currentColor; border-radius:50%;"></span><span style="font-family:'Hanken Grotesk',sans-serif; font-size:10px; font-weight:700;">Practice</span></div>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:6px; color:#5C857D;"><span style="display:flex; align-items:flex-end; gap:2.5px; width:20px; height:20px;"><i style="width:4px; height:9px; background:currentColor; border-radius:1px;"></i><i style="width:4px; height:15px; background:currentColor; border-radius:1px;"></i><i style="width:4px; height:20px; background:currentColor; border-radius:1px;"></i></span><span style="font-family:'Hanken Grotesk',sans-serif; font-size:10px; font-weight:600;">Activities</span></div>
+          <div style="position:absolute; bottom:9px; left:50%; transform:translateX(-50%); width:120px; height:5px; border-radius:3px; background:rgba(248,240,226,.45);"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 10 · ACTIVITIES / PROGRESS (cream) ============ -->
+    <div style="flex:none; width:360px;">
+      <div style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:#15403B; margin-bottom:13px;">10 · Activities — the long view</div>
+      <div style="width:360px; height:760px; border-radius:46px; overflow:hidden; position:relative; background:#F8F0E2; box-shadow:0 28px 54px -18px rgba(7,42,38,.4), 0 6px 16px rgba(7,42,38,.16); border:1px solid #E2D8C4;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:18px 28px 0; font-family:'Hanken Grotesk',sans-serif; font-size:13px; font-weight:600; color:#6F8B85;"><span>9:41</span><span style="display:flex; gap:5px; align-items:center;"><span style="width:5px; height:5px; border-radius:50%; background:#6F8B85;"></span><span style="width:5px; height:5px; border-radius:50%; background:#6F8B85;"></span><span style="width:18px; height:10px; border:1.4px solid #6F8B85; border-radius:3px;"></span></span></div>
+
+        <div style="padding:18px 28px 4px;">
+          <div style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.12em; color:#6F8B85;">DAY 9 OF 28 · JAPANESE</div>
+          <div style="font-family:'Newsreader',serif; font-style:italic; color:#15403B; font-size:30px; margin-top:4px;">Your adventure</div>
+        </div>
+
+        <div style="position:absolute; left:0; right:0; top:118px; bottom:92px; overflow-y:auto; padding:6px 24px 18px;">
+          <!-- reps over time -->
+          <div style="border:1px solid #E2D8C4; border-radius:18px; padding:16px; background:#fff;">
+            <div style="display:flex; justify-content:space-between; align-items:baseline;"><span style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.1em; color:#6F8B85;">REPS GATHERED</span><span style="font-family:'Hanken Grotesk',sans-serif; font-size:13px; font-weight:800; color:#0A554E;">312</span></div>
+            <div style="display:flex; gap:5px; align-items:flex-end; height:60px; margin-top:14px;">
+              <i style="flex:1; height:28%; background:#CFE0D6; border-radius:3px;"></i><i style="flex:1; height:42%; background:#CFE0D6; border-radius:3px;"></i><i style="flex:1; height:35%; background:#9BC4B8; border-radius:3px;"></i><i style="flex:1; height:58%; background:#9BC4B8; border-radius:3px;"></i><i style="flex:1; height:50%; background:#5C9A8C; border-radius:3px;"></i><i style="flex:1; height:74%; background:#5C9A8C; border-radius:3px;"></i><i style="flex:1; height:64%; background:#0E635B; border-radius:3px;"></i><i style="flex:1; height:88%; background:#0E635B; border-radius:3px;"></i><i style="flex:1; height:78%; background:#0A554E; border-radius:3px;"></i><i style="flex:1; height:100%; background:#0A554E; border-radius:3px;"></i>
+            </div>
+          </div>
+
+          <!-- stat row -->
+          <div style="display:flex; gap:10px; margin-top:14px;">
+            <div style="flex:1; border:1px solid #E2D8C4; border-radius:14px; padding:13px 8px; text-align:center; background:#fff;"><div style="font-family:'Hanken Grotesk',sans-serif; font-size:22px; font-weight:800; color:#0A554E; line-height:1;">2</div><div style="font-family:'Hanken Grotesk',sans-serif; font-size:9px; font-weight:600; color:#6F8B85; margin-top:4px;">LESSONS DONE</div></div>
+            <div style="flex:1; border:1px solid #E2D8C4; border-radius:14px; padding:13px 8px; text-align:center; background:#fff;"><div style="font-family:'Hanken Grotesk',sans-serif; font-size:22px; font-weight:800; color:#0A554E; line-height:1;">4.5★</div><div style="font-family:'Hanken Grotesk',sans-serif; font-size:9px; font-weight:600; color:#6F8B85; margin-top:4px;">AVG GRADE</div></div>
+            <div style="flex:1; border:1px solid #E2D8C4; border-radius:14px; padding:13px 8px; text-align:center; background:#fff;"><div style="font-family:'Hanken Grotesk',sans-serif; font-size:22px; font-weight:800; color:#0A554E; line-height:1;">9</div><div style="font-family:'Hanken Grotesk',sans-serif; font-size:9px; font-weight:600; color:#6F8B85; margin-top:4px;">DAY STREAK</div></div>
+          </div>
+
+          <!-- what's next -->
+          <div style="font-family:'Hanken Grotesk',sans-serif; font-size:11px; font-weight:700; letter-spacing:.12em; color:#6F8B85; margin:18px 2px 10px;">RECENTLY</div>
+          <div style="display:flex; gap:12px; padding:8px 0; border-bottom:1px solid #EEE5D4;"><span style="font-family:'Hanken Grotesk',sans-serif; font-size:10px; font-weight:600; color:#6F8B85; width:44px; flex:none;">Jun 16</span><span style="font-family:'Hanken Grotesk',sans-serif; font-size:12px; color:#15403B; flex:1;">Shadowed 18 reps · At the market</span></div>
+          <div style="display:flex; gap:12px; padding:8px 0; border-bottom:1px solid #EEE5D4;"><span style="font-family:'Hanken Grotesk',sans-serif; font-size:10px; font-weight:600; color:#6F8B85; width:44px; flex:none;">Jun 15</span><span style="font-family:'Hanken Grotesk',sans-serif; font-size:12px; color:#15403B; flex:1;">Passed “これをください” · 4★ auto</span></div>
+          <div style="display:flex; gap:12px; padding:8px 0;"><span style="font-family:'Hanken Grotesk',sans-serif; font-size:10px; font-weight:600; color:#6F8B85; width:44px; flex:none;">Jun 14</span><span style="font-family:'Hanken Grotesk',sans-serif; font-size:12px; color:#15403B; flex:1;">Passed LMPI-002 · 4.5★</span></div>
+        </div>
+
+        <div style="position:absolute; left:0; right:0; bottom:0; background:#0A554E; padding:13px 0 24px; display:flex; align-items:flex-start; justify-content:space-around; border-top:1px solid rgba(143,192,184,.2);">
+          <div style="display:flex; flex-direction:column; align-items:center; gap:6px; color:#5C857D;"><span style="width:20px; height:20px; border:1.8px solid currentColor; border-radius:6px;"></span><span style="font-family:'Hanken Grotesk',sans-serif; font-size:10px; font-weight:600;">Home</span></div>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:6px; color:#5C857D;"><span style="width:20px; height:20px; border:1.8px solid currentColor; border-radius:50%;"></span><span style="font-family:'Hanken Grotesk',sans-serif; font-size:10px; font-weight:600;">Practice</span></div>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:6px; color:#F8F0E2;"><span style="display:flex; align-items:flex-end; gap:2.5px; width:20px; height:20px;"><i style="width:4px; height:9px; background:currentColor; border-radius:1px;"></i><i style="width:4px; height:15px; background:currentColor; border-radius:1px;"></i><i style="width:4px; height:20px; background:currentColor; border-radius:1px;"></i></span><span style="font-family:'Hanken Grotesk',sans-serif; font-size:10px; font-weight:700;">Activities</span></div>
+          <div style="position:absolute; bottom:9px; left:50%; transform:translateX(-50%); width:120px; height:5px; border-radius:3px; background:rgba(248,240,226,.45);"></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="flex:none; width:230px; align-self:center; color:#6F8B85; font-family:'Newsreader',serif; font-style:italic; font-size:17px; line-height:1.6;">Reps are the hero metric throughout — the road behind you. Coral appears once per screen: here, the one live thing on the horizon.</div>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:&quot;100%&quot;}}"></script>
+<script>
+(async () => {
+  if (!document.title || !document.title.trim()) document.title = "LMA Practice Player";
+  // Prepend so page-supplied @page / break rules (deck-stage's margin:0,
+  // author CSS) keep source-order precedence over the baseline.
+  const baseCss = document.createElement('style');
+  baseCss.textContent = "@media print {\n  @page { margin: 0.5cm; }\n  figure, table { break-inside: avoid; }\n  *, *::before, *::after {\n    print-color-adjust: exact; -webkit-print-color-adjust: exact;\n    backdrop-filter: none !important; -webkit-backdrop-filter: none !important;\n    animation-delay: -99s !important; animation-duration: .001s !important;\n    animation-iteration-count: 1 !important; animation-fill-mode: both !important;\n    animation-play-state: running !important; transition-duration: 0s !important;\n  }\n}";
+  document.head.prepend(baseCss);
+  if (document.readyState === 'loading') {
+    await new Promise((r) => document.addEventListener('DOMContentLoaded', r, { once: true }));
+  }
+  let ds = document.querySelector('deck-stage');
+  // whenDefined never resolves when nothing registers the element, so only
+  // await it when a <deck-stage> tag exists (and race a timeout regardless).
+  if (ds && !customElements.get('deck-stage')) {
+    try {
+      await Promise.race([
+        customElements.whenDefined('deck-stage'),
+        new Promise((r) => setTimeout(r, 3000)),
+      ]);
+    } catch (e) {}
+    ds = document.querySelector('deck-stage');
+  }
+  // dc-runtime assigns window.DCLogic at init and mounts into #dc-root on
+  // DOMContentLoaded; settle on that subtree so React has rendered before
+  // print(). Non-DC pages fall through to weighing body.
+  const isDc = !ds && 'DCLogic' in window;
+  const settleRoot = ds || (isDc ? document.getElementById('dc-root') : null) || document.body;
+  if (settleRoot) {
+    // Weigh only content children — skip script/style/template so inline
+    // Babel/CSS doesn't register as stable "content" before the framework
+    // has mounted anything.
+    const MEDIA = 'img,svg,canvas,video,picture,iframe,embed,object';
+    const weigh = () => {
+      let text = 0, media = 0;
+      for (const c of settleRoot.children) {
+        const t = c.tagName;
+        if (t === 'SCRIPT' || t === 'STYLE' || t === 'TEMPLATE') continue;
+        text += (c.textContent || '').trim().length;
+        media += c.querySelectorAll(MEDIA).length + (c.matches(MEDIA) ? 1 : 0);
+      }
+      return text + media * 100;
+    };
+    // "Non-zero and stable" alone is not sufficient to mean rendered: generic
+    // body can carry a static shell while async main content is pending, and
+    // #dc-root can carry the root DC's static text while child refs are still
+    // .sc-placeholder boxes. Gate generic on readyState 'complete', and never
+    // accept stability while a dc-runtime placeholder is present.
+    const isGeneric = settleRoot === document.body;
+    const deadline = Date.now() + 15000;
+    let last = -1, stable = 0;
+    while (Date.now() < deadline) {
+      const n = weigh();
+      const ready =
+        (!isGeneric || document.readyState === 'complete') &&
+        !settleRoot.querySelector('.sc-placeholder');
+      if (n > 0 && n === last && ready) { if (++stable >= 2) break; } else { stable = 0; }
+      last = n;
+      await new Promise((r) => setTimeout(r, 250));
+    }
+  }
+  // Reveal content gated on scroll or visibility before printing. Lazy <img>,
+  // IntersectionObserver fade-ins, and collapsed <details> don't render while
+  // off-screen, so a long page would print with them blank or closed. Open
+  // every <details>, force native-lazy images eager, and scroll the document
+  // through its full height to trip lazy-load + IO; then wait (bounded) for the
+  // newly-triggered images. Inert for deck-stage (slides aren't scroll-gated).
+  try {
+    for (const d of document.querySelectorAll('details')) d.open = true;
+    for (const img of document.querySelectorAll('img[loading="lazy"]'))
+      img.loading = 'eager';
+    const scroller = document.scrollingElement || document.documentElement;
+    const full = Math.max(scroller.scrollHeight, document.body.scrollHeight);
+    const step = window.innerHeight || 800;
+    for (let y = 0; y <= full; y += step) {
+      window.scrollTo(0, y);
+      await new Promise((r) => requestAnimationFrame(r));
+    }
+    window.scrollTo(0, 0);
+    await Promise.race([
+      Promise.all(
+        [...document.images].map((img) =>
+          img.complete
+            ? null
+            : new Promise((res) => {
+                img.addEventListener('load', res, { once: true });
+                img.addEventListener('error', res, { once: true });
+              })
+        )
+      ),
+      new Promise((r) => setTimeout(r, 4000)),
+    ]);
+  } catch (e) {}
+  try { await document.fonts.ready; } catch (e) {}
+  // Jump every animation to its end state so print() never captures a slide
+  // mid-entrance. Ordering matters: the 0s-transition style must be live
+  // BEFORE data-deck-active is set so attribute-keyed transitions don't
+  // start a (now-0s) run from the pre-active base.
+  const st = document.createElement('style');
+  st.textContent = '*,*::before,*::after{animation-delay:-99s !important;animation-duration:.001s !important;animation-iteration-count:1 !important;animation-fill-mode:both !important;animation-play-state:running !important;transition-duration:0s !important}';
+  document.head.appendChild(st);
+  for (const d of document.querySelectorAll('deck-stage')) {
+    for (const c of d.children) {
+      const t = c.tagName;
+      if (t === 'SCRIPT' || t === 'STYLE' || t === 'TEMPLATE') continue;
+      c.setAttribute('data-deck-active', '');
+    }
+  }
+  // Re-append deck-stage's @page last so no author @page can add a margin and
+  // spill each full-bleed slide onto two sheets. Backstop for old copies.
+  if (ds) {
+    let pg = document.getElementById('deck-stage-print-page');
+    if (!pg) {
+      pg = document.createElement('style');
+      pg.textContent = '@page{size:' + (+ds.getAttribute('width') || 1920) +
+        'px ' + (+ds.getAttribute('height') || 1080) + 'px;margin:0}';
+    }
+    document.body.appendChild(pg);
+  }
+  try {
+    const sweep = () => {
+      for (const a of document.getAnimations()) {
+        try { a.finish(); } catch (e) {
+          try { a.currentTime = (a.effect && a.effect.getComputedTiming().duration) || 0; a.pause(); } catch (e2) {}
+        }
+      }
+    };
+    sweep();
+    await new Promise((r) => requestAnimationFrame(r));
+    sweep();
+    await new Promise((r) => requestAnimationFrame(r));
+  } catch (e) {}
+  // Relax break-inside on oversized elements. An element taller than a
+  // printable page can't honor break-inside: avoid — browsers either overflow
+  // it or push it whole to the next page, leaving a blank gap, then break it
+  // anyway at an arbitrary point. After the final layout (content revealed,
+  // animations jumped), find elements taller than a page that still compute
+  // break-inside: avoid and reset them to auto, so the browser breaks them at
+  // their children's boundaries instead (children keep their own avoid). PAGE_PX
+  // is a conservative portrait estimate at 96 CSS px/in — Letter/A4 usable
+  // height minus our 0.5in margins — so only clearly-oversized elements are
+  // touched and under-page elements still stay whole. Skipped for decks, whose
+  // slides are sized to the page.
+  try {
+    if (!document.querySelector('deck-stage')) {
+      const PAGE_PX = 1024;
+      // Our print defaults add a body padding inset only when we also zero the
+      // @page margin; computed style can't tell us (it reports screen media),
+      // so read the injected rule directly.
+      const defaults = document.querySelector('style[data-omelette-print-defaults]');
+      const pageInset = /body\s*\{[^}]*padding/.test(defaults ? defaults.textContent || '' : '');
+      const SEL = 'section,article,figure,table,pre,blockquote,[class~="card" i],[class~="page" i],[class~="sheet" i]';
+      for (const el of document.body.querySelectorAll(SEL)) {
+        if (el instanceof HTMLElement && el.offsetHeight > PAGE_PX) {
+          el.setAttribute('data-om-oversized', '');
+          // Fake-paged docs simulate sheets with over-tall break-after:page
+          // boxes; honoring the break spills half-blank pages and ends a
+          // colored box mid-sheet. Flow them, and (only when we own the page
+          // inset) drop the redundant padding/background via the rule below.
+          const cs = getComputedStyle(el);
+          if (cs.breakAfter === 'page' || cs.pageBreakAfter === 'always') {
+            el.setAttribute('data-om-fakepage', '');
+          }
+        }
+      }
+      const ost = document.createElement('style');
+      ost.textContent = '@media print{' +
+        '[data-om-oversized]{break-inside:auto !important;page-break-inside:auto !important}' +
+        '[data-om-fakepage]{break-after:auto !important;page-break-after:auto !important}' +
+        (pageInset ? '[data-om-fakepage]{padding:0 !important;background:none !important}' : '') +
+        '}';
+      document.head.appendChild(ost);
+    }
+  } catch (e) {}
+  // macOS Preview renders Skia-PDF Luminosity soft-masks as opaque grey boxes;
+  // swap the CSS that triggers them for Preview-safe forms.
+  try {
+    for (const el of document.body.querySelectorAll('*')) {
+      const cs = getComputedStyle(el);
+
+      if (cs.boxShadow !== 'none' && cs.filter === 'none') {
+        const outs = [], kept = [];
+        for (const s of cs.boxShadow.split(/,(?![^(]*[)])/)) {
+          const t = s.trim();
+          const m = t.match(/^(rgba?[(][^)]+[)]) (-?[0-9.]+px) (-?[0-9.]+px) ([0-9.]+px) -?[0-9.]+px$/);
+          if (m && parseFloat(m[4]) > 0) outs.push('drop-shadow(' + m[2] + ' ' + m[3] + ' ' + m[4] + ' ' + m[1] + ')');
+          else kept.push(t);
+        }
+        if (outs.length) {
+          el.style.setProperty('filter', outs.join(' '), 'important');
+          el.style.setProperty('box-shadow', kept.join(', ') || 'none', 'important');
+        }
+      }
+
+      const mask = cs.maskImage && cs.maskImage !== 'none' ? cs.maskImage : cs.webkitMaskImage;
+      if (mask && mask !== 'none' && cs.filter === 'none') el.style.setProperty('filter', 'opacity(1)', 'important');
+    }
+  } catch (e) {}
+  setTimeout(() => { try { window.print(); } catch (e) {} }, 200);
+})();
+</script>
+</body>
+</html>

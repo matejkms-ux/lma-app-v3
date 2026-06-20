@@ -1,0 +1,35 @@
+{
+  "name": "lma-practice-player",
+  "private": true,
+  "version": "0.2.0",
+  "type": "module",
+  "description": "LMA Practice Player — premium language-acquisition practice companion (frontend, mock data)",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -b --noEmit",
+    "import:sentences": "tsx scripts/import-sentences.ts",
+    "upload:audio": "tsx scripts/upload-audio.ts"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.108.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.43",
+    "@types/react": "^18.3.5",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.20",
+    "csv-parse": "^5.6.0",
+    "dotenv": "^16.6.1",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.13",
+    "tsx": "^4.22.4",
+    "typescript": "^5.6.2",
+    "vite": "^5.4.8"
+  }
+}

@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>LMA Practice Player</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500;1,6..72,600&family=Noto+Serif+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --em: #0A554E;
+      --em2: #0E635B;
+      --coral: #EF6A47;
+      --cream: #F8F0E2;
+      --teal: #8FC0B8;
+      --heading: #15403B;
+      --muted: #6F8B85;
+      --rule: #E2D8C4;
+      --panel: #FBF5EA;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { height: 100%; }
+    body {
+      height: 100%;
+      background: #0c1a18;
+      font-family: 'Hanken Grotesk', sans-serif;
+      overflow: hidden;
+    }
+    #app {
+      width: 100%;
+      max-width: 430px;
+      height: 100dvh;
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 80px rgba(0,0,0,.6);
+    }
+    .screen {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+    }
+    .screen.active { display: flex; }
+    .dark { background: var(--em); color: var(--cream); }
+    .light { background: var(--cream); color: var(--heading); }
+
+    /* Status bar */
+    .sb {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 24px 0;
+      font-size: 13px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .dark .sb { color: var(--teal); }
+    .light .sb { color: var(--muted); }
+    .sb-icons { display: flex; gap: 4px; align-items: center; }
+    .sb-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+    .sb-batt { width: 18px; height: 10px; border: 1.4px solid currentColor; border-radius: 3px; }
+
+    /* Bottom nav */
+    .bnav {
+      background: var(--em);
+      padding: 12px 0 20px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-around;
+      border-top: 1px solid rgba(143,192,184,.2);
+      flex-shrink: 0;
+      position: relative;
+    }
+    .bnav-item {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 5px; color: #5C857D; cursor: pointer; padding: 2px 20px;
+    }
+    .bnav-item.on { color: var(--cream); }
+    .bnav-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; }
+    .bnav-lbl { font-size: 10px; font-weight: 600; }
+    .bnav-item.on .bnav-lbl { font-weight: 700; }
+    .home-ind {
+      position: absolute; bottom: 7px; left: 50%; transform: translateX(-50%);
+      width: 120px; height: 5px; border-radius: 3px; background: rgba(248,240,226,.35);
+    }
+
+    /* Scrollable body */
+    .sbody { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+
+    /* Animations — coral ONLY */
+    @keyframes pring { 0%,100%{transform:scale(1);opacity:1}50%{transform:scale(2.3);opacity:0} }
+    @keyframes bwave { 0%,100%{transform:scaleY(.28)}50%{transform:scaleY(1)} }
+    .pr { animation: pring 1.9s infinite ease-out; }
+    .bw { transform-origin: center bottom; animation: bwave .8s infinite ease-in-out; }
+
+    /* Player */
+    .player { display:flex; align-items:center; gap:14px; padding:0 24px; flex-shrink:0; }
+    .play-btn {
+      width:56px; height:56px; border-radius:50%; background:var(--cream); color:var(--em);
+      border:none; cursor:pointer; display:flex; align-items:center; justify-content:center;
+      font-size:16px; flex-shrink:0;
+    }
+    .ptrack { flex:1; }
+    .pbar-bg { height:5px; border-radius:3px; background:rgba(143,192,184,.22); overflow:hidden; }
+    .pbar-fill { height:100%; border-radius:3px; background:var(--teal); transition:width .4s; }
+    .pbar-labels {
+      display:flex; justify-content:space-between; margin-top:6px;
+      font-size:10px; font-weight:700; letter-spacing:.1em; color:#5C857D;
+    }
+
+    /* Step indicator */
+    .sindi { display:flex; gap:5px; padding:16px 22px 0; flex-shrink:0; }
+    .spip { flex:1; text-align:center; }
+    .spip-bar { height:5px; border-radius:3px; }
+    .spip-lbl { font-size:9px; font-weight:600; letter-spacing:.04em; margin-top:6px; }
+    .spip.done .spip-bar { background:var(--teal); }
+    .spip.done .spip-lbl { color:var(--teal); }
+    .spip.on .spip-bar { background:var(--cream); }
+    .spip.on .spip-lbl { color:var(--cream); font-weight:800; }
+    .spip.off .spip-bar { background:rgba(143,192,184,.22); }
+    .spip.off .spip-lbl { color:rgba(143,192,184,.5); }
+
+    /* Gate */
+    .gate {
+      margin:0 24px; padding-top:14px; border-top:1px solid rgba(143,192,184,.18);
+      flex-shrink:0;
+    }
+    .gate-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+    .gate-lbl { font-size:11px; font-weight:700; letter-spacing:.08em; color:var(--teal); }
+    .stars { display:flex; gap:2px; cursor:pointer; }
+    .star { font-size:20px; color:rgba(143,192,184,.3); transition:color .1s; }
+    .star.on { color:var(--cream); }
+    .rep-row { display:flex; align-items:center; gap:10px; padding-bottom:18px; }
+    .rep-lbl { font-size:11px; font-weight:700; letter-spacing:.06em; color:var(--teal); }
+    .rep-dots { display:flex; gap:6px; }
+    .rdot { width:8px; height:8px; border-radius:50%; background:rgba(143,192,184,.28); }
+    .rdot.done { background:var(--teal); }
+    .rep-note { margin-left:auto; font-family:'Newsreader',serif; font-style:italic; font-size:13px; color:#5C857D; }
+
+    /* Waveform bars */
+    .wbars { display:flex; gap:3px; align-items:center; height:38px; }
+    .wbars i { flex:1; border-radius:2px; }
+    .wbars.model i { background:var(--teal); }
+    .wbars.live i {
+      background:var(--coral); transform-origin:center bottom;
+    }
+    .wbars.live i:nth-child(1){animation:bwave .7s infinite ease-in-out}
+    .wbars.live i:nth-child(2){animation:bwave .9s infinite ease-in-out .1s}
+    .wbars.live i:nth-child(3){animation:bwave .8s infinite ease-in-out .2s}
+    .wbars.live i:nth-child(4){animation:bwave 1s infinite ease-in-out .08s}
+    .wbars.live i:nth-child(5){animation:bwave .75s infinite ease-in-out .25s}
+    .wbars.live i:nth-child(6){animation:bwave .85s infinite ease-in-out .15s}
+    .wbars.live i:nth-child(7){animation:bwave .95s infinite ease-in-out .3s}
+    .wbars.live i:nth-child(8){animation:bwave .7s infinite ease-in-out .18s}
+    .wbars.live i:nth-child(9){animation:bwave .9s infinite ease-in-out .05s}
+    .wbars.live i:nth-child(10){animation:bwave .82s infinite ease-in-out .22s}
+    .wbars.live i:nth-child(11){animation:bwave 1s infinite ease-in-out .32s}
+    .wbars.live i:nth-child(12){animation:bwave .78s infinite ease-in-out .1s}
+    .wbars.live i:nth-child(13){animation:bwave .88s infinite ease-in-out .26s}
+
+    /* Waveform static model heights */
+    .wbars.model i:nth-child(1){height:35%}
+    .wbars.model i:nth-child(2){height:65%}
+    .wbars.model i:nth-child(3){height:50%}
+    .wbars.model i:nth-child(4){height:90%}
+    .wbars.model i:nth-child(5){height:70%}
+    .wbars.model i:nth-child(6){height:100%}
+    .wbars.model i:nth-child(7){height:55%}
+    .wbars.model i:nth-child(8){height:80%}
+    .wbars.model i:nth-child(9){height:40%}
+    .wbars.model i:nth-child(10){height:72%}
+    .wbars.model i:nth-child(11){height:48%}
+    .wbars.model i:nth-child(12){height:85%}
+    .wbars.model i:nth-child(13){height:60%}
+
+    /* Toggle chip */
+    .tchip {
+      border:1px solid rgba(143,192,184,.25); border-radius:14px;
+      padding:12px 14px; cursor:pointer; transition:background .15s; margin-bottom:8px;
+    }
+    .tchip-hd { display:flex; align-items:center; justify-content:space-between; }
+    .tchip-lbl { font-size:10.5px; font-weight:700; letter-spacing:.12em; color:var(--teal); }
+    .tswitch {
+      width:40px; height:22px; border-radius:12px; background:rgba(143,192,184,.25);
+      position:relative; transition:background .2s; flex-shrink:0;
+    }
+    .tswitch::after {
+      content:''; position:absolute; left:2px; top:2px; width:18px; height:18px;
+      border-radius:50%; background:var(--teal); transition:.2s;
+    }
+    .tswitch.on { background:var(--teal); }
+    .tswitch.on::after { left:20px; background:var(--em); }
+    .tchip-body {
+      overflow:hidden; max-height:0; transition:max-height .25s ease;
+      font-family:'Hanken Grotesk',sans-serif; font-size:16px; font-weight:500; color:var(--cream);
+    }
+    .tchip-body.open { max-height:100px; }
+    .tchip-body-inner { padding-top:10px; text-align:center; }
+
+    /* Avatar */
+    .av {
+      border-radius:50%; background:var(--em2); display:flex; align-items:center;
+      justify-content:center; font-family:'Newsreader',serif; color:var(--teal); flex-shrink:0;
+    }
+
+    /* Card (cream screens) */
+    .card {
+      background:#fff; border:1px solid var(--rule); border-radius:18px; padding:16px 18px;
+    }
+    .card-lbl { font-size:11px; font-weight:700; letter-spacing:.14em; color:var(--muted); }
+
+    /* Lesson row */
+    .lrow {
+      display:flex; align-items:center; gap:14px;
+      border:1px solid var(--rule); border-radius:16px; padding:15px 16px;
+      margin-bottom:11px; background:#fff; cursor:pointer;
+    }
+    .lrow.active { border-color:var(--em); background:var(--panel); }
+    .lrow-num { font-size:10.5px; font-weight:700; letter-spacing:.08em; color:var(--muted); }
+    .lrow-title { font-family:'Newsreader',serif; color:var(--heading); font-size:19px; line-height:1.15; }
+
+    /* Sentence row (overview) */
+    .srow {
+      display:flex; align-items:center; gap:12px;
+      padding:11px 0; border-bottom:1px solid #EEE5D4;
+    }
+    .srow.active {
+      padding:12px 10px; margin:4px -10px;
+      border-radius:12px; background:#FBF1E9; border-bottom:none;
+    }
+    .srow-icon {
+      width:22px; height:22px; border-radius:50%; flex-shrink:0;
+      display:flex; align-items:center; justify-content:center; font-size:11px;
+    }
+    .srow-icon.done { background:var(--em); color:var(--cream); }
+    .srow-icon.live { position:relative; }
+    .srow-icon.locked { border:1.5px solid #C9BEA8; color:#A9A089; }
+    .srow-jp { font-family:'Noto Serif JP','Newsreader',serif; color:var(--heading); font-size:15px; }
+    .srow-en { font-size:10px; color:var(--muted); }
+    .srow-stars { font-size:11px; letter-spacing:.5px; color:var(--em); }
+
+    /* Misc utils */
+    .sr { font-family:'Newsreader',serif; }
+    .si { font-family:'Newsreader',serif; font-style:italic; }
+    .jp { font-family:'Noto Serif JP','Newsreader',serif; }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ═══════════════════════════════════ ENTRY ═══════════════════════════════════ -->
+  <div id="s-entry" class="screen dark active">
+    <div class="sb"><span>9:41</span><span class="sb-icons"><span class="sb-dot"></span><span class="sb-dot"></span><span class="sb-batt"></span></span></div>
+    <div style="padding:36px 28px 8px;">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.42em;color:var(--teal);">L · M · A</div>
+      <div class="si" style="color:var(--cream);font-size:36px;line-height:1.06;margin-top:18px;">Welcome back,<br>adventurer.</div>
+      <div style="color:var(--teal);font-size:14px;margin-top:10px;">Choose your name to enter.</div>
+    </div>
+    <div style="margin:18px 24px 8px;display:flex;align-items:center;gap:11px;background:rgba(143,192,184,.1);border:1px solid rgba(143,192,184,.28);border-radius:14px;padding:12px 16px;cursor:text;">
+      <span style="width:14px;height:14px;border:1.8px solid var(--teal);border-radius:50%;position:relative;flex-shrink:0;"><span style="position:absolute;width:6px;height:1.8px;background:var(--teal);transform:rotate(45deg);right:-4px;bottom:-1px;"></span></span>
+      <span style="color:var(--teal);font-size:13px;">Find your name</span>
+    </div>
+    <div class="sbody" style="padding:4px 24px 24px;" id="roster"></div>
+  </div>
+
+  <!-- ═══════════════════════════════════ HOME ═══════════════════════════════════ -->
+  <div id="s-home" class="screen light">
+    <div class="sb"><span>9:41</span><span class="sb-icons"><span class="sb-dot"></span><span class="sb-dot"></span><span class="sb-batt"></span></span></div>
+    <div class="sbody" style="padding:14px 24px 20px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div>
+          <div style="font-size:12px;font-weight:600;letter-spacing:.04em;color:var(--muted);" id="home-day-lang">DAY 9 OF 28 · JAPANESE</div>
+          <div class="si" style="color:var(--heading);font-size:32px;line-height:1.06;margin-top:7px;" id="home-greeting">Welcome back,<br>Charles.</div>
+        </div>
+        <span class="av" id="home-av" style="width:42px;height:42px;font-size:18px;">C</span>
+      </div>
+
+      <!-- Hero: reps -->
+      <div style="margin-top:22px;border:1px solid var(--rule);border-radius:22px;padding:22px 20px;background:var(--panel);">
+        <div class="card-lbl">REPS GATHERED</div>
+        <div style="display:flex;align-items:baseline;gap:12px;margin-top:6px;">
+          <div style="font-size:62px;font-weight:800;line-height:.9;color:var(--em);letter-spacing:-.02em;" id="home-reps">312</div>
+          <div style="font-size:14px;font-weight:700;color:var(--coral);">+24 today</div>
+        </div>
+        <div class="si" style="font-size:14px;color:var(--muted);margin-top:7px;">Every take is a rep. The reps are the road.</div>
+      </div>
+
+      <!-- Current lesson -->
+      <div style="margin-top:14px;" class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span class="card-lbl">CONTINUE · LMPI-003</span>
+          <span style="font-size:11px;font-weight:600;color:var(--muted);">7 / 10</span>
+        </div>
+        <div class="sr" style="color:var(--heading);font-size:22px;margin-top:5px;">At the market</div>
+        <div style="display:flex;gap:5px;margin-top:12px;">
+          <div style="flex:1;height:5px;border-radius:3px;background:var(--em);"></div>
+          <div style="flex:1;height:5px;border-radius:3px;background:var(--em);"></div>
+          <div style="flex:1;height:5px;border-radius:3px;background:var(--em);"></div>
+          <div style="flex:1;height:5px;border-radius:3px;background:var(--rule);"></div>
+          <div style="flex:1;height:5px;border-radius:3px;background:var(--rule);"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:9.5px;font-weight:600;letter-spacing:.04em;">
+          <span style="color:var(--muted);">GRASP</span><span style="color:var(--muted);">HUM</span><span style="color:var(--heading);font-weight:800;">SHADOW</span><span style="color:#C9BEA8;">READ</span><span style="color:#C9BEA8;">RECALL</span>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div style="margin-top:14px;display:flex;gap:12px;">
+        <div style="flex:1;background:#fff;border:1px solid var(--rule);border-radius:18px;padding:14px;">
+          <div class="card-lbl" style="font-size:10px;letter-spacing:.1em;">LESSONS PASSED</div>
+          <div class="sr" style="color:var(--heading);font-size:18px;margin-top:3px;">2 of 6</div>
+        </div>
+        <div style="flex:1;background:#fff;border:1px solid var(--rule);border-radius:18px;padding:14px;">
+          <div class="card-lbl" style="font-size:10px;letter-spacing:.1em;">AVG GRADE</div>
+          <div class="sr" style="color:var(--heading);font-size:18px;margin-top:3px;">4.5★ self</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div style="padding:0 24px 12px;background:linear-gradient(transparent,var(--cream) 40%);margin-top:-20px;">
+      <button onclick="startPractice()" style="background:var(--em);color:var(--cream);border:none;border-radius:15px;font-family:'Hanken Grotesk',sans-serif;font-size:15px;font-weight:700;padding:16px;width:100%;cursor:pointer;letter-spacing:.01em;">Continue practice →</button>
+    </div>
+    <div class="bnav">
+      <div class="bnav-item on" onclick="goTab('home')"><div class="bnav-icon"><span style="width:20px;height:20px;border:1.8px solid currentColor;border-radius:6px;"></span></div><span class="bnav-lbl">Home</span></div>
+      <div class="bnav-item" onclick="goTab('practice')"><div class="bnav-icon"><span style="width:20px;height:20px;border:1.8px solid currentColor;border-radius:50%;"></span></div><span class="bnav-lbl">Practice</span></div>
+      <div class="bnav-item" onclick="goTab('activities')"><div class="bnav-icon"><span style="display:flex;align-items:flex-end;gap:2.5px;width:20px;height:20px;"><i style="width:5px;height:40%;background:currentColor;border-radius:1px;"></i><i style="width:5px;height:68%;background:currentColor;border-radius:1px;"></i><i style="width:5px;height:100%;background:currentColor;border-radius:1px;"></i></span></div><span class="bnav-lbl">Activities</span></div>
+      <div class="home-ind"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ LESSONS ═══════════════════════════════════ -->
+  <div id="s-lessons" class="screen light">
+    <div class="sb"><span>9:41</span><span class="sb-icons"><span class="sb-dot"></span><span class="sb-dot"></span><span class="sb-batt"></span></span></div>
+    <div style="padding:18px 24px 8px;flex-shrink:0;">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.16em;color:var(--muted);">JAPANESE · LMPI SERIES</div>
+      <div class="si" style="color:var(--heading);font-size:30px;margin-top:4px;">Your lessons</div>
+    </div>
+    <div class="sbody" style="padding:6px 20px 20px;">
+      <!-- LMPI-001 passed -->
+      <div class="lrow">
+        <span style="width:30px;height:30px;border-radius:50%;background:var(--em);color:var(--cream);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;">✓</span>
+        <div style="flex:1;"><div class="lrow-num">LMPI-001</div><div class="lrow-title">First arrivals</div></div>
+        <div style="text-align:right;"><div style="color:var(--em);font-size:13px;letter-spacing:1px;">★★★★★</div><div style="font-size:10px;color:var(--muted);margin-top:2px;">Passed · 4.7</div></div>
+      </div>
+      <!-- LMPI-002 passed -->
+      <div class="lrow">
+        <span style="width:30px;height:30px;border-radius:50%;background:var(--em);color:var(--cream);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;">✓</span>
+        <div style="flex:1;"><div class="lrow-num">LMPI-002</div><div class="lrow-title">Numbers &amp; prices</div></div>
+        <div style="text-align:right;"><div style="color:var(--em);font-size:13px;letter-spacing:1px;">★★★★<span style="color:var(--rule);">★</span></div><div style="font-size:10px;color:var(--muted);margin-top:2px;">Passed · 4.5</div></div>
+      </div>
+      <!-- LMPI-003 in progress -->
+      <div class="lrow active" onclick="startPractice()">
+        <span style="position:relative;width:30px;height:30px;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+          <span style="position:absolute;inset:0;border-radius:50%;background:rgba(239,106,71,.3);" class="pr"></span>
+          <span style="position:relative;width:13px;height:13px;border-radius:50%;background:var(--coral);"></span>
+        </span>
+        <div style="flex:1;"><div class="lrow-num" style="color:var(--coral);">LMPI-003 · IN PROGRESS</div><div class="lrow-title">At the market</div></div>
+        <div style="text-align:right;"><div style="font-size:14px;font-weight:800;color:var(--em);">7/10</div><div style="font-size:10px;color:var(--muted);margin-top:2px;">Shadow</div></div>
+      </div>
+      <!-- locked -->
+      <div class="lrow" style="opacity:.6;">
+        <span style="width:30px;height:30px;border-radius:50%;border:1.5px solid #C9BEA8;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#A9A089;font-size:12px;">🔒</span>
+        <div style="flex:1;"><div class="lrow-num">LMPI-004</div><div class="lrow-title">At a café</div></div>
+        <div style="font-size:10px;color:var(--muted);">Locked</div>
+      </div>
+      <div class="lrow" style="opacity:.6;margin-bottom:0;">
+        <span style="width:30px;height:30px;border-radius:50%;border:1.5px solid #C9BEA8;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#A9A089;font-size:12px;">🔒</span>
+        <div style="flex:1;"><div class="lrow-num">LMPI-005</div><div class="lrow-title">Getting around</div></div>
+        <div style="font-size:10px;color:var(--muted);">Locked</div>
+      </div>
+    </div>
+    <div class="bnav">
+      <div class="bnav-item" onclick="goTab('home')"><div class="bnav-icon"><span style="width:20px;height:20px;border:1.8px solid currentColor;border-radius:6px;"></span></div><span class="bnav-lbl">Home</span></div>
+      <div class="bnav-item on" onclick="goTab('practice')"><div class="bnav-icon"><span style="width:20px;height:20px;border:1.8px solid currentColor;border-radius:50%;"></span></div><span class="bnav-lbl">Practice</span></div>
+      <div class="bnav-item" onclick="goTab('activities')"><div class="bnav-icon"><span style="display:flex;align-items:flex-end;gap:2.5px;width:20px;height:20px;"><i style="width:5px;height:40%;background:currentColor;border-radius:1px;"></i><i style="width:5px;height:68%;background:currentColor;border-radius:1px;"></i><i style="width:5px;height:100%;background:currentColor;border-radius:1px;"></i></span></div><span class="bnav-lbl">Activities</span></div>
+      <div class="home-ind"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ PRACTICE ═══════════════════════════════════ -->
+  <div id="s-practice" class="screen dark" style="flex-direction:column;">
+    <div class="sb"><span>9:41</span><span class="sb-icons"><span class="sb-dot"></span><span class="sb-dot"></span><span class="sb-batt"></span></span></div>
+    <!-- Back nav -->
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 20px 0;font-size:12px;color:var(--teal);flex-shrink:0;">
+      <span onclick="goBack()" style="font-size:20px;cursor:pointer;padding:4px;">‹</span>
+      <span style="font-weight:600;letter-spacing:.04em;">LMPI-003 · At the market</span>
+      <span id="p-sent-count" style="font-weight:700;">7/10</span>
+    </div>
+    <!-- Step indicator -->
+    <div class="sindi" id="p-sindi"></div>
+    <!-- Dynamic practice content -->
+    <div id="p-content" style="flex:1;display:flex;flex-direction:column;overflow:hidden;"></div>
+  </div>
+
+  <!-- ═══════════════════════════════════ OVERVIEW ═══════════════════════════════════ -->
+  <div id="s-overview" class="screen light">
+    <div class="sb"><span>9:41</span><span class="sb-icons"><span class="sb-dot"></span><span class="sb-dot"></span><span class="sb-batt"></span></span></div>
+    <div style="padding:16px 24px 4px;flex-shrink:0;">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.12em;color:var(--muted);">LMPI-003 · JAPANESE</div>
+      <div class="si" style="color:var(--heading);font-size:28px;margin-top:4px;">At the market</div>
+    </div>
+    <!-- Summary strip -->
+    <div style="display:flex;gap:10px;padding:10px 20px 6px;flex-shrink:0;">
+      <div style="flex:1;border:1px solid var(--rule);border-radius:14px;padding:12px 8px;text-align:center;background:#fff;"><div style="font-size:22px;font-weight:800;color:var(--em);line-height:1;">6/10</div><div style="font-size:9px;font-weight:600;letter-spacing:.06em;color:var(--muted);margin-top:4px;">PASSED</div></div>
+      <div style="flex:1;border:1px solid var(--rule);border-radius:14px;padding:12px 8px;text-align:center;background:#fff;"><div style="font-size:22px;font-weight:800;color:var(--em);line-height:1;">4.2★</div><div style="font-size:9px;font-weight:600;letter-spacing:.06em;color:var(--muted);margin-top:4px;">AVG SELF</div></div>
+      <div style="flex:1;border:1px solid var(--rule);border-radius:14px;padding:12px 8px;text-align:center;background:#fff;"><div style="font-size:22px;font-weight:800;color:var(--em);line-height:1;">74</div><div style="font-size:9px;font-weight:600;letter-spacing:.06em;color:var(--muted);margin-top:4px;">REPS</div></div>
+    </div>
+    <div class="sbody" style="padding:4px 20px 20px;" id="overview-sentences"></div>
+    <div class="bnav">
+      <div class="bnav-item" onclick="goTab('home')"><div class="bnav-icon"><span style="width:20px;height:20px;border:1.8px solid currentColor;border-radius:6px;"></span></div><span class="bnav-lbl">Home</span></div>
+      <div class="bnav-item on" onclick="goTab('practice')"><div class="bnav-icon"><span style="width:20px;height:20px;border:1.8px solid currentColor;border-radius:50%;"></span></div><span class="bnav-lbl">Practice</span></div>
+      <div class="bnav-item" onclick="goTab('activities')"><div class="bnav-icon"><span style="display:flex;align-items:flex-end;gap:2.5px;width:20px;height:20px;"><i style="width:5px;height:40%;background:currentColor;border-radius:1px;"></i><i style="width:5px;height:68%;background:currentColor;border-radius:1px;"></i><i style="width:5px;height:100%;background:currentColor;border-radius:1px;"></i></span></div><span class="bnav-lbl">Activities</span></div>
+      <div class="home-ind"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ ACTIVITIES ═══════════════════════════════════ -->
+  <div id="s-activities" class="screen light">
+    <div class="sb"><span>9:41</span><span class="sb-icons"><span class="sb-dot"></span><span class="sb-dot"></span><span class="sb-batt"></span></span></div>
+    <div style="padding:16px 24px 4px;flex-shrink:0;">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.12em;color:var(--muted);">DAY 9 OF 28 · JAPANESE</div>
+      <div class="si" style="color:var(--heading);font-size:28px;margin-top:4px;">Your adventure</div>
+    </div>
+    <div class="sbody" style="padding:8px 20px 20px;">
+      <!-- Reps chart -->
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;">
+          <span class="card-lbl">REPS GATHERED</span>
+          <span style="font-size:13px;font-weight:800;color:var(--em);">312</span>
+        </div>
+        <div style="display:flex;gap:5px;align-items:flex-end;height:60px;margin-top:14px;">
+          <i style="flex:1;height:28%;background:#CFE0D6;border-radius:3px;"></i>
+          <i style="flex:1;height:42%;background:#CFE0D6;border-radius:3px;"></i>
+          <i style="flex:1;height:35%;background:#9BC4B8;border-radius:3px;"></i>
+          <i style="flex:1;height:58%;background:#9BC4B8;border-radius:3px;"></i>
+          <i style="flex:1;height:50%;background:#5C9A8C;border-radius:3px;"></i>
+          <i style="flex:1;height:74%;background:#5C9A8C;border-radius:3px;"></i>
+          <i style="flex:1;height:64%;background:var(--em2);border-radius:3px;"></i>
+          <i style="flex:1;height:88%;background:var(--em2);border-radius:3px;"></i>
+          <i style="flex:1;height:78%;background:var(--em);border-radius:3px;"></i>
+          <i style="flex:1;height:100%;background:var(--em);border-radius:3px;"></i>
+        </div>
+      </div>
+      <!-- Stats -->
+      <div style="display:flex;gap:10px;margin-top:14px;">
+        <div style="flex:1;border:1px solid var(--rule);border-radius:14px;padding:13px 8px;text-align:center;background:#fff;"><div style="font-size:21px;font-weight:800;color:var(--em);line-height:1;">2</div><div style="font-size:9px;font-weight:600;color:var(--muted);margin-top:4px;">LESSONS DONE</div></div>
+        <div style="flex:1;border:1px solid var(--rule);border-radius:14px;padding:13px 8px;text-align:center;background:#fff;"><div style="font-size:21px;font-weight:800;color:var(--em);line-height:1;">4.5★</div><div style="font-size:9px;font-weight:600;color:var(--muted);margin-top:4px;">AVG GRADE</div></div>
+        <div style="flex:1;border:1px solid var(--rule);border-radius:14px;padding:13px 8px;text-align:center;background:#fff;"><div style="font-size:21px;font-weight:800;color:var(--em);line-height:1;">9</div><div style="font-size:9px;font-weight:600;color:var(--muted);margin-top:4px;">DAY STREAK</div></div>
+      </div>
+      <!-- Recent -->
+      <div style="font-size:11px;font-weight:700;letter-spacing:.12em;color:var(--muted);margin:18px 2px 10px;">RECENTLY</div>
+      <div style="display:flex;gap:12px;padding:8px 0;border-bottom:1px solid #EEE5D4;">
+        <span style="font-size:10px;font-weight:600;color:var(--muted);width:44px;flex-shrink:0;">Jun 16</span>
+        <span style="font-size:12px;color:var(--heading);flex:1;">Shadowed 18 reps · At the market</span>
+      </div>
+      <div style="display:flex;gap:12px;padding:8px 0;border-bottom:1px solid #EEE5D4;">
+        <span style="font-size:10px;font-weight:600;color:var(--muted);width:44px;flex-shrink:0;">Jun 15</span>
+        <span style="font-size:12px;color:var(--heading);flex:1;">Passed "これをください" · 4★ auto</span>
+      </div>
+      <div style="display:flex;gap:12px;padding:8px 0;">
+        <span style="font-size:10px;font-weight:600;color:var(--muted);width:44px;flex-shrink:0;">Jun 14</span>
+        <span style="font-size:12px;color:var(--heading);flex:1;">Passed LMPI-002 · 4.5★</span>
+      </div>
+    </div>
+    <div class="bnav">
+      <div class="bnav-item" onclick="goTab('home')"><div class="bnav-icon"><span style="width:20px;height:20px;border:1.8px solid currentColor;border-radius:6px;"></span></div><span class="bnav-lbl">Home</span></div>
+      <div class="bnav-item" onclick="goTab('practice')"><div class="bnav-icon"><span style="width:20px;height:20px;border:1.8px solid currentColor;border-radius:50%;"></span></div><span class="bnav-lbl">Practice</span></div>
+      <div class="bnav-item on" onclick="goTab('activities')"><div class="bnav-icon"><span style="display:flex;align-items:flex-end;gap:2.5px;width:20px;height:20px;"><i style="width:5px;height:40%;background:currentColor;border-radius:1px;"></i><i style="width:5px;height:68%;background:currentColor;border-radius:1px;"></i><i style="width:5px;height:100%;background:currentColor;border-radius:1px;"></i></span></div><span class="bnav-lbl">Activities</span></div>
+      <div class="home-ind"></div>
+    </div>
+  </div>
+
+</div><!-- /#app -->
+
+<script>
+// ═══════════════════════════ DATA ═══════════════════════════
+const USERS = [
+  { name:'Charles', lang:'JAPANESE' },
+  { name:'Tom', lang:'KHMER' },
+  { name:'Anamarija', lang:'GERMAN' },
+  { name:'Jerod', lang:'THAI' },
+  { name:'Jason', lang:'JAPANESE' },
+  { name:'Trenton', lang:'SPANISH' },
+];
+
+const SENTENCES = [
+  { jp:'いらっしゃいませ。', ro:'Irasshaimase.', en:'Welcome!' },
+  { jp:'これはいくらですか？', ro:'Kore wa ikura desu ka?', en:'How much is this?' },
+  { jp:'ふたつください。', ro:'Futatsu kudasai.', en:'Two, please.' },
+  { jp:'牛乳はありますか？', ro:'Gyūnyū wa arimasu ka?', en:'Do you have milk?' },
+  { jp:'ちょっと高いですね。', ro:'Chotto takai desu ne.', en:"That's a bit pricey." },
+  { jp:'これをください。', ro:'Kore o kudasai.', en:"I'll take this." },
+  { jp:'パンはどこですか？', ro:'Pan wa doko desu ka?', en:'Where is the bread?' },
+  { jp:'袋をください。', ro:'Fukuro o kudasai.', en:'A bag, please.' },
+  { jp:'ありがとうございます。', ro:'Arigatō gozaimasu.', en:'Thank you very much.' },
+  { jp:'また来ます。', ro:'Mata kimasu.', en:"I'll come again." },
+];
+
+const STEPS = ['GRASP','HUM','SHADOW','READ','RECALL'];
+const STEP_NUMS = ['STEP ONE','STEP TWO','STEP THREE','STEP FOUR','STEP FIVE'];
+
+// ═══════════════════════════ STATE ═══════════════════════════
+const S = {
+  screen: 'entry',
+  user: null,
+  step: 2,       // 0=GRASP, 1=HUM, 2=SHADOW, 3=READ, 4=RECALL
+  sentIdx: 6,    // current sentence index
+  rep: 2,        // 1-3
+  stars: 0,
+  isPlaying: false,
+  playPct: 60,
+  showTranslit: false,
+  showTranslation: false,
+  modelRevealed: false,
+  playTimer: null,
+};
+
+// Sentence status: 0=locked, 1=active, 2=done
+const SENT_STATUS = [2,2,2,2,2,2,1,0,0,0];
+const SENT_STARS  = [5,4,5,4,3,4,0,0,0,0];
+
+// ═══════════════════════════ NAV ═══════════════════════════
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('s-'+id).classList.add('active');
+  S.screen = id;
+}
+
+function goBack() {
+  show(S.backScreen || 'lessons');
+}
+
+function goTab(tab) {
+  if (tab === 'home') { show('home'); }
+  else if (tab === 'practice') { show('lessons'); }
+  else if (tab === 'activities') { show('activities'); }
+}
+
+function startPractice() {
+  S.backScreen = S.screen === 'home' ? 'home' : 'lessons';
+  renderPractice();
+  show('practice');
+}
+
+// ═══════════════════════════ ROSTER ═══════════════════════════
+function buildRoster() {
+  const el = document.getElementById('roster');
+  el.innerHTML = USERS.map(u => `
+    <div onclick="selectUser('${u.name}')" style="display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid rgba(143,192,184,.16);cursor:pointer;">
+      <span style="width:46px;height:46px;border-radius:50%;background:var(--em2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Newsreader',serif;color:var(--teal);font-size:20px;">${u.name[0]}</span>
+      <div style="flex:1;"><div style="font-family:'Newsreader',serif;color:var(--cream);font-size:22px;line-height:1;">${u.name}</div></div>
+      <span style="font-size:11px;font-weight:600;letter-spacing:.12em;color:var(--teal);">${u.lang}</span>
+      <span style="color:var(--teal);font-size:18px;opacity:.7;">›</span>
+    </div>
+  `).join('');
+}
+
+function selectUser(name) {
+  S.user = USERS.find(u => u.name === name);
+  // Update home screen
+  document.getElementById('home-day-lang').textContent = `DAY 9 OF 28 · ${S.user.lang}`;
+  document.getElementById('home-greeting').innerHTML = `Welcome back,<br>${S.user.name}.`;
+  document.getElementById('home-av').textContent = S.user.name[0];
+  show('home');
+}
+
+// ═══════════════════════════ OVERVIEW SENTENCES ═══════════════════════════
+function buildOverview() {
+  const el = document.getElementById('overview-sentences');
+  el.innerHTML = SENTENCES.map((s, i) => {
+    const status = SENT_STATUS[i];
+    const stars = SENT_STARS[i];
+    const starsHtml = status === 2
+      ? Array(5).fill(0).map((_,k) => `<span style="color:${k<stars?'var(--em)':'#D8CDB6'}">★</span>`).join('')
+      : '— — — — —';
+
+    if (status === 1) {
+      return `<div class="srow active">
+        <span class="srow-icon live">
+          <span style="position:absolute;inset:0;border-radius:50%;background:rgba(239,106,71,.28);" class="pr"></span>
+          <span style="position:relative;width:11px;height:11px;border-radius:50%;background:var(--coral);display:inline-block;"></span>
+        </span>
+        <div style="flex:1;"><div class="srow-jp">${s.jp}</div><div class="srow-en" style="color:var(--coral);font-weight:700;">In progress · Shadow 3/5</div></div>
+        <span class="srow-stars" style="color:#C9BEA8;">${starsHtml}</span>
+      </div>`;
+    }
+    if (status === 0) {
+      return `<div class="srow" style="opacity:.55;${i===SENTENCES.length-1?'border-bottom:none;':''}">
+        <span class="srow-icon locked">🔒</span>
+        <div style="flex:1;"><div class="srow-jp">${s.jp}</div><div class="srow-en">${s.en}</div></div>
+        <span style="font-size:11px;letter-spacing:.5px;color:#D8CDB6;">${starsHtml}</span>
+      </div>`;
+    }
+    return `<div class="srow" style="${i===SENTENCES.length-1?'border-bottom:none;':''}">
+      <span class="srow-icon done">✓</span>
+      <div style="flex:1;"><div class="srow-jp">${s.jp}</div><div class="srow-en">${s.en}</div></div>
+      <span class="srow-stars">${starsHtml}</span>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════ PRACTICE RENDERER ═══════════════════════════
+function renderStepIndicator() {
+  const el = document.getElementById('p-sindi');
+  el.innerHTML = STEPS.map((name, i) => {
+    const cls = i < S.step ? 'done' : i === S.step ? 'on' : 'off';
+    return `<div class="spip ${cls}"><div class="spip-bar"></div><div class="spip-lbl">${name}</div></div>`;
+  }).join('');
+}
+
+function renderPlayer() {
+  const playIcon = S.isPlaying ? '❚❚' : '▶';
+  return `
+  <div class="player" style="margin-bottom:12px;">
+    <button class="play-btn" onclick="togglePlay()">${playIcon}</button>
+    <div class="ptrack">
+      <div class="pbar-bg"><div class="pbar-fill" id="pbar" style="width:${S.playPct}%"></div></div>
+      <div class="pbar-labels"><span id="ptime">0:06</span><span>FORWARD ONLY</span><span>0:09</span></div>
+    </div>
+  </div>`;
+}
+
+function renderGate(label, note) {
+  const dots = Array(3).fill(0).map((_,i) => `<span class="rdot ${i<S.rep-1?'done':''}"></span>`).join('');
+  const starHtml = Array(5).fill(0).map((_,i) => `<span class="star ${i<S.stars?'on':''}" onclick="rateStar(${i+1})">★</span>`).join('');
+  return `
+  <div class="gate">
+    <div class="gate-row">
+      <span class="gate-lbl">${label}</span>
+      <span class="stars" onclick="void(0)">${starHtml}</span>
+    </div>
+    <div class="rep-row">
+      <span class="rep-lbl">REP ${S.rep} OF 3</span>
+      <span class="rep-dots">${dots}</span>
+      <span class="rep-note">${note}</span>
+    </div>
+  </div>`;
+}
+
+function renderMicIndicator(label) {
+  return `
+  <div class="mic-indicator" style="margin-bottom:10px;">
+    <div style="position:relative;width:12px;height:12px;flex-shrink:0;">
+      <span style="position:absolute;inset:0;border-radius:50%;background:rgba(239,106,71,.5);" class="pr"></span>
+      <span style="position:absolute;inset:2px;border-radius:50%;background:var(--coral);"></span>
+    </div>
+    <span style="font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--coral);">${label}</span>
+    <span style="margin-left:auto;display:flex;gap:2px;align-items:center;height:18px;">
+      ${['.7s','.9s .1s','.8s .2s','1s .08s','.75s .25s'].map(t=>`<i class="bw" style="width:3px;background:var(--coral);height:100%;border-radius:2px;animation-duration:${t.split(' ')[0]};animation-delay:${t.split(' ')[1]||'0s'}"></i>`).join('')}
+    </span>
+  </div>`;
+}
+
+function renderGRASP() {
+  return `
+  <div style="text-align:center;padding:18px 28px 0;flex-shrink:0;">
+    <div style="font-size:11px;font-weight:700;letter-spacing:.34em;color:var(--teal);">STEP ONE</div>
+    <div style="font-family:'Newsreader',serif;font-size:40px;font-weight:500;color:var(--cream);margin-top:4px;">Grasp</div>
+    <div style="font-family:'Newsreader',serif;font-style:italic;font-size:15px;color:var(--teal);margin-top:7px;line-height:1.5;">Just listen. Let the meaning<br>arrive — nothing to read yet.</div>
+  </div>
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;">
+    <div style="position:relative;width:160px;height:160px;display:flex;align-items:center;justify-content:center;">
+      <span style="position:absolute;width:160px;height:160px;border-radius:50%;border:1px solid rgba(143,192,184,.25);"></span>
+      <span style="position:absolute;width:120px;height:120px;border-radius:50%;border:1px solid rgba(143,192,184,.35);"></span>
+      <span style="width:88px;height:88px;border-radius:50%;background:radial-gradient(circle at 50% 42%,rgba(143,192,184,.55),rgba(14,99,91,.6));display:flex;align-items:center;justify-content:center;">
+        <span style="display:flex;gap:3px;align-items:center;height:26px;">
+          <i style="width:3px;height:40%;background:var(--cream);border-radius:2px;"></i>
+          <i style="width:3px;height:75%;background:var(--cream);border-radius:2px;"></i>
+          <i style="width:3px;height:100%;background:var(--cream);border-radius:2px;"></i>
+          <i style="width:3px;height:60%;background:var(--cream);border-radius:2px;"></i>
+          <i style="width:3px;height:85%;background:var(--cream);border-radius:2px;"></i>
+        </span>
+      </span>
+    </div>
+  </div>
+  ${renderPlayer()}
+  ${renderGate('DID THE MEANING LAND?', 'no mic — self-rated')}`;
+}
+
+function renderHUM() {
+  return `
+  <div style="text-align:center;padding:18px 28px 0;flex-shrink:0;">
+    <div style="font-size:11px;font-weight:700;letter-spacing:.34em;color:var(--teal);">STEP TWO</div>
+    <div style="font-family:'Newsreader',serif;font-size:40px;font-weight:500;color:var(--cream);margin-top:4px;">Hum</div>
+    <div style="font-family:'Newsreader',serif;font-style:italic;font-size:15px;color:var(--teal);margin-top:7px;line-height:1.5;">Match the melody — the shape<br>of the sound, no words.</div>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:14px;padding:0 22px;">
+    <div>
+      <div style="font-size:9.5px;font-weight:700;letter-spacing:.16em;color:var(--teal);margin-bottom:8px;">MODEL MELODY</div>
+      <svg viewBox="0 0 300 60" style="width:100%;height:50px;display:block;">
+        <path d="M4 44 C 40 44,50 14,86 16 S 140 46,168 30 S 220 6,252 22 S 288 40,296 30" fill="none" stroke="var(--teal)" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div style="border:1px solid rgba(239,106,71,.4);border-radius:14px;padding:13px;background:rgba(239,106,71,.08);">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <div style="position:relative;width:12px;height:12px;flex-shrink:0;">
+          <span style="position:absolute;inset:0;border-radius:50%;background:rgba(239,106,71,.5);" class="pr"></span>
+          <span style="position:absolute;inset:2px;border-radius:50%;background:var(--coral);"></span>
+        </div>
+        <span style="font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--coral);">YOUR HUM · MIC OPEN</span>
+      </div>
+      <div class="wbars live">${Array(13).fill('<i></i>').join('')}</div>
+    </div>
+  </div>
+  ${renderPlayer()}
+  ${renderGate('RATE THIS TAKE', 'auto: 3★ this take')}`;
+}
+
+function renderSHADOW() {
+  return `
+  <div style="text-align:center;padding:18px 28px 0;flex-shrink:0;">
+    <div style="font-size:11px;font-weight:700;letter-spacing:.34em;color:var(--teal);">STEP THREE</div>
+    <div style="font-family:'Newsreader',serif;font-size:40px;font-weight:500;color:var(--cream);margin-top:4px;">Shadow</div>
+    <div style="font-family:'Newsreader',serif;font-style:italic;font-size:15px;color:var(--teal);margin-top:7px;line-height:1.5;">Speak at the same time.<br>Don't wait — ride the voice.</div>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:12px;padding:0 22px;">
+    <div style="border:1px solid rgba(143,192,184,.22);border-radius:14px;padding:13px;">
+      <div style="font-size:9.5px;font-weight:700;letter-spacing:.16em;color:var(--teal);margin-bottom:9px;">MODEL VOICE</div>
+      <div class="wbars model">${Array(13).fill('<i></i>').join('')}</div>
+    </div>
+    <div style="border:1px solid rgba(239,106,71,.4);border-radius:14px;padding:13px;background:rgba(239,106,71,.08);">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px;">
+        <div style="position:relative;width:12px;height:12px;flex-shrink:0;">
+          <span style="position:absolute;inset:0;border-radius:50%;background:rgba(239,106,71,.5);" class="pr"></span>
+          <span style="position:absolute;inset:2px;border-radius:50%;background:var(--coral);"></span>
+        </div>
+        <span style="font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--coral);">YOUR VOICE · RECORDING</span>
+      </div>
+      <div class="wbars live">${Array(13).fill('<i></i>').join('')}</div>
+    </div>
+  </div>
+  ${renderPlayer()}
+  ${renderGate('RATE THIS TAKE', 'one more rep to pass')}`;
+}
+
+function renderREAD() {
+  const sent = SENTENCES[S.sentIdx];
+  const tSwitch = S.showTranslit ? 'on' : '';
+  const trSwitch = S.showTranslation ? 'on' : '';
+  return `
+  <div style="text-align:center;padding:16px 28px 0;flex-shrink:0;">
+    <div style="font-size:11px;font-weight:700;letter-spacing:.34em;color:var(--teal);">STEP FOUR</div>
+    <div style="font-family:'Newsreader',serif;font-size:40px;font-weight:500;color:var(--cream);margin-top:4px;">Read</div>
+    <div style="font-family:'Newsreader',serif;font-style:italic;font-size:15px;color:var(--teal);margin-top:6px;">Now the words appear. Read aloud.</div>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 24px;gap:0;">
+    <div style="font-family:'Noto Serif JP','Newsreader',serif;color:var(--cream);font-size:32px;font-weight:500;line-height:1.35;text-align:center;">${sent.jp}</div>
+    <!-- Transliteration toggle -->
+    <div class="tchip" id="translit-chip" onclick="toggleTranslit()" style="width:100%;margin-top:20px;">
+      <div class="tchip-hd">
+        <span class="tchip-lbl">TRANSLITERATION</span>
+        <span class="tswitch ${tSwitch}" id="translit-sw"></span>
+      </div>
+      <div class="tchip-body ${S.showTranslit ? 'open' : ''}" id="translit-body">
+        <div class="tchip-body-inner">${sent.ro}</div>
+      </div>
+    </div>
+    <!-- Translation toggle -->
+    <div class="tchip" id="transl-chip" onclick="toggleTranslation()" style="width:100%;">
+      <div class="tchip-hd">
+        <span class="tchip-lbl">TRANSLATION</span>
+        <span class="tswitch ${trSwitch}" id="transl-sw"></span>
+      </div>
+      <div class="tchip-body ${S.showTranslation ? 'open' : ''}" id="transl-body">
+        <div class="tchip-body-inner" style="font-family:'Newsreader',serif;font-style:italic;font-size:15px;">${sent.en}</div>
+      </div>
+    </div>
+  </div>
+  <!-- Mic strip -->
+  ${renderMicIndicator('READING ALOUD · MIC OPEN')}
+  ${renderPlayer()}
+  <!-- Gate: 4★ auto pass shown -->
+  <div class="gate">
+    <div class="gate-row">
+      <span class="gate-lbl">YOUR TAKE</span>
+      <span class="stars">${Array(5).fill(0).map((_,i)=>`<span class="star ${i<S.stars?'on':''}" onclick="rateStar(${i+1})">★</span>`).join('')}</span>
+    </div>
+    <div class="rep-row">
+      ${S.stars >= 4 ? `
+        <span style="display:inline-flex;align-items:center;gap:7px;background:rgba(143,192,184,.16);border:1px solid rgba(143,192,184,.4);border-radius:20px;padding:5px 12px;">
+          <span style="width:16px;height:16px;border-radius:50%;background:var(--teal);color:var(--em);display:flex;align-items:center;justify-content:center;font-size:10px;">✓</span>
+          <span style="font-size:11px;font-weight:800;letter-spacing:.06em;color:var(--cream);">4★ — PASSED</span>
+        </span>
+        <span class="rep-note">on to sentence ${S.sentIdx + 2} →</span>
+      ` : `
+        <span class="rep-lbl">REP ${S.rep} OF 3</span>
+        <span class="rep-dots">${Array(3).fill(0).map((_,i)=>`<span class="rdot ${i<S.rep-1?'done':''}"></span>`).join('')}</span>
+        <span class="rep-note">read it aloud</span>
+      `}
+    </div>
+  </div>`;
+}
+
+function renderRECALL() {
+  const sent = SENTENCES[S.sentIdx];
+  return `
+  <div style="text-align:center;padding:16px 28px 0;flex-shrink:0;">
+    <div style="font-size:11px;font-weight:700;letter-spacing:.34em;color:var(--teal);">STEP FIVE</div>
+    <div style="font-family:'Newsreader',serif;font-size:40px;font-weight:500;color:var(--cream);margin-top:4px;">Recall</div>
+    <div style="font-family:'Newsreader',serif;font-style:italic;font-size:15px;color:var(--teal);margin-top:6px;">From memory. Say it before you reveal.</div>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:12px;padding:0 24px;">
+    <div style="text-align:center;">
+      <div style="font-size:10.5px;font-weight:700;letter-spacing:.16em;color:var(--teal);">SAY IN JAPANESE</div>
+      <div style="margin-top:12px;display:inline-flex;align-items:center;gap:12px;border:1px solid rgba(143,192,184,.3);border-radius:30px;padding:8px 20px 8px 10px;cursor:pointer;" onclick="togglePlay()">
+        <span style="width:40px;height:40px;border-radius:50%;background:var(--cream);color:var(--em);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;">${S.isPlaying ? '❚❚' : '▶'}</span>
+        <span style="font-family:'Newsreader',serif;font-style:italic;color:var(--cream);font-size:18px;">Play the cue</span>
+      </div>
+    </div>
+    <!-- Model: hidden until revealed -->
+    <div id="model-reveal" style="border:1px ${S.modelRevealed ? 'solid rgba(143,192,184,.3)' : 'dashed rgba(143,192,184,.4)'};border-radius:14px;padding:14px;text-align:center;position:relative;overflow:hidden;">
+      <div style="font-family:'Noto Serif JP','Newsreader',serif;color:${S.modelRevealed ? 'var(--cream)' : 'rgba(143,192,184,.18)'};font-size:20px;${S.modelRevealed ? '' : 'filter:blur(7px);'};">${sent.jp}</div>
+      ${!S.modelRevealed ? `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--teal);">🔒 Hidden until your take</div>` : ''}
+    </div>
+    <!-- Reveal control -->
+    <div onclick="${S.modelRevealed ? 'void(0)' : 'revealModel()'}" style="display:flex;align-items:center;justify-content:center;gap:10px;border:1px solid rgba(143,192,184,.25);border-radius:14px;padding:11px;cursor:pointer;${S.modelRevealed ? 'opacity:.5;' : ''}">
+      <span style="width:28px;height:28px;border-radius:50%;border:1.5px solid #5C857D;color:#5C857D;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;">▶</span>
+      <span style="font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--teal);">${S.modelRevealed ? 'MODEL REVEALED' : 'REVEAL MODEL AUDIO'}</span>
+      <span style="font-size:11px;">${S.modelRevealed ? '✓' : '🔒'}</span>
+    </div>
+  </div>
+  <!-- Coral record -->
+  <div style="padding:0 22px 10px;">
+    <div style="display:flex;align-items:center;gap:13px;border:1px solid rgba(239,106,71,.4);border-radius:16px;padding:11px 13px;background:rgba(239,106,71,.08);">
+      <div style="position:relative;width:40px;height:40px;flex-shrink:0;display:flex;align-items:center;justify-content:center;" onclick="revealModel()">
+        <span style="position:absolute;inset:0;border-radius:50%;border:2px solid var(--coral);" class="pr"></span>
+        <span style="width:34px;height:34px;border-radius:50%;background:var(--coral);display:flex;align-items:center;justify-content:center;cursor:pointer;">
+          <span style="width:12px;height:12px;border-radius:4px;background:var(--cream);"></span>
+        </span>
+      </div>
+      <span style="font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--coral);">RECORDING YOUR TAKE — SAY IT NOW</span>
+    </div>
+  </div>
+  ${renderGate('RATE YOUR TAKE', 'reveal after you speak')}`;
+}
+
+function renderPractice() {
+  renderStepIndicator();
+  document.getElementById('p-sent-count').textContent = `${S.sentIdx + 1}/10`;
+
+  const content = document.getElementById('p-content');
+  const renders = [renderGRASP, renderHUM, renderSHADOW, renderREAD, renderRECALL];
+  content.innerHTML = renders[S.step]();
+}
+
+// ═══════════════════════════ INTERACTIONS ═══════════════════════════
+function rateStar(n) {
+  S.stars = n;
+  renderPractice();
+}
+
+function toggleTranslit() {
+  S.showTranslit = !S.showTranslit;
+  renderPractice();
+}
+
+function toggleTranslation() {
+  S.showTranslation = !S.showTranslation;
+  renderPractice();
+}
+
+function revealModel() {
+  if (!S.modelRevealed) {
+    S.modelRevealed = true;
+    renderPractice();
+  }
+}
+
+function togglePlay() {
+  if (S.playTimer) {
+    clearInterval(S.playTimer);
+    S.playTimer = null;
+    S.isPlaying = false;
+  } else {
+    S.isPlaying = true;
+    if (S.playPct >= 99) S.playPct = 0;
+    S.playTimer = setInterval(() => {
+      S.playPct = Math.min(100, S.playPct + 1.5);
+      const bar = document.getElementById('pbar');
+      const time = document.getElementById('ptime');
+      if (bar) bar.style.width = S.playPct + '%';
+      if (time) {
+        const secs = Math.round((S.playPct / 100) * 9);
+        time.textContent = `0:0${secs}`;
+      }
+      if (S.playPct >= 100) {
+        clearInterval(S.playTimer);
+        S.playTimer = null;
+        S.isPlaying = false;
+        S.playPct = 100;
+        renderPractice();
+      }
+    }, 80);
+  }
+  // Update play button without full re-render
+  const btn = document.querySelector('.play-btn');
+  if (btn) btn.textContent = S.isPlaying ? '❚❚' : '▶';
+}
+
+// Step navigation
+function nextStep() {
+  if (S.step < 4) {
+    S.step++;
+    S.stars = 0;
+    S.rep = 1;
+    S.showTranslit = false;
+    S.showTranslation = false;
+    S.modelRevealed = false;
+    S.playPct = 0;
+    S.isPlaying = false;
+    if (S.playTimer) { clearInterval(S.playTimer); S.playTimer = null; }
+    renderPractice();
+  }
+}
+
+// ═══════════════════════════ INIT ═══════════════════════════
+buildRoster();
+buildOverview();
+// Default to first user for demo
+selectUser('Charles');
+show('entry'); // start at entry
+</script>
+</body>
+</html>
