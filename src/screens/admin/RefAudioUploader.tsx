@@ -143,7 +143,7 @@ export function RefAudioUploader({ lessonCode }: { lessonCode: string }) {
                   <div className="truncate text-[10.5px] font-semibold text-muted">
                     {st.fileName ?? 'uploaded'}
                   </div>
-                  <audio controls src={st.url} className="mt-1.5 h-7 w-full" />
+                  <audio controls src={st.url} className="mt-1.5 h-7 w-full" playsInline />
                 </div>
               )}
 

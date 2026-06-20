@@ -1,5 +1,5 @@
 import { supabase, useSupabase } from '../lib/supabase';
-import { USERS, LESSONS, SENTENCES, type User, type Lesson, type Sentence } from './mock';
+import { USERS, LESSONS, type User, type Lesson, type Sentence } from './mock';
 
 /** Roster for name-select. */
 export async function getRoster(): Promise<User[]> {
@@ -78,5 +78,5 @@ export async function getSentences(lessonCode: string): Promise<Sentence[]> {
       return data.map((r) => ({ ...r, stars: 0, status: 'locked' as const })) as Sentence[];
     }
   }
-  return SENTENCES;
+  return [];
 }

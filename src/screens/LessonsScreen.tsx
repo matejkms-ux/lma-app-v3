@@ -115,8 +115,20 @@ export function LessonsScreen() {
         {lessons.length > 0 ? (
           <>
             {lessons.map((l, i) => {
+              // Hide lessons with no uploaded audio. While uploadedCodes is
+              // loading (null), nothing renders to avoid a flash.
+              if (!uploadedCodes?.has(l.code)) return null;
+
+              // Gate: the nearest preceding lesson that also has audio is the
+              // one the learner must pass to unlock this one.
+              const prevWithAudio = lessons
+                .slice(0, i)
+                .filter((prev) => uploadedCodes.has(prev.code))
+                .slice(-1)[0];
+
               const unlocked =
-                i === 0 || isLessonUnlockComplete(user.id, lessons[i - 1].code, lessons[i - 1].audioStepCount);
+                !prevWithAudio ||
+                isLessonUnlockComplete(user.id, prevWithAudio.code, prevWithAudio.audioStepCount);
 
               if (unlocked) {
                 return (
@@ -128,11 +140,6 @@ export function LessonsScreen() {
                   />
                 );
               }
-
-              // Locked: only show if audio has been uploaded for this lesson.
-              // While the upload-codes fetch is in flight, hide locked rows to
-              // avoid a flash of incorrect content.
-              if (!uploadedCodes || !uploadedCodes.has(l.code)) return null;
 
               return <LockedLessonRow key={l.code} lesson={l} />;
             })}

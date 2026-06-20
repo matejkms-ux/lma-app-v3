@@ -288,7 +288,7 @@ export function AdminScreen() {
                         <div className="truncate text-[10.5px] font-semibold text-muted">
                           {st.row.file_name ?? 'uploaded'}
                         </div>
-                        <audio controls src={st.row.audio_url} className="mt-1.5 h-7 w-full" />
+                        <audio controls src={st.row.audio_url} className="mt-1.5 h-7 w-full" playsInline />
                       </div>
                     )}
 

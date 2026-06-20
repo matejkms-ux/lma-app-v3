@@ -73,6 +73,8 @@ export function AudioPlayer({
         ref={audioRef}
         src={src}
         preload="metadata"
+        playsInline
+        crossOrigin="anonymous"
         onPlay={() => {
           setPlaying(true);
           onPlay?.();

@@ -260,9 +260,11 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
                   <span className="text-[10px] font-bold tracking-[.14em] text-coral">{cfg.micLabel}</span>
                 </>
               )}
-              {recorder.status === 'denied' && (
+              {(recorder.status === 'denied' || recorder.status === 'unsupported') && (
                 <span className="text-[10px] font-semibold tracking-[.08em] text-teal-dim">
-                  MIC OFF · playback still counts
+                  {recorder.status === 'unsupported'
+                    ? 'RECORDING UNAVAILABLE ON THIS BROWSER'
+                    : 'MIC OFF · playback still counts'}
                 </span>
               )}
             </div>

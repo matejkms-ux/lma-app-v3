@@ -123,8 +123,8 @@ export function repsToday(userId: string): number {
 }
 
 export function isLessonUnlockComplete(userId: string, code: string, audioStepCount?: number): boolean {
-  // Lessons with no audio are always passable (nothing to master).
-  if (audioStepCount === 0) return true;
+  // A lesson with no audio can never be "passed" — nothing to master.
+  if (audioStepCount === 0) return false;
   const { completedSteps } = lessonProgress(userId, code);
   // Nothing completed → not done.
   if (completedSteps.length === 0) return false;
