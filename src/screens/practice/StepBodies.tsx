@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { ModelWaveform, LiveWaveform } from '../../components/Waveform';
 import { PulseDot } from '../../components/MicIndicator';
 
@@ -89,22 +90,56 @@ export function ShadowBody() {
   );
 }
 
-/** READ — scrollable sentence list showing L2 text + transliteration. */
-export function ReadBody({ sentences }: { sentences: { l2: string; translit: string }[] }) {
+/** READ — scrollable sentence list. L2 shown by default; toggle to transliteration. */
+export function ReadBody({ sentences }: { sentences: Array<{ l2: string; l2_translit: string | null }> }) {
+  const [showTranslit, setShowTranslit] = useState(false);
+
+  // Determine if any sentence actually has a distinct transliteration.
+  const hasTranslit = sentences.some((s) => s.l2_translit && s.l2_translit !== s.l2);
+
   return (
-    <div className="flex-1 overflow-y-auto px-[22px] py-1">
-      <ol className="space-y-2.5">
-        {sentences.map((s, i) => (
-          <li
-            key={i}
-            className="rounded-[12px] border border-teal/[.18] bg-teal/[.06] px-4 py-3"
-          >
-            <div className="font-serif text-[17px] leading-[1.4] text-cream">{s.l2}</div>
-            <div className="mt-0.5 text-[11.5px] leading-[1.3] tracking-[.02em] text-teal/65">
-              {s.translit}
-            </div>
+    <div className="flex flex-1 flex-col overflow-hidden px-[22px]">
+      {/* Toggle — only shown when transliteration exists */}
+      {hasTranslit && (
+        <div className="mb-2 flex shrink-0 justify-end">
+          <div className="flex overflow-hidden rounded-full border border-teal/[.28]">
+            <button
+              onClick={() => setShowTranslit(false)}
+              className={`px-3 py-1 text-[10px] font-bold tracking-[.08em] transition-colors ${
+                !showTranslit ? 'bg-teal/20 text-cream' : 'text-teal/50'
+              }`}
+            >
+              L2
+            </button>
+            <button
+              onClick={() => setShowTranslit(true)}
+              className={`px-3 py-1 text-[10px] font-bold tracking-[.08em] transition-colors ${
+                showTranslit ? 'bg-teal/20 text-cream' : 'text-teal/50'
+              }`}
+            >
+              TRANSLIT
+            </button>
+          </div>
+        </div>
+      )}
+      <ol className="flex-1 space-y-2.5 overflow-y-auto py-1">
+        {sentences.length === 0 ? (
+          <li className="py-6 text-center font-serif text-[14px] italic text-teal/50">
+            Sentences loading…
           </li>
-        ))}
+        ) : (
+          sentences.map((s, i) => {
+            const display = showTranslit && s.l2_translit ? s.l2_translit : s.l2;
+            return (
+              <li
+                key={i}
+                className="rounded-[12px] border border-teal/[.18] bg-teal/[.06] px-4 py-3"
+              >
+                <div className="font-serif text-[17px] leading-[1.4] text-cream">{display}</div>
+              </li>
+            );
+          })
+        )}
       </ol>
     </div>
   );

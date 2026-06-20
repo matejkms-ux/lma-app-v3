@@ -15,25 +15,10 @@ import {
   lessonsForLanguage,
   type PracticeLesson,
 } from '../data/content';
+import { getSentences } from '../data/api';
 import { getRecording, saveRecording } from '../lib/recordings';
 import { lifetimeReps, addRepEvent, getStepStars, setStepStars } from '../lib/progress';
 import { STEPS, type Step } from '../tokens';
-
-// Temporary: hardcoded sentences for Jerod's Thai lesson until the DB wire-up lands.
-const READ_SENTENCES: Record<string, { l2: string; translit: string }[]> = {
-  'JERODC2604-th-001': [
-    { l2: 'ผมเห็นคุณไปวัด',              translit: 'Phŏm hĕn khun bpai wát' },
-    { l2: 'ทำไมคุณไปวัด',                translit: 'Tham-mai khun bpai wát' },
-    { l2: 'ผมอยากรู้',                   translit: 'Phŏm yàak rúu' },
-    { l2: 'บุญเท่าไหร่ถึงจะพอ',          translit: 'Bun thâo-rài thŭng jà phaaw' },
-    { l2: 'มันพอไหม',                    translit: 'Man phaaw mái' },
-    { l2: 'พระเยซูมาเพื่อให้คุณมีชีวิต', translit: 'Phra Yee-suu maa phûea hâi khun mii chii-wít' },
-    { l2: 'ผมเห็นคุณไปร้าน',             translit: 'Phŏm hĕn khun bpai ráan' },
-    { l2: 'นิพพานคืออะไร',               translit: 'Níp-phaan khuu à-rai' },
-    { l2: 'นิพพานคือการหนีไหม',          translit: 'Níp-phaan khuu gaan nĭi mái' },
-    { l2: 'คุณเชื่อในพระเยซูไหม',        translit: 'Khun chûea nai Phra Yee-suu mái' },
-  ],
-};
 
 export function PracticeScreen() {
   const navigate = useNavigate();
@@ -100,6 +85,13 @@ function Player({ lesson, userId }: { lesson: PracticeLesson; userId: string }) 
   const [lifetime, setLifetime] = useState(() => lifetimeReps(userId));
   const [playing, setPlaying] = useState(false);
   const [stars, setStarsState] = useState<number | null>(null);
+
+  const [sentences, setSentences] = useState<Array<{ l2: string; l2_translit: string | null }>>([]);
+  useEffect(() => {
+    void getSentences(lesson.code).then((rows) =>
+      setSentences(rows.map((r) => ({ l2: r.l2, l2_translit: r.l2_translit || null }))),
+    );
+  }, [lesson.code]);
 
   // Stars for all steps — needed to compute unlock status reactively.
   const [allStars, setAllStars] = useState<Record<Step, number | null>>(() =>
@@ -199,10 +191,7 @@ function Player({ lesson, userId }: { lesson: PracticeLesson; userId: string }) 
     switch (cfg.body) {
       case 'dualWave': return <ShadowBody />;
       case 'melody':   return <HumBody />;
-      case 'text': {
-        const sentences = READ_SENTENCES[lesson.code];
-        return sentences ? <ReadBody sentences={sentences} /> : <GraspBody active={playing} />;
-      }
+      case 'text':     return <ReadBody sentences={sentences} />;
       default:         return <GraspBody active={playing} />;
     }
   };
