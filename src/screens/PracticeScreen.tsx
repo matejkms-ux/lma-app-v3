@@ -352,6 +352,7 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
             <audio
               ref={takeAudioRef}
               src={takeUrl}
+              playsInline
               onPlay={() => setTakePlaying(true)}
               onPause={() => setTakePlaying(false)}
               onEnded={() => setTakePlaying(false)}
