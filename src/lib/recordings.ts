@@ -104,3 +104,112 @@ export async function uploadRecording(
     /* upload failure is non-fatal */
   }
 }
+
+// ─── Freestyle (the 6th step) ───────────────────────────────────────────────
+//
+// Freestyle takes are kept in full — every recording is its own row in the same
+// learner_recordings table (step = 'FREESTYLE'), with the learner's 1–5 star
+// self-rating and the take's duration. Audio lives compressed in a dedicated
+// private bucket; playback uses short-lived signed URLs. This is intentionally
+// separate from the rep/progress system (no auto-scoring, no reps).
+
+export const FREESTYLE_BUCKET = 'freestyle-recordings';
+const FREESTYLE_STEP = 'FREESTYLE';
+
+export interface FreestyleTake {
+  id: string;
+  storage_path: string;
+  duration_seconds: number | null;
+  stars: number | null;
+  created_at: string;
+  /** Short-lived signed URL for playback; null if it could not be created. */
+  url: string | null;
+}
+
+/**
+ * Encode a freestyle take to MP3, upload it to the freestyle bucket, and record
+ * one row (with duration + self-rating) in learner_recordings. Returns the new
+ * row id on success, or null if Supabase is unavailable / the write failed.
+ */
+export async function uploadFreestyleRecording(
+  userId: string,
+  lesson: string,
+  blob: Blob,
+  durationSeconds: number,
+  stars: number | null,
+): Promise<string | null> {
+  if (!useSupabase || !supabase) return null;
+  try {
+    const mp3 = await encodeToMp3(blob);
+    const path = `${userId}/${lesson}/${Date.now()}.mp3`;
+    const { error: uploadError } = await supabase.storage
+      .from(FREESTYLE_BUCKET)
+      .upload(path, mp3, { contentType: 'audio/mpeg', upsert: false });
+    if (uploadError) return null;
+
+    const { data, error } = await supabase
+      .from('learner_recordings')
+      .insert({
+        user_id: userId,
+        lesson_code: lesson,
+        step: FREESTYLE_STEP,
+        storage_path: path,
+        duration_seconds: Math.round(durationSeconds),
+        stars,
+      })
+      .select('id')
+      .single();
+    if (error || !data) return null;
+    return (data as { id: string }).id;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The learner's freestyle takes for a lesson, newest first, each with a signed
+ * playback URL. Returns [] when Supabase is unavailable.
+ */
+export async function listFreestyleRecordings(
+  userId: string,
+  lesson: string,
+): Promise<FreestyleTake[]> {
+  if (!useSupabase || !supabase) return [];
+  try {
+    const { data, error } = await supabase
+      .from('learner_recordings')
+      .select('id, storage_path, duration_seconds, stars, created_at')
+      .eq('user_id', userId)
+      .eq('lesson_code', lesson)
+      .eq('step', FREESTYLE_STEP)
+      .order('created_at', { ascending: false });
+    if (error || !data) return [];
+
+    const rows = data as Array<Omit<FreestyleTake, 'url'>>;
+    const signed = await Promise.all(
+      rows.map(async (r) => {
+        try {
+          const { data: s } = await supabase!.storage
+            .from(FREESTYLE_BUCKET)
+            .createSignedUrl(r.storage_path, 3600);
+          return { ...r, url: s?.signedUrl ?? null };
+        } catch {
+          return { ...r, url: null };
+        }
+      }),
+    );
+    return signed;
+  } catch {
+    return [];
+  }
+}
+
+/** Update the self-rating on a single freestyle take. Best-effort. */
+export async function updateFreestyleStars(id: string, stars: number): Promise<void> {
+  if (!useSupabase || !supabase) return;
+  try {
+    await supabase.from('learner_recordings').update({ stars }).eq('id', id);
+  } catch {
+    /* best-effort */
+  }
+}

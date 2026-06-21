@@ -6,6 +6,7 @@ import { StepIndicator } from '../components/StepIndicator';
 import { AudioPlayer } from '../components/AudioPlayer';
 import { PulseDot } from '../components/MicIndicator';
 import { GraspBody, HumBody, ShadowBody, ReadBody } from './practice/StepBodies';
+import { FreestylePanel } from './practice/FreestylePanel';
 import { STEP_CONFIG } from '../practice/steps';
 import { usePractice } from '../practice/usePractice';
 import { useRecorder } from '../practice/useRecorder';
@@ -18,7 +19,7 @@ import {
 import { getSentences } from '../data/api';
 import { getRecording, saveRecording, uploadRecording } from '../lib/recordings';
 import { lifetimeReps, addRepEvent, getStepStars, setStepStars } from '../lib/progress';
-import { STEPS, type Step } from '../tokens';
+import { STEPS, AUDIO_STEPS, type Step } from '../tokens';
 
 export function PracticeScreen() {
   const navigate = useNavigate();
@@ -95,9 +96,11 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
     );
   }, [lesson.code]);
 
-  // Stars for all steps — needed to compute unlock status reactively.
+  // Stars for the five audio steps — needed to compute unlock status reactively.
+  // FREESTYLE is excluded: it carries no rep/unlock state (its takes are rated
+  // individually and stored separately).
   const [allStars, setAllStars] = useState<Record<Step, number | null>>(() =>
-    Object.fromEntries(STEPS.map((s) => [s, getStepStars(userId, lesson.code, s)])) as Record<Step, number | null>
+    Object.fromEntries(AUDIO_STEPS.map((s) => [s, getStepStars(userId, lesson.code, s)])) as Record<Step, number | null>
   );
 
   const [flash, setFlash] = useState<number | null>(null);
@@ -249,6 +252,19 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
         </div>
       </div>
 
+      {api.step === 'FREESTYLE' ? (
+        isCurrentStepUnlocked ? (
+          <FreestylePanel userId={userId} lesson={lesson.code} />
+        ) : (
+          <div className="flex flex-1 flex-col items-center justify-center gap-1 px-8 text-center">
+            <span className="text-[11px] font-bold tracking-[.16em] text-teal-dim">STEP LOCKED</span>
+            <span className="font-serif text-[13px] italic text-teal-dim">
+              Complete the previous step to unlock freestyle.
+            </span>
+          </div>
+        )
+      ) : (
+        <>
       {body()}
 
       {isCurrentStepUnlocked ? (
@@ -367,6 +383,8 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
           </>
         )}
       </div>
+        </>
+      )}
 
       <div className="flex shrink-0 items-center justify-between gap-2 px-6 pb-5 pt-1">
         <button
