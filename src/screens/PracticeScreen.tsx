@@ -16,7 +16,7 @@ import {
   type PracticeLesson,
 } from '../data/content';
 import { getSentences } from '../data/api';
-import { getRecording, saveRecording } from '../lib/recordings';
+import { getRecording, saveRecording, uploadRecording } from '../lib/recordings';
 import { lifetimeReps, addRepEvent, getStepStars, setStepStars } from '../lib/progress';
 import { STEPS, type Step } from '../tokens';
 
@@ -165,6 +165,7 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
     if (take) {
       await saveRecording(userId, lesson.code, api.step, take.blob, take.mime);
       setTake(take.blob);
+      void uploadRecording(userId, lesson.code, api.step, take.blob);
     }
     addRepEvent(userId, lesson.code, api.step, 1);
     api.bumpPass(api.step);

@@ -1,12 +1,15 @@
 /**
- * Recordings store — the learner's mic takes, kept locally in IndexedDB (blobs
- * don't fit in localStorage). This is the local stand-in for "save the recording
- * to the database"; when Supabase lands these blobs get uploaded.
+ * Recordings store — two layers:
+ *   1. Local IndexedDB (fast, offline): the most-recent take per step.
+ *   2. Supabase Storage (cloud): every take, encoded to MP3 at 96 kbps.
  *
- * Keyed by `<userId>:<lessonCode>:<step>` so a re-take overwrites the prior one.
- * Every call is wrapped — if IndexedDB is unavailable the app keeps working,
- * just without saved audio.
+ * IndexedDB key: `<userId>:<lessonCode>:<step>` — re-take overwrites prior.
+ * Storage path:  `<userId>/<lessonCode>/<step>/<unix-ms>.mp3`
+ * Both layers wrapped in try/catch — if unavailable the app keeps working.
  */
+import { supabase, useSupabase } from './supabase';
+import { encodeToMp3 } from './encodemp3';
+
 const DB_NAME = 'lma';
 const STORE = 'recordings';
 const VERSION = 1;
@@ -69,5 +72,35 @@ export async function getRecording(
     return result;
   } catch {
     return null;
+  }
+}
+
+/**
+ * Encode the raw take to MP3 then upload to Supabase Storage.
+ * Every take is kept — the path includes a timestamp so re-takes never
+ * overwrite each other.  No-ops silently when Supabase is not configured.
+ */
+export async function uploadRecording(
+  userId: string,
+  lesson: string,
+  step: string,
+  blob: Blob,
+): Promise<void> {
+  if (!useSupabase || !supabase) return;
+  try {
+    const mp3 = await encodeToMp3(blob);
+    const path = `${userId}/${lesson}/${step}/${Date.now()}.mp3`;
+    const { error: uploadError } = await supabase.storage
+      .from('learner-recordings')
+      .upload(path, mp3, { contentType: 'audio/mpeg', upsert: false });
+    if (uploadError) return;
+    await supabase.from('learner_recordings').insert({
+      user_id: userId,
+      lesson_code: lesson,
+      step,
+      storage_path: path,
+    });
+  } catch {
+    /* upload failure is non-fatal */
   }
 }
