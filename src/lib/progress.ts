@@ -12,7 +12,7 @@
  * and merges it into the local snapshot so any device sees accumulated progress.
  */
 import { createClient } from '@supabase/supabase-js';
-import { STEPS, type Step } from '../tokens';
+import { AUDIO_STEPS, type Step } from '../tokens';
 
 // ─── Supabase client ──────────────────────────────────────────────────────────
 
@@ -71,7 +71,7 @@ export function lessonProgress(userId: string, code: string): LessonProgress {
 
   // Augment completedSteps with any steps the Supabase cache shows as passed
   const cache = getSbCache(userId);
-  const extra = STEPS.filter(
+  const extra = AUDIO_STEPS.filter(
     (s) => (cache[`${code}:${s}`]?.pass_count ?? 0) > 0 && !local.completedSteps.includes(s),
   );
   return extra.length === 0 ? local : { ...local, completedSteps: [...local.completedSteps, ...extra] };

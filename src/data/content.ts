@@ -1,4 +1,4 @@
-import { STEPS, type Step } from '../tokens';
+import { AUDIO_STEPS, type Step } from '../tokens';
 import { getLessonAudio } from './lessonAudio';
 
 export interface PracticeLesson {
@@ -121,7 +121,7 @@ export async function getPracticeLessonWithAudio(code: string): Promise<Practice
   if (!rows) return base;
 
   const audio: Partial<Record<Step, string>> = { ...base.audio };
-  for (const step of STEPS) {
+  for (const step of AUDIO_STEPS) {
     if (rows[step]?.audio_url) audio[step] = rows[step].audio_url;
   }
   return { ...base, audio };

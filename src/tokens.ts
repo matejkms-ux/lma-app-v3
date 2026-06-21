@@ -50,9 +50,22 @@ export const radius = {
   pill: '14px',
 } as const;
 
-/** The five practice steps, in fixed order. */
-export const STEPS = ['GRASP', 'HUM', 'SHADOW', 'READ', 'RECALL'] as const;
+/**
+ * The practice steps, in fixed order. The first five are the canonical method
+ * steps backed by reference audio + rep/mastery progress. FREESTYLE is a sixth,
+ * open-ended production step: no reference audio, the learner speaks freely and
+ * self-rates. It sits OUTSIDE the rep/unlock system (see lib/recordings).
+ */
+export const STEPS = ['GRASP', 'HUM', 'SHADOW', 'READ', 'RECALL', 'FREESTYLE'] as const;
 export type Step = (typeof STEPS)[number];
 
-export const tokens = { colors, fonts, radius, STEPS };
+/**
+ * The five steps that carry reference audio and feed the rep/progress/unlock
+ * system. `lesson_audio` and `lesson_step_progress` only ever hold these — the
+ * DB CHECK constraints reject anything else, so FREESTYLE is deliberately out.
+ */
+export const AUDIO_STEPS = ['GRASP', 'HUM', 'SHADOW', 'READ', 'RECALL'] as const;
+export type AudioStep = (typeof AUDIO_STEPS)[number];
+
+export const tokens = { colors, fonts, radius, STEPS, AUDIO_STEPS };
 export default tokens;

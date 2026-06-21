@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { STEPS, type Step } from '../tokens';
+import { AUDIO_STEPS, type Step } from '../tokens';
 import { STEP_CONFIG } from '../practice/steps';
 import {
   getLessonAudio,
@@ -44,7 +44,7 @@ interface StepState {
 
 function initStates(): Record<Step, StepState> {
   return Object.fromEntries(
-    STEPS.map((s) => [s, { row: null, file: null, progress: null, error: null, dragOver: false }]),
+    AUDIO_STEPS.map((s) => [s, { row: null, file: null, progress: null, error: null, dragOver: false }]),
   ) as Record<Step, StepState>;
 }
 
@@ -99,7 +99,7 @@ export function AdminScreen() {
     if (rows) {
       setStates((prev) => {
         const next = { ...prev };
-        for (const s of STEPS) {
+        for (const s of AUDIO_STEPS) {
           if (rows[s]) next[s] = { ...next[s], row: rows[s] };
         }
         return next;
@@ -246,7 +246,7 @@ export function AdminScreen() {
               {lessonCode} — ALL FIVE STEPS
             </div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {STEPS.map((step) => {
+              {AUDIO_STEPS.map((step) => {
                 const cfg = STEP_CONFIG[step];
                 const st = states[step];
                 const uploaded = !!st.row;
@@ -344,7 +344,7 @@ export function AdminScreen() {
             {/* Summary bar */}
             <div className="mt-8 flex items-center gap-3 rounded-[14px] border border-rule bg-white px-5 py-4">
               <div className="flex gap-1.5">
-                {STEPS.map((s) => (
+                {AUDIO_STEPS.map((s) => (
                   <div
                     key={s}
                     className={`h-2 w-8 rounded-full ${states[s].row ? 'bg-emerald' : 'bg-rule'}`}
@@ -352,7 +352,7 @@ export function AdminScreen() {
                 ))}
               </div>
               <span className="text-[11.5px] font-semibold text-muted">
-                {STEPS.filter((s) => states[s].row).length} of 5 steps uploaded for {lessonCode}
+                {AUDIO_STEPS.filter((s) => states[s].row).length} of 5 steps uploaded for {lessonCode}
               </span>
             </div>
 

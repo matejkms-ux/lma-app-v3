@@ -1,13 +1,16 @@
 /**
- * Static, declarative config for each of the five steps. Presentation reads
- * from this so the chassis stays identical and only the per-step differences
- * (instruction, whether text shows, mic copy, prompt type) vary.
+ * Static, declarative config for each step. Presentation reads from this so the
+ * chassis stays identical and only the per-step differences (instruction,
+ * whether text shows, mic copy, prompt type) vary.
  *
  * Method invariants (v3 brief §3):
  *  - GRASP / HUM / SHADOW show NO written text (ears before eyes).
  *  - READ is where text first appears, with optional transliteration + translation.
  *  - RECALL produces from memory; model audio revealed only after the take.
- *  - All five steps record (mic live). Each completed take = +1 rep.
+ *  - The five canonical steps record (mic live); each completed take = +1 rep.
+ *  - FREESTYLE is open-ended free production: no reference audio, the learner
+ *    records up to 60s and self-rates. It is NOT auto-scored and sits outside
+ *    the rep/unlock system (its UI lives in screens/practice/FreestylePanel).
  */
 import type { Step } from '../tokens';
 
@@ -19,7 +22,7 @@ export interface StepConfig {
   /** GRASP/HUM/SHADOW = false (audio only); READ/RECALL = true */
   showsText: boolean;
   /** the visual centrepiece of the body */
-  body: 'orb' | 'melody' | 'dualWave' | 'text' | 'recall';
+  body: 'orb' | 'melody' | 'dualWave' | 'text' | 'recall' | 'freestyle';
   /** the live-mic / self-assessment prompt shown under the gate divider */
   gateLabel: string;
   /** copy for the live recording indicator (coral) */
@@ -82,6 +85,17 @@ export const STEP_CONFIG: Record<Step, StepConfig> = {
     body: 'recall',
     gateLabel: 'RATE YOUR TAKE',
     micLabel: 'RECORDING YOUR TAKE — SAY IT NOW',
+    scoring: 'self',
+  },
+  FREESTYLE: {
+    step: 'FREESTYLE',
+    ordinal: 'STEP SIX',
+    title: 'Freestyle',
+    instruction: 'No model now. Speak freely — up to a minute. Then rate yourself.',
+    showsText: false,
+    body: 'freestyle',
+    gateLabel: 'RATE YOUR TAKE',
+    micLabel: 'FREESTYLE · RECORDING',
     scoring: 'self',
   },
 };
