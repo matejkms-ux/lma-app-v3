@@ -28,7 +28,11 @@ interface Sent {
 type Outcome =
   | { kind: 'scored'; stars: number; word: number; pron: number }
   | { kind: 'unavailable' }
+  | { kind: 'not_counted' }
   | null;
+
+/** Steps that must be produced before hearing the model (anti-parroting). */
+const BEFORE_SPEAKER: JudgedStep[] = ['GRASP', 'RECALL'];
 
 export function JudgedStepCapture({
   userId,
@@ -53,6 +57,11 @@ export function JudgedStepCapture({
   const [assessing, setAssessing] = useState(false);
   const [outcome, setOutcome] = useState<Outcome>(null);
   const [reveal, setReveal] = useState(false);
+  // Anti-parroting: GRASP/RECALL must be produced BEFORE hearing the model. The
+  // reference stays locked until a take is recorded; a take made after hearing
+  // doesn't count.
+  const [recorded, setRecorded] = useState(false);
+  const [heard, setHeard] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement>(null);
 
@@ -82,12 +91,21 @@ export function JudgedStepCapture({
 
   const cur = sentences[idx];
   const refUrl = cur?.l2_audio_url ?? (step === 'GRASP' ? refAudio.ref_l1 : refAudio.ref_l2);
+  const beforeSpeaker = BEFORE_SPEAKER.includes(step);
+  // For before-speaker steps the reference is locked until a take is recorded.
+  const refLocked = beforeSpeaker && !recorded;
   const showText = step === 'GRASP' ? false : step === 'SHADOW' ? false : reveal;
   const hideUntilReveal = step === 'RECALL' && !reveal;
 
   const handleTake = useCallback(
     async (blob: Blob) => {
       if (!cur) return;
+      setRecorded(true);
+      // Heard the model before producing → echo, doesn't count (anti-parroting).
+      if (beforeSpeaker && heard) {
+        setOutcome({ kind: 'not_counted' });
+        return;
+      }
       setAssessing(true);
       const { referenceText, locale } = assessTargetForStep(step, cur, language);
       const r = await assessPronunciation(blob, referenceText, locale);
@@ -99,7 +117,7 @@ export function JudgedStepCapture({
       }
       setAssessing(false);
     },
-    [cur, step, language, userId],
+    [cur, step, language, userId, beforeSpeaker, heard],
   );
 
   const onRecordTap = useCallback(async () => {
@@ -115,7 +133,8 @@ export function JudgedStepCapture({
 
   const playReference = () => {
     const a = audioRef.current;
-    if (!a || !refUrl) return;
+    if (!a || !refUrl || refLocked) return;
+    setHeard(true);
     a.src = refUrl;
     void a.play().catch(() => {});
   };
@@ -123,6 +142,8 @@ export function JudgedStepCapture({
   const next = () => {
     setOutcome(null);
     setReveal(false);
+    setRecorded(false);
+    setHeard(false);
     if (idx >= sentences.length - 1) onComplete();
     else setIdx((i) => i + 1);
   };
@@ -152,14 +173,19 @@ export function JudgedStepCapture({
         <span className="text-[10px] font-bold tracking-[.14em] text-teal">
           SENTENCE {idx + 1} / {sentences.length}
         </span>
-        {refUrl && (
-          <button
-            onClick={playReference}
-            className="rounded-full border border-teal/40 px-3 py-1 text-[10px] font-bold tracking-[.08em] text-teal"
-          >
-            ▶ HEAR IT
-          </button>
-        )}
+        {refUrl &&
+          (refLocked ? (
+            <span className="rounded-full border border-teal/15 px-3 py-1 text-[10px] font-bold tracking-[.08em] text-teal-dim">
+              🔒 SAY IT FIRST
+            </span>
+          ) : (
+            <button
+              onClick={playReference}
+              className="rounded-full border border-teal/40 px-3 py-1 text-[10px] font-bold tracking-[.08em] text-teal"
+            >
+              ▶ HEAR IT
+            </button>
+          ))}
       </div>
 
       {/* Prompt */}
@@ -205,6 +231,11 @@ export function JudgedStepCapture({
         {outcome?.kind === 'unavailable' && (
           <span className="mt-1 text-[10px] font-semibold tracking-[.08em] text-teal-dim">
             AUTO-SCORE UNAVAILABLE · manual only
+          </span>
+        )}
+        {outcome?.kind === 'not_counted' && (
+          <span className="mt-1 text-[10px] font-bold tracking-[.08em] text-coral">
+            HEARD THE MODEL FIRST · doesn't count — say it from memory, then record
           </span>
         )}
       </div>
