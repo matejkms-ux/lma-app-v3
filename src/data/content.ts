@@ -61,14 +61,6 @@ export const PRACTICE_LESSONS: PracticeLesson[] = [
     audioStepCount: 5,
   },
   {
-    code: 'JERODC2604-th-002',
-    title: 'Lesson 2',
-    language: 'THAI',
-    audio: {},
-    pointsPerStep: 1,
-    audioStepCount: 5,
-  },
-  {
     code: 'JERODC2604-th-003',
     title: 'Lesson 3',
     language: 'THAI',
