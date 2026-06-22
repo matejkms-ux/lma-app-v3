@@ -1,0 +1,66 @@
+name: Generate lesson (TTS + land in Supabase)
+
+# Runs the v4.1 sentence generator (Python + ffmpeg) on a committed CSV, then
+# lands the audio + sentences in Supabase so the app picks the lesson up.
+# Supabase can't run Python/ffmpeg itself, so this runs on a GitHub Actions runner.
+#
+# Trigger: Actions tab → "Generate lesson" → Run workflow. Provide:
+#   csv_path     path to a CSV committed under lesson-sets/ (cols: APP-USERNAME,
+#                SENTENCE #, SENTENCE CLAUSES, L2, L1, LANGUAGE)
+#   app_username e.g. TOMR2504-km   (the generator output folder + lesson handle)
+#   nnn          lesson number, default 001  → lesson_code TOMR2504-km-001
+#
+# Required repo secrets (Settings → Secrets and variables → Actions):
+#   ELEVENLABS_API_KEY      (all languages except Khmer)
+#   AZURE_SPEECH_KEY        (Khmer; also used by the app's speech functions)
+#   AZURE_SPEECH_REGION     (e.g. eastus)
+#   SUPABASE_URL            https://wcrwnfvwydibhggislne.supabase.co
+#   SUPABASE_SERVICE_ROLE_KEY   (service role — bypasses RLS; never in client)
+
+on:
+  workflow_dispatch:
+    inputs:
+      csv_path:
+        description: "CSV path in repo (e.g. lesson-sets/tom-km-001.csv)"
+        required: true
+      app_username:
+        description: "App username / handle (e.g. TOMR2504-km)"
+        required: true
+      nnn:
+        description: "Lesson number (e.g. 001)"
+        required: true
+        default: "001"
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install ffmpeg + deps
+        run: |
+          sudo apt-get update && sudo apt-get install -y ffmpeg
+          pip install requests pydub
+
+      - name: Generate audio (7 MP3s)
+        env:
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          AZURE_SPEECH_KEY: ${{ secrets.AZURE_SPEECH_KEY }}
+          AZURE_SPEECH_REGION: ${{ secrets.AZURE_SPEECH_REGION }}
+        run: |
+          python3 scripts/generator/lma-sentence-generator-v4.1.py "${{ inputs.csv_path }}" "${{ inputs.nnn }}"
+
+      - name: Land audio + sentences in Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          SRC=$(ls -dt "${{ inputs.app_username }}"/*/ | head -1)
+          echo "Generated folder: $SRC"
+          python3 scripts/generator/land-lesson.py \
+            --src "$SRC" --csv "${{ inputs.csv_path }}" \
+            --app-username "${{ inputs.app_username }}" --nnn "${{ inputs.nnn }}" --commit
