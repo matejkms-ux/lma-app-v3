@@ -94,32 +94,40 @@ export function getStepStars(userId: string, code: string, step: Step): number |
   return Math.max(localVal ?? 0, sbVal ?? 0);
 }
 
+/**
+ * Reps are awarded per PLAY: every completed play of an audio step is worth a
+ * flat REPS_PER_PLAY. Totals are DERIVED from the captured play count (the local
+ * rep-event log and Supabase pass_count) — never from a stored points sum — so
+ * the rule applies uniformly to all history without rewriting captured progress.
+ * (Each rep event still records `points` for the log, but it does not drive totals.)
+ */
+export const REPS_PER_PLAY = 10;
+
 export function lifetimeReps(userId: string): number {
   const events = repEvents(userId);
 
-  // Aggregate local reps per step-key
-  const localPerStep: Record<string, number> = {};
+  // Count local plays per step-key (one event = one play).
+  const localPlays: Record<string, number> = {};
   for (const e of events) {
     const k = `${e.lesson}:${e.step}`;
-    localPerStep[k] = (localPerStep[k] ?? 0) + e.points;
+    localPlays[k] = (localPlays[k] ?? 0) + 1;
   }
 
-  // Sum max(local, supabase) per step
+  // reps = REPS_PER_PLAY × max(local play count, Supabase pass_count) per step.
   const cache = getSbCache(userId);
-  const allKeys = new Set([...Object.keys(localPerStep), ...Object.keys(cache)]);
-  let total = 0;
+  const allKeys = new Set([...Object.keys(localPlays), ...Object.keys(cache)]);
+  let plays = 0;
   for (const k of allKeys) {
-    total += Math.max(localPerStep[k] ?? 0, cache[k]?.reps ?? 0);
+    plays += Math.max(localPlays[k] ?? 0, cache[k]?.pass_count ?? 0);
   }
-  return total;
+  return plays * REPS_PER_PLAY;
 }
 
 export function repsToday(userId: string): number {
   const t0 = new Date();
   t0.setHours(0, 0, 0, 0);
-  return repEvents(userId)
-    .filter((e) => e.ts >= t0.getTime())
-    .reduce((sum, e) => sum + e.points, 0);
+  const playsToday = repEvents(userId).filter((e) => e.ts >= t0.getTime()).length;
+  return playsToday * REPS_PER_PLAY;
 }
 
 export function isLessonUnlockComplete(userId: string, code: string, audioStepCount?: number): boolean {
@@ -174,8 +182,8 @@ async function _syncStep(userId: string, code: string, step: Step): Promise<void
   try {
     const events    = repEvents(userId);
     const stepEvt   = events.filter((e) => e.lesson === code && e.step === step);
-    const reps      = stepEvt.reduce((s, e) => s + e.points, 0);
     const passCount = stepEvt.length;
+    const reps      = passCount * REPS_PER_PLAY; // derived: flat REPS_PER_PLAY per play
     const stars     = lsRead<Record<string, number>>(starsKey(userId), {})[`${code}:${step}`] ?? 0;
     await _upsertRow(userId, code, step, reps, stars, passCount);
   } catch { /* best-effort */ }
@@ -230,16 +238,16 @@ export async function initProgressSync(userId: string): Promise<void> {
       const code      = key.slice(0, colonIdx);
       const step      = key.slice(colonIdx + 1) as Step;
       const stepEvt   = events.filter((e) => e.lesson === code && e.step === step);
-      const localReps = stepEvt.reduce((s, e) => s + e.points, 0);
       const localPass = stepEvt.length;
       const localStar = starsMap[key] ?? 0;
       const sb        = cache[key];
 
-      if (!sb || localReps > sb.reps || localPass > sb.pass_count || localStar > sb.stars) {
+      if (!sb || localPass > sb.pass_count || localStar > sb.stars) {
+        const pass = Math.max(localPass, sb?.pass_count ?? 0);
         pushes.push(_upsertRow(userId, code, step,
-          Math.max(localReps, sb?.reps ?? 0),
+          pass * REPS_PER_PLAY, // derived: flat REPS_PER_PLAY per play
           Math.max(localStar, sb?.stars ?? 0),
-          Math.max(localPass, sb?.pass_count ?? 0),
+          pass,
         ));
       }
     }
