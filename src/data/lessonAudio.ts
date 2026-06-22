@@ -17,12 +17,21 @@ export interface LessonAudioRow {
   updated_at: string;
 }
 
-/** Returns the set of lesson codes that have at least one row in lesson_audio. */
+/**
+ * Lesson codes that are practiceable — i.e. have step audio (lesson_audio) OR at
+ * least one sentence with per-sentence reference audio (sentences.l2_audio_url).
+ */
 export async function getUploadedLessonCodes(): Promise<Set<string>> {
   if (!adminClient) return new Set();
-  const { data } = await adminClient.from('lesson_audio').select('lesson_code');
-  if (!data) return new Set();
-  return new Set(data.map((r: { lesson_code: string }) => r.lesson_code));
+  const codes = new Set<string>();
+  const { data: audio } = await adminClient.from('lesson_audio').select('lesson_code');
+  for (const r of (audio ?? []) as { lesson_code: string }[]) codes.add(r.lesson_code);
+  const { data: sents } = await adminClient
+    .from('sentences')
+    .select('lesson_code')
+    .not('l2_audio_url', 'is', null);
+  for (const r of (sents ?? []) as { lesson_code: string }[]) codes.add(r.lesson_code);
+  return codes;
 }
 
 /** Fetch all uploaded step audio for a lesson. */
