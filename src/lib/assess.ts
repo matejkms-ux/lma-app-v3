@@ -17,6 +17,23 @@ export const LOCALE_BY_LANGUAGE: Record<string, string> = {
   KHMER: 'km-KH', // not supported → auto_unavailable
 };
 
+/** L1 here is English. */
+export const L1_LOCALE = 'en-US';
+
+/**
+ * What to assess for a judged step (decision: GRASP scores the spoken English
+ * meaning against L1 in en-US — so it's scorable for every learner; SHADOW and
+ * RECALL score the spoken L2 against the target text/locale).
+ */
+export function assessTargetForStep(
+  step: 'GRASP' | 'SHADOW' | 'RECALL',
+  sentence: { l1: string; l2: string },
+  language: string,
+): { referenceText: string; locale: string } {
+  if (step === 'GRASP') return { referenceText: sentence.l1, locale: L1_LOCALE };
+  return { referenceText: sentence.l2, locale: LOCALE_BY_LANGUAGE[language] ?? 'en-US' };
+}
+
 export interface AssessResult {
   word_accuracy: number;
   pronunciation: number;
@@ -86,17 +103,15 @@ function toBase64(buf: ArrayBuffer): string {
 }
 
 /**
- * Score a recorded take against the sentence's reference text. `language` is the
- * learner's uppercase language; unsupported languages resolve to auto_unavailable
- * server-side. Returns an unavailable flag (never throws) so manual scoring is
- * unaffected.
+ * Score a recorded take against a reference text in a given locale (use
+ * assessTargetForStep to derive both). Unsupported locales resolve to
+ * auto_unavailable server-side. Never throws, so manual scoring is unaffected.
  */
 export async function assessPronunciation(
   blob: Blob,
   referenceText: string,
-  language: string,
+  locale: string,
 ): Promise<AssessResult | AssessUnavailable> {
-  const locale = LOCALE_BY_LANGUAGE[language] ?? 'en-US';
   try {
     const pcm = await blobToPcm16kMono(blob);
     const res = await fetch('/.netlify/functions/assess-pronunciation', {
