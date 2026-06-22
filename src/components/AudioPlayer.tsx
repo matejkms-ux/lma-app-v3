@@ -61,7 +61,14 @@ export function AudioPlayer({
   const reverse = () => {
     const a = audioRef.current;
     if (!a) return;
-    a.currentTime = Math.max(0, a.currentTime - REVERSE_SECONDS);
+    const now = Number.isFinite(a.currentTime) ? a.currentTime : 0;
+    const target = Math.max(0, now - REVERSE_SECONDS);
+    try {
+      a.currentTime = target;
+    } catch {
+      /* ignore unseekable edge */
+    }
+    setCur(target);
   };
 
   const pct = dur > 0 ? Math.min(100, (cur / dur) * 100) : 0;
@@ -71,9 +78,8 @@ export function AudioPlayer({
       <audio
         ref={audioRef}
         src={src}
-        preload="metadata"
+        preload="auto"
         playsInline
-        crossOrigin="anonymous"
         onPlay={() => {
           setPlaying(true);
           onPlay?.();
