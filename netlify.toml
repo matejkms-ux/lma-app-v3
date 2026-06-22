@@ -1,0 +1,9 @@
+# Pins the build + functions setup (previously only in the Netlify dashboard).
+# The Azure key is read ONLY inside the function via process.env — never client-side.
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
