@@ -18,7 +18,9 @@ import {
 } from '../data/content';
 import { getSentences } from '../data/api';
 import { getRecording, saveRecording, uploadRecording } from '../lib/recordings';
-import { lifetimeReps, addRepEvent, getStepStars, setStepStars, REPS_PER_PLAY } from '../lib/progress';
+import { lifetimeReps, addRepEvent, getStepStars, setStepStars, setStepAutoScore, REPS_PER_PLAY } from '../lib/progress';
+import { assessPronunciation, isUnavailable, LOCALE_BY_LANGUAGE } from '../lib/assess';
+import { JUDGED_STEPS } from '../lib/scoring';
 import { STEPS, AUDIO_STEPS, type Step } from '../tokens';
 
 export function PracticeScreen() {
@@ -89,12 +91,17 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
   const [playing, setPlaying] = useState(false);
   const [stars, setStarsState] = useState<number | null>(null);
 
-  const [sentences, setSentences] = useState<Array<{ l2: string; l2_translit: string | null }>>([]);
+  const [sentences, setSentences] = useState<Array<{ l1: string; l2: string; l2_translit: string | null }>>([]);
   useEffect(() => {
     void getSentences(lesson.code).then((rows) =>
-      setSentences(rows.map((r) => ({ l2: r.l2, l2_translit: r.l2_translit || null }))),
+      setSentences(rows.map((r) => ({ l1: r.l1, l2: r.l2, l2_translit: r.l2_translit || null }))),
     );
   }, [lesson.code]);
+
+  // Whole-take auto score for the current step (judged steps only).
+  const [autoScore, setAutoScore] = useState<
+    null | 'scoring' | 'unavailable' | { stars: number; combined: number }
+  >(null);
 
   // Stars for the five audio steps — needed to compute unlock status reactively.
   // FREESTYLE is excluded: it carries no rep/unlock state (its takes are rated
@@ -130,6 +137,7 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
   }, [userId, lesson.code, api.step, setTake]);
 
   useEffect(() => {
+    setAutoScore(null); // clear the previous step's auto score
     setStarsState(getStepStars(userId, lesson.code, api.step));
   }, [userId, lesson.code, api.step]);
 
@@ -181,7 +189,24 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
     setFlash(REPS_PER_PLAY);
     if (flashTimer.current) window.clearTimeout(flashTimer.current);
     flashTimer.current = window.setTimeout(() => setFlash(null), 1900);
-  }, [recorder, userId, lesson.code, api, setTake]);
+
+    // Whole-take auto evaluation for the judged steps (GRASP/SHADOW/RECALL):
+    // score the recording of all sentences against the combined reference.
+    // GRASP = spoken English meaning vs combined L1 (en-US); SHADOW/RECALL = L2.
+    if (take && (JUDGED_STEPS as readonly string[]).includes(api.step) && sentences.length) {
+      const isGrasp = api.step === 'GRASP';
+      const referenceText = sentences.map((s) => (isGrasp ? s.l1 : s.l2)).join(' ');
+      const locale = isGrasp ? 'en-US' : (LOCALE_BY_LANGUAGE[lesson.language] ?? 'en-US');
+      setAutoScore('scoring');
+      const r = await assessPronunciation(take.blob, referenceText, locale);
+      if (isUnavailable(r)) {
+        setAutoScore('unavailable');
+      } else {
+        setAutoScore({ stars: r.auto_stars, combined: r.combined });
+        void setStepAutoScore(userId, lesson.code, api.step, r.combined, r.auto_stars);
+      }
+    }
+  }, [recorder, userId, lesson.code, lesson.language, api, setTake, sentences]);
 
   const handleRate = useCallback((n: number) => {
     setStepStars(userId, lesson.code, api.step, n);
@@ -348,6 +373,26 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
         {isCurrentStepUnlocked && unlockHint && (
           <div className="mt-1.5 text-[10px] font-semibold tracking-[.06em] text-teal/50">
             {unlockHint}
+          </div>
+        )}
+
+        {autoScore && (
+          <div className="mt-2 flex items-center gap-2 text-[11px] font-bold tracking-[.06em]">
+            {autoScore === 'scoring' ? (
+              <span className="text-teal-dim">SCORING…</span>
+            ) : autoScore === 'unavailable' ? (
+              <span className="text-teal-dim">AUTO-SCORE UNAVAILABLE · manual only</span>
+            ) : (
+              <>
+                <span className="text-teal">AUTO</span>
+                <span className="text-[15px] leading-none">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <span key={n} className={n <= autoScore.stars ? 'text-coral' : 'text-teal/25'}>★</span>
+                  ))}
+                </span>
+                <span className="text-teal-dim">{Math.round(autoScore.combined)}/100</span>
+              </>
+            )}
           </div>
         )}
 

@@ -175,6 +175,23 @@ export function setStepStars(userId: string, code: string, step: Step, stars: nu
   void _syncStep(userId, code, step);
 }
 
+/**
+ * Step-level auto score (whole-take pronunciation assessment vs the combined
+ * reference). Writes ONLY auto_* — never the manual stars / reps / pass_count.
+ */
+export async function setStepAutoScore(
+  userId: string, code: string, step: Step, combined: number, stars: number,
+): Promise<void> {
+  if (!_db) return;
+  try {
+    await _db.from('lesson_step_progress').upsert(
+      { user_id: userId, lesson_code: code, step, auto_combined: combined, auto_stars: stars,
+        updated_at: new Date().toISOString() },
+      { onConflict: 'user_id,lesson_code,step' },
+    );
+  } catch { /* best-effort */ }
+}
+
 // ─── Supabase sync (internal) ─────────────────────────────────────────────────
 
 async function _syncStep(userId: string, code: string, step: Step): Promise<void> {
