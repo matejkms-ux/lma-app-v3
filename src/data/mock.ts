@@ -21,6 +21,8 @@ export interface Sentence {
   l2: string;
   l2_translit: string;
   l1: string;
+  /** Per-sentence reference audio URL (may be absent). */
+  l2_audio_url?: string | null;
   /** done | active | locked */
   status: 'done' | 'active' | 'locked';
   /** 0–5 accuracy stars; 0 when not yet graded */

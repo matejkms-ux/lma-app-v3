@@ -43,7 +43,6 @@ type SbCache = Record<string, SbStepData>; // "lessonCode:step" → data
 const progressKey = (id: string) => `lma:progress:${id}`;
 const repsKey     = (id: string) => `lma:reps:${id}`;
 const starsKey    = (id: string) => `lma:stars:${id}`;
-const sentStarsKey = (id: string) => `lma:sentstars:${id}`;
 const sbCacheKey  = (id: string) => `lma:sb:${id}`;
 
 function lsRead<T>(key: string, fallback: T): T {
@@ -174,20 +173,6 @@ export function setStepStars(userId: string, code: string, step: Step, stars: nu
   all[`${code}:${step}`] = stars;
   lsWrite(starsKey(userId), all);
   void _syncStep(userId, code, step);
-}
-
-// ─── Per-sentence self-rating (local only) ──────────────────────────────────
-// Stored per learner, keyed `${lessonCode}:${sentenceNr}`. Local-first like the
-// step stars; no Supabase sync yet.
-
-export function getSentenceStars(userId: string, code: string, sentenceNr: number): number | null {
-  return lsRead<Record<string, number>>(sentStarsKey(userId), {})[`${code}:${sentenceNr}`] ?? null;
-}
-
-export function setSentenceStars(userId: string, code: string, sentenceNr: number, stars: number): void {
-  const all = lsRead<Record<string, number>>(sentStarsKey(userId), {});
-  all[`${code}:${sentenceNr}`] = stars;
-  lsWrite(sentStarsKey(userId), all);
 }
 
 // ─── Supabase sync (internal) ─────────────────────────────────────────────────
