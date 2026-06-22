@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRecorder } from '../../practice/useRecorder';
 import { PulseDot } from '../../components/MicIndicator';
 import { getSentences } from '../../data/api';
+import { getRefAudio } from '../../data/lessonAudio';
 import { assessPronunciation, assessTargetForStep, isUnavailable } from '../../lib/assess';
 import { setAutoScore, GRASP_GATE_STARS, type JudgedStep } from '../../lib/scoring';
 
@@ -44,6 +45,9 @@ export function JudgedStepCapture({
 }) {
   const recorder = useRecorder();
   const [sentences, setSentences] = useState<Sent[]>([]);
+  // Per-lesson reference audio fallback (ref_l1 for GRASP/English, ref_l2 for L2),
+  // used when a sentence has no per-sentence clip of its own.
+  const [refAudio, setRefAudio] = useState<{ ref_l1?: string; ref_l2?: string }>({});
   const [loading, setLoading] = useState(true);
   const [idx, setIdx] = useState(0);
   const [assessing, setAssessing] = useState(false);
@@ -69,10 +73,15 @@ export function JudgedStepCapture({
       );
       setLoading(false);
     });
+    void getRefAudio(lessonCode).then((rows) => {
+      if (!alive) return;
+      setRefAudio({ ref_l1: rows.ref_l1?.audio_url, ref_l2: rows.ref_l2?.audio_url });
+    });
     return () => { alive = false; };
   }, [lessonCode]);
 
   const cur = sentences[idx];
+  const refUrl = cur?.l2_audio_url ?? (step === 'GRASP' ? refAudio.ref_l1 : refAudio.ref_l2);
   const showText = step === 'GRASP' ? false : step === 'SHADOW' ? false : reveal;
   const hideUntilReveal = step === 'RECALL' && !reveal;
 
@@ -106,8 +115,8 @@ export function JudgedStepCapture({
 
   const playReference = () => {
     const a = audioRef.current;
-    if (!a || !cur?.l2_audio_url) return;
-    a.src = cur.l2_audio_url;
+    if (!a || !refUrl) return;
+    a.src = refUrl;
     void a.play().catch(() => {});
   };
 
@@ -143,7 +152,7 @@ export function JudgedStepCapture({
         <span className="text-[10px] font-bold tracking-[.14em] text-teal">
           SENTENCE {idx + 1} / {sentences.length}
         </span>
-        {cur?.l2_audio_url && (
+        {refUrl && (
           <button
             onClick={playReference}
             className="rounded-full border border-teal/40 px-3 py-1 text-[10px] font-bold tracking-[.08em] text-teal"
