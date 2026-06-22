@@ -8,6 +8,7 @@ import { useSession } from '../session';
 import { lessonsForLanguage, type PracticeLesson } from '../data/content';
 import { lessonProgress, isLessonUnlockComplete } from '../lib/progress';
 import { getUploadedLessonCodes, getLessonTitles } from '../data/lessonAudio';
+import { getCompletedFreestyleLessons } from '../lib/recordings';
 import { STEPS } from '../tokens';
 
 function LockIcon({ size = 18 }: { size?: number }) {
@@ -31,16 +32,21 @@ function LessonRow({
   userId,
   lesson,
   customTitle,
+  freestyleDone,
   onOpen,
 }: {
   userId: string;
   lesson: PracticeLesson;
   customTitle?: string;
+  freestyleDone?: boolean;
   onOpen: () => void;
 }) {
   const { completedSteps, currentStep } = lessonProgress(userId, lesson.code);
-  const done = completedSteps.length;
-  const total = lesson.audioStepCount;
+  // Progress is over all 6 steps: the audio steps + FREESTYLE (counts once a
+  // full 60s take exists).
+  const audioTotal = lesson.audioStepCount;
+  const total = audioTotal + 1;
+  const done = Math.min(completedSteps.length, audioTotal) + (freestyleDone ? 1 : 0);
   const finished = total > 0 && done >= total;
   const label = finished
     ? 'complete'
@@ -120,6 +126,7 @@ export function LessonsScreen() {
   const { user } = useSession();
   const [uploadedCodes, setUploadedCodes] = useState<Set<string> | null>(null);
   const [titles, setTitles] = useState<Record<string, string>>({});
+  const [freestyleDone, setFreestyleDone] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     void getUploadedLessonCodes().then(setUploadedCodes);
@@ -129,7 +136,8 @@ export function LessonsScreen() {
     if (!user) return;
     const codes = lessonsForLanguage(user.language).map((l) => l.code);
     void getLessonTitles(codes).then(setTitles);
-  }, [user?.language]); // eslint-disable-line react-hooks/exhaustive-deps
+    void getCompletedFreestyleLessons(user.id).then(setFreestyleDone);
+  }, [user?.id, user?.language]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!user) return <Navigate to="/" replace />;
 
@@ -168,6 +176,7 @@ export function LessonsScreen() {
                     userId={user.id}
                     lesson={l}
                     customTitle={titles[l.code]}
+                    freestyleDone={freestyleDone.has(l.code)}
                     onOpen={() => navigate('/practice', { state: { lessonCode: l.code, startAt: 'GRASP' } })}
                   />
                 );

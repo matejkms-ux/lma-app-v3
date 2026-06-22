@@ -213,3 +213,24 @@ export async function updateFreestyleStars(id: string, stars: number): Promise<v
     /* best-effort */
   }
 }
+
+/**
+ * The set of lesson codes for which this learner has a completed freestyle take
+ * (a recording that reached the 60s cap). Used to count freestyle toward lesson
+ * progress in the lessons list. Returns an empty set when Supabase is unavailable.
+ */
+export async function getCompletedFreestyleLessons(userId: string): Promise<Set<string>> {
+  if (!useSupabase || !supabase) return new Set();
+  try {
+    const { data, error } = await supabase
+      .from('learner_recordings')
+      .select('lesson_code')
+      .eq('user_id', userId)
+      .eq('step', FREESTYLE_STEP)
+      .gte('duration_seconds', 60);
+    if (error || !data) return new Set();
+    return new Set((data as Array<{ lesson_code: string }>).map((r) => r.lesson_code));
+  } catch {
+    return new Set();
+  }
+}
