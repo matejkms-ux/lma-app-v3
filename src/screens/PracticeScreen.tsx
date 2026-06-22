@@ -234,9 +234,13 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
         <button onClick={() => navigate('/lessons')} className="p-1 text-xl" aria-label="Back">
           ‹
         </button>
-        <span className="font-semibold tracking-[.04em]">
+        <button
+          onClick={() => navigate('/sentences', { state: { lessonCode: lesson.code } })}
+          className="font-semibold tracking-[.04em] underline-offset-2 hover:underline"
+          aria-label="View sentences"
+        >
           {lesson.code} · {lesson.title}
-        </span>
+        </button>
         <span className="font-bold">
           {api.stepIndex + 1}/{api.steps.length}
         </span>
