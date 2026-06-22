@@ -12,6 +12,7 @@ import {
 } from '../data/lessonAudio';
 import { USERS, displayName, type User } from '../data/mock';
 import { SentenceUploader } from './admin/SentenceUploader';
+import { SentenceAudioUploader } from './admin/SentenceAudioUploader';
 import { RefAudioUploader } from './admin/RefAudioUploader';
 import { LearnerEditor } from './admin/LearnerEditor';
 
@@ -435,6 +436,8 @@ export function AdminScreen() {
               language={selectedUser?.language ?? ''}
               lessonNr={lessonNr}
             />
+
+            <SentenceAudioUploader lessonCode={lessonCode} />
           </>
         )}
       </div>

@@ -213,6 +213,59 @@ export async function upsertSentences(
   return error ? { error: error.message } : {};
 }
 
+// ─── Per-sentence reference audio (sentences.l2_audio_url) ───────────────────
+//
+// One reference clip per sentence, stored in the public lesson-audio bucket under
+// <lessonCode>/sentences/<nr>.<ext>; the public URL is written to the sentence's
+// l2_audio_url. Feeds the Sentences play-voice button and the per-sentence
+// judged-step capture flow.
+
+export async function uploadSentenceAudio(
+  lessonCode: string,
+  sentenceId: string,
+  sentenceNr: number,
+  file: File,
+  onProgress?: (pct: number) => void,
+): Promise<{ url: string } | { error: string }> {
+  if (!adminClient) return { error: 'Supabase not configured' };
+
+  const ext = file.name.split('.').pop() ?? 'mp3';
+  const objectPath = `${lessonCode}/sentences/${sentenceNr}.${ext}`;
+
+  onProgress?.(5);
+  const { error: upErr } = await adminClient.storage
+    .from(AUDIO_BUCKET)
+    .upload(objectPath, file, { contentType: file.type || 'audio/mpeg', upsert: true });
+  if (upErr) return { error: upErr.message };
+  onProgress?.(70);
+
+  const { data: pub } = adminClient.storage.from(AUDIO_BUCKET).getPublicUrl(objectPath);
+  const audioUrl = pub.publicUrl;
+
+  const { error: dbErr } = await adminClient
+    .from('sentences')
+    .update({ l2_audio_url: audioUrl })
+    .eq('id', sentenceId);
+  if (dbErr) return { error: dbErr.message };
+
+  onProgress?.(100);
+  return { url: audioUrl };
+}
+
+export async function deleteSentenceAudio(
+  lessonCode: string,
+  sentenceId: string,
+  sentenceNr: number,
+): Promise<{ error?: string }> {
+  if (!adminClient) return { error: 'Supabase not configured' };
+  await adminClient.storage.from(AUDIO_BUCKET).remove([`${lessonCode}/sentences/${sentenceNr}.mp3`]);
+  const { error } = await adminClient
+    .from('sentences')
+    .update({ l2_audio_url: null })
+    .eq('id', sentenceId);
+  return error ? { error: error.message } : {};
+}
+
 // ─── Lesson code parsing + custom titles ────────────────────────────────────
 
 /**
