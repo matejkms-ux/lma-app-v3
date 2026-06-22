@@ -82,7 +82,7 @@ export const PRACTICE_LESSONS: PracticeLesson[] = [
     language: 'KHMER',
     audio: {},
     pointsPerStep: 1,
-    audioStepCount: 0,
+    audioStepCount: 5,
   },
   {
     code: 'WONCHAKL2401-ja-001',

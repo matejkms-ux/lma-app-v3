@@ -7,8 +7,6 @@ import { AudioPlayer } from '../components/AudioPlayer';
 import { PulseDot } from '../components/MicIndicator';
 import { GraspBody, HumBody, ShadowBody, ReadBody } from './practice/StepBodies';
 import { FreestylePanel } from './practice/FreestylePanel';
-import { JudgedStepCapture } from './practice/JudgedStepCapture';
-import { JUDGED_STEPS, type JudgedStep } from '../lib/scoring';
 import { STEP_CONFIG } from '../practice/steps';
 import { usePractice } from '../practice/usePractice';
 import { useRecorder } from '../practice/useRecorder';
@@ -158,7 +156,6 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
   const url = api.currentUrl;
   const hasAudio = Boolean(url);
   const isCurrentStepUnlocked = isUnlocked(api.step);
-  const isJudged = (JUDGED_STEPS as readonly string[]).includes(api.step);
 
   // NEXT is available once the current step is unlock-complete (which unlocks the next).
   const canAdvance = useMemo(() => isUnlockComplete(api.step), [isUnlockComplete, api.step]);
@@ -185,19 +182,6 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
     if (flashTimer.current) window.clearTimeout(flashTimer.current);
     flashTimer.current = window.setTimeout(() => setFlash(null), 1900);
   }, [recorder, userId, lesson.code, api, setTake]);
-
-  // Judged-step capture finished its per-sentence pass — award the step's reps
-  // (same as an audio step's play); per-sentence auto scores are written inside
-  // the capture component.
-  const handleStepComplete = useCallback(() => {
-    addRepEvent(userId, lesson.code, api.step, REPS_PER_PLAY);
-    api.bumpPass(api.step);
-    api.completeStep();
-    setLifetime(lifetimeReps(userId));
-    setFlash(REPS_PER_PLAY);
-    if (flashTimer.current) window.clearTimeout(flashTimer.current);
-    flashTimer.current = window.setTimeout(() => setFlash(null), 1900);
-  }, [userId, lesson.code, api]);
 
   const handleRate = useCallback((n: number) => {
     setStepStars(userId, lesson.code, api.step, n);
@@ -283,23 +267,6 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
             <span className="text-[11px] font-bold tracking-[.16em] text-teal-dim">STEP LOCKED</span>
             <span className="font-serif text-[13px] italic text-teal-dim">
               Complete the previous step to unlock freestyle.
-            </span>
-          </div>
-        )
-      ) : isJudged ? (
-        isCurrentStepUnlocked ? (
-          <JudgedStepCapture
-            userId={userId}
-            lessonCode={lesson.code}
-            language={lesson.language}
-            step={api.step as JudgedStep}
-            onComplete={handleStepComplete}
-          />
-        ) : (
-          <div className="flex flex-1 flex-col items-center justify-center gap-1 px-8 text-center">
-            <span className="text-[11px] font-bold tracking-[.16em] text-teal-dim">STEP LOCKED</span>
-            <span className="font-serif text-[13px] italic text-teal-dim">
-              Complete the previous step to unlock this one.
             </span>
           </div>
         )
