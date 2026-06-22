@@ -4,7 +4,7 @@ import { StatusBar } from '../components/StatusBar';
 import { BottomNav } from '../components/BottomNav';
 import { lessonsForLanguage } from '../data/content';
 import { lessonProgress, lifetimeReps, repsToday, isLessonUnlockComplete, getStepStars } from '../lib/progress';
-import { STEPS } from '../tokens';
+import { STEPS, AUDIO_STEPS } from '../tokens';
 import { useSession } from '../session';
 import { displayName } from '../data/mock';
 
@@ -32,7 +32,7 @@ export function HomeScreen() {
     : 0;
   const allRatedStars = user
     ? lessons.flatMap((l) =>
-        STEPS.map((s) => getStepStars(user.id, l.code, s)).filter((v): v is number => v !== null),
+        AUDIO_STEPS.map((s) => getStepStars(user.id, l.code, s)).filter((v): v is number => v !== null),
       )
     : [];
   const avgGrade =

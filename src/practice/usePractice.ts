@@ -1,13 +1,14 @@
 /**
- * The practice engine — progressive, persisted, and over the full five-step
- * method.
+ * The practice engine — progressive, persisted, over the full method.
  *
- * Navigation runs through ALL five canonical steps (GRASP → HUM → SHADOW → READ →
- * RECALL), in order, even when a step has no audio yet — a missing clip must never
+ * Navigation runs through ALL steps (GRASP → HUM → SHADOW → READ → RECALL →
+ * FREESTYLE), in order, even when a step has no audio — a missing clip must never
  * block reaching the next step. A step that HAS audio is cleared by playing its
- * clip to the end (worth `pointsPerStep` reps); a step WITHOUT audio is just a
- * pass-through until its clip lands. Progress is saved locally so a reload resumes
- * where the learner left off.
+ * clip to the end (worth `pointsPerStep` reps); a step WITHOUT audio (an audio
+ * step awaiting its clip, or FREESTYLE which has none by design) is a pass-through
+ * and never gates `allDone`. Progress is saved locally so a reload resumes where
+ * the learner left off. (FREESTYLE's own takes/ratings live in lib/recordings,
+ * not in this engine.)
  */
 import { useCallback, useMemo, useState } from 'react';
 import { STEPS, type Step } from '../tokens';
