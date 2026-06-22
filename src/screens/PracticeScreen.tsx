@@ -18,7 +18,7 @@ import {
 } from '../data/content';
 import { getSentences } from '../data/api';
 import { getRecording, saveRecording, uploadRecording } from '../lib/recordings';
-import { lifetimeReps, addRepEvent, getStepStars, setStepStars } from '../lib/progress';
+import { lifetimeReps, addRepEvent, getStepStars, setStepStars, REPS_PER_PLAY } from '../lib/progress';
 import { STEPS, AUDIO_STEPS, type Step } from '../tokens';
 
 export function PracticeScreen() {
@@ -106,6 +106,10 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
   const [flash, setFlash] = useState<number | null>(null);
   const flashTimer = useRef<number | null>(null);
 
+  // FREESTYLE gate: the lesson can only be finished once a full 60s freestyle
+  // take exists (reported by the panel). Audio steps + this = lesson complete.
+  const [freestyleComplete, setFreestyleComplete] = useState(false);
+
   const [takeUrl, setTakeUrl] = useState<string | null>(null);
   const [takePlaying, setTakePlaying] = useState(false);
   const takeAudioRef = useRef<HTMLAudioElement>(null);
@@ -170,12 +174,12 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
       setTake(take.blob);
       void uploadRecording(userId, lesson.code, api.step, take.blob);
     }
-    addRepEvent(userId, lesson.code, api.step, 1);
+    addRepEvent(userId, lesson.code, api.step, REPS_PER_PLAY);
     api.bumpPass(api.step);
     api.completeStep();
     const newTotal = lifetimeReps(userId);
     setLifetime(newTotal);
-    setFlash(1);
+    setFlash(REPS_PER_PLAY);
     if (flashTimer.current) window.clearTimeout(flashTimer.current);
     flashTimer.current = window.setTimeout(() => setFlash(null), 1900);
   }, [recorder, userId, lesson.code, api, setTake]);
@@ -254,7 +258,7 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
 
       {api.step === 'FREESTYLE' ? (
         isCurrentStepUnlocked ? (
-          <FreestylePanel userId={userId} lesson={lesson.code} />
+          <FreestylePanel userId={userId} lesson={lesson.code} onCompletionChange={setFreestyleComplete} />
         ) : (
           <div className="flex flex-1 flex-col items-center justify-center gap-1 px-8 text-center">
             <span className="text-[11px] font-bold tracking-[.16em] text-teal-dim">STEP LOCKED</span>
@@ -326,12 +330,12 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
                 ✓
               </span>
               <span className="text-[11px] font-extrabold tracking-[.06em] text-cream">
-                +{lesson.pointsPerStep} REPS · DONE
+                +{REPS_PER_PLAY} REPS · DONE
               </span>
             </span>
           ) : (
             <span className="text-[11px] font-bold tracking-[.06em] text-teal">
-              PLAY TO THE END FOR +{lesson.pointsPerStep} REPS
+              PLAY TO THE END FOR +{REPS_PER_PLAY} REPS
             </span>
           )}
           <span className="ml-auto font-serif text-[13px] italic text-teal-dim">
@@ -411,10 +415,10 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
         {api.isLast ? (
           <button
             onClick={() => navigate('/home')}
-            disabled={!api.allDone}
+            disabled={!(api.allDone && freestyleComplete)}
             className="rounded-full border border-teal/30 px-4 py-1.5 text-[11px] font-bold tracking-[.08em] text-teal disabled:opacity-30"
           >
-            {api.allDone ? 'FINISH ✓' : 'FINISH'}
+            {api.allDone && freestyleComplete ? 'FINISH ✓' : 'FINISH'}
           </button>
         ) : (
           <button

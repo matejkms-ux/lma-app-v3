@@ -25,7 +25,16 @@ function fmt(secs: number): string {
   return `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`;
 }
 
-export function FreestylePanel({ userId, lesson }: { userId: string; lesson: string }) {
+export function FreestylePanel({
+  userId,
+  lesson,
+  onCompletionChange,
+}: {
+  userId: string;
+  lesson: string;
+  /** Reports whether a full-length (≥ MAX_SECONDS) take exists — the lesson gate. */
+  onCompletionChange?: (complete: boolean) => void;
+}) {
   const recorder = useRecorder();
 
   const [takes, setTakes] = useState<FreestyleTake[]>([]);
@@ -135,6 +144,13 @@ export function FreestylePanel({ userId, lesson }: { userId: string; lesson: str
     void a.play().catch(() => setPlayingId(null));
   }, [playingId]);
 
+  // Completion gate: a full-length take (reached the 60s cap) must exist. Early
+  // stops are kept in history but don't satisfy the lesson gate.
+  const complete = takes.some((t) => (t.duration_seconds ?? 0) >= MAX_SECONDS);
+  useEffect(() => {
+    onCompletionChange?.(complete);
+  }, [complete, onCompletionChange]);
+
   const unavailable = recorder.status === 'unsupported';
   const denied = recorder.status === 'denied';
   const remaining = Math.max(0, MAX_SECONDS - Math.floor(elapsed));
@@ -180,6 +196,18 @@ export function FreestylePanel({ userId, lesson }: { userId: string; lesson: str
               </span>
             )}
           </>
+        )}
+
+        {!unavailable && (
+          <span
+            className={`mt-0.5 text-[10px] font-bold tracking-[.08em] ${
+              complete ? 'text-teal' : 'text-teal-dim'
+            }`}
+          >
+            {complete
+              ? 'FULL 60s TAKE SAVED ✓ · LESSON CAN BE FINISHED'
+              : 'RECORD A FULL 60s TAKE TO FINISH THE LESSON'}
+          </span>
         )}
       </div>
 
