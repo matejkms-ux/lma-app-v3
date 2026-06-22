@@ -173,86 +173,6 @@ export async function deleteRefAudio(lessonCode: string, slot: RefSlot): Promise
   return error ? { error: error.message } : {};
 }
 
-// ─── Reference audio per LANGUAGE (language_ref_audio) ──────────────────────
-//
-// A reference recording that applies across all of a language's lessons, rather
-// than to a single lesson-step. Files live in the same public lesson-audio
-// bucket (under _lang/<language>/) and are retrieved via public URL, exactly
-// like step audio. The per-lesson ref_l2/ref_l1 uploaders are untouched.
-
-export interface LanguageRefAudioRow {
-  language: string;
-  slot: RefSlot;
-  audio_url: string;
-  file_name: string | null;
-  updated_at: string;
-}
-
-export async function getLanguageRefAudio(
-  language: string,
-): Promise<Partial<Record<RefSlot, LanguageRefAudioRow>>> {
-  if (!adminClient || !language) return {};
-  const { data, error } = await adminClient
-    .from('language_ref_audio')
-    .select('language, slot, audio_url, file_name, updated_at')
-    .eq('language', language);
-  if (error || !data) return {};
-  const result: Partial<Record<RefSlot, LanguageRefAudioRow>> = {};
-  for (const r of data as LanguageRefAudioRow[]) result[r.slot] = r;
-  return result;
-}
-
-export async function uploadLanguageRefAudio(
-  language: string,
-  slot: RefSlot,
-  file: File,
-  onProgress?: (pct: number) => void,
-): Promise<{ url: string } | { error: string }> {
-  if (!adminClient) return { error: 'Supabase not configured' };
-  if (!language) return { error: 'No language selected' };
-
-  const ext = file.name.split('.').pop() ?? 'mp3';
-  const objectPath = `_lang/${language}/${slot}.${ext}`;
-
-  onProgress?.(5);
-
-  const { error: upErr } = await adminClient.storage
-    .from(AUDIO_BUCKET)
-    .upload(objectPath, file, { contentType: file.type || 'audio/mpeg', upsert: true });
-
-  if (upErr) return { error: upErr.message };
-  onProgress?.(70);
-
-  const { data: pub } = adminClient.storage.from(AUDIO_BUCKET).getPublicUrl(objectPath);
-  const audioUrl = pub.publicUrl;
-
-  const { error: dbErr } = await adminClient.from('language_ref_audio').upsert(
-    { language, slot, audio_url: audioUrl, file_name: file.name, updated_at: new Date().toISOString() },
-    { onConflict: 'language,slot' },
-  );
-
-  if (dbErr) return { error: dbErr.message };
-  onProgress?.(100);
-  return { url: audioUrl };
-}
-
-export async function deleteLanguageRefAudio(
-  language: string,
-  slot: RefSlot,
-): Promise<{ error?: string }> {
-  if (!adminClient) return { error: 'Supabase not configured' };
-
-  await adminClient.storage.from(AUDIO_BUCKET).remove([`_lang/${language}/${slot}.mp3`]);
-
-  const { error } = await adminClient
-    .from('language_ref_audio')
-    .delete()
-    .eq('language', language)
-    .eq('slot', slot);
-
-  return error ? { error: error.message } : {};
-}
-
 // ─── Sentence import ──────────────────────────────────────────────────────────
 
 export interface SentenceImportRow {
@@ -293,12 +213,11 @@ export async function upsertSentences(
   return error ? { error: error.message } : {};
 }
 
-// ─── Bulk CSV import (sentences across one or more lessons) ──────────────────
+// ─── Lesson code parsing + custom titles ────────────────────────────────────
 
 /**
- * Reverse of the admin LANG_CODE map — used to derive a lesson's language and
- * number from a well-formed lesson_code during bulk CSV import (the CSV carries
- * lesson_code per row but no language, and sentences FK → lessons.lesson_code).
+ * Reverse of the admin LANG_CODE map — derives a lesson's language and number
+ * from a well-formed lesson_code (used when creating a lessons row on rename).
  */
 const CODE_LANG: Record<string, string> = {
   de: 'GERMAN',
@@ -329,64 +248,49 @@ export function parseLessonCode(code: string): ParsedLessonCode | null {
   return { language, lessonNr: parseInt(m[3], 10) };
 }
 
-export interface BulkSentenceRow {
-  lesson_code: string;
-  sentence_nr: number;
-  l1: string;
-  l2: string;
-  l2_translit: string | null;
+/** The custom title stored in the DB for a lesson, or null if none. */
+export async function getLessonTitle(lessonCode: string): Promise<string | null> {
+  if (!adminClient || !lessonCode) return null;
+  const { data, error } = await adminClient
+    .from('lessons')
+    .select('title')
+    .eq('lesson_code', lessonCode)
+    .maybeSingle();
+  if (error || !data) return null;
+  return (data as { title: string | null }).title ?? null;
+}
+
+/** Custom titles for many lessons at once, as a { lesson_code: title } map. */
+export async function getLessonTitles(lessonCodes: string[]): Promise<Record<string, string>> {
+  if (!adminClient || lessonCodes.length === 0) return {};
+  const { data, error } = await adminClient
+    .from('lessons')
+    .select('lesson_code, title')
+    .in('lesson_code', lessonCodes);
+  if (error || !data) return {};
+  const map: Record<string, string> = {};
+  for (const r of data as Array<{ lesson_code: string; title: string | null }>) {
+    if (r.title) map[r.lesson_code] = r.title;
+  }
+  return map;
 }
 
 /**
- * Bulk-upsert sentences that already carry their own lesson_code + sentence_nr
- * (from a CSV). Ensures a lessons row exists for each distinct code first — only
- * creating ones that are missing, so existing lesson metadata is left intact —
- * then upserts every sentence on (lesson_code, sentence_nr).
+ * Set a lesson's display title. Upserts the lessons row (creating it with a
+ * language derived from the code if it doesn't exist yet) so renaming works even
+ * for lessons that have no sentences/audio yet.
  */
-export async function upsertSentencesBulk(
-  rows: BulkSentenceRow[],
-): Promise<{ error?: string; lessons?: number; sentences?: number }> {
+export async function setLessonTitle(
+  lessonCode: string,
+  title: string,
+): Promise<{ error?: string }> {
   if (!adminClient) return { error: 'Supabase not configured' };
-  if (!rows.length) return { error: 'No rows to import' };
-
-  const distinct = Array.from(new Set(rows.map((r) => r.lesson_code)));
-
-  const { data: existing, error: selErr } = await adminClient
-    .from('lessons')
-    .select('lesson_code')
-    .in('lesson_code', distinct);
-  if (selErr) return { error: selErr.message };
-
-  const have = new Set((existing ?? []).map((r: { lesson_code: string }) => r.lesson_code));
-  const toCreate = distinct
-    .filter((c) => !have.has(c))
-    .map((c) => {
-      const parsed = parseLessonCode(c);
-      return {
-        lesson_code: c,
-        language: parsed?.language ?? 'UNKNOWN',
-        title: `Lesson ${parsed?.lessonNr ?? 1}`,
-      };
-    });
-
-  if (toCreate.length) {
-    const { error: insErr } = await adminClient
-      .from('lessons')
-      .upsert(toCreate, { onConflict: 'lesson_code' });
-    if (insErr) return { error: insErr.message };
-  }
-
-  const { error } = await adminClient.from('sentences').upsert(
-    rows.map((r) => ({
-      lesson_code: r.lesson_code,
-      sentence_nr: r.sentence_nr,
-      l1: r.l1,
-      l2: r.l2,
-      l2_translit: r.l2_translit || null,
-    })),
-    { onConflict: 'lesson_code,sentence_nr' },
+  const trimmed = title.trim();
+  if (!trimmed) return { error: 'Title cannot be empty' };
+  const parsed = parseLessonCode(lessonCode);
+  const { error } = await adminClient.from('lessons').upsert(
+    { lesson_code: lessonCode, language: parsed?.language ?? 'UNKNOWN', title: trimmed },
+    { onConflict: 'lesson_code' },
   );
-  if (error) return { error: error.message };
-
-  return { lessons: distinct.length, sentences: rows.length };
+  return error ? { error: error.message } : {};
 }

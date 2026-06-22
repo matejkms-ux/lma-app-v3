@@ -5,14 +5,14 @@ import {
   getLessonAudio,
   uploadStepAudio,
   deleteStepAudio,
+  getLessonTitle,
+  setLessonTitle,
   adminClient,
   type LessonAudioRow,
 } from '../data/lessonAudio';
 import { USERS, displayName, type User } from '../data/mock';
 import { SentenceUploader } from './admin/SentenceUploader';
-import { CsvSentenceUploader } from './admin/CsvSentenceUploader';
 import { RefAudioUploader } from './admin/RefAudioUploader';
-import { LangRefAudioUploader } from './admin/LangRefAudioUploader';
 import { LearnerEditor } from './admin/LearnerEditor';
 
 // Fixed cohort suffix for this programme cohort.
@@ -59,6 +59,12 @@ export function AdminScreen() {
   const [states, setStates] = useState<Record<Step, StepState>>(initStates);
   const [loading, setLoading] = useState(false);
   const fileRefs = useRef<Record<Step, HTMLInputElement | null>>({} as Record<Step, HTMLInputElement | null>);
+
+  // Custom lesson title (rename). `defaultTitle` is the "Lesson N" fallback.
+  const defaultTitle = `Lesson ${lessonNr}`;
+  const [lessonTitle, setLessonTitle_] = useState('');
+  const [savingTitle, setSavingTitle] = useState(false);
+  const [titleStatus, setTitleStatus] = useState<{ ok: boolean; msg: string } | null>(null);
 
   // Load roster from Supabase, fall back to mock.
   useEffect(() => {
@@ -113,6 +119,28 @@ export function AdminScreen() {
   useEffect(() => {
     void fetchExisting(lessonCode);
   }, [lessonCode, fetchExisting]);
+
+  // Load the lesson's custom title (blank field = no custom title, shows "Lesson N").
+  useEffect(() => {
+    let alive = true;
+    setTitleStatus(null);
+    setLessonTitle_('');
+    if (!lessonCode) return;
+    void getLessonTitle(lessonCode).then((t) => {
+      if (alive && t && t !== `Lesson ${lessonNr}`) setLessonTitle_(t);
+    });
+    return () => { alive = false; };
+  }, [lessonCode, lessonNr]);
+
+  const handleSaveTitle = useCallback(async () => {
+    if (!lessonCode) return;
+    setSavingTitle(true);
+    setTitleStatus(null);
+    const title = lessonTitle.trim() || `Lesson ${lessonNr}`;
+    const { error } = await setLessonTitle(lessonCode, title);
+    setSavingTitle(false);
+    setTitleStatus(error ? { ok: false, msg: error } : { ok: true, msg: 'Saved.' });
+  }, [lessonCode, lessonTitle, lessonNr]);
 
   const handleFile = useCallback(
     async (step: Step, file: File) => {
@@ -235,6 +263,36 @@ export function AdminScreen() {
                 </span>
               </div>
             </div>
+          </div>
+
+          {/* Rename lesson — custom title shown in the app over "Lesson N" */}
+          <div className="mt-4 border-t border-rule pt-4">
+            <label className="mb-1.5 block text-[11px] font-bold tracking-[.1em] text-muted">
+              LESSON TITLE
+            </label>
+            <div className="flex flex-wrap items-center gap-3">
+              <input
+                value={lessonTitle}
+                onChange={(e) => { setLessonTitle_(e.target.value); setTitleStatus(null); }}
+                placeholder={defaultTitle}
+                className="min-w-[220px] flex-1 rounded-[12px] border border-rule bg-cream px-4 py-3 text-sm font-semibold text-heading placeholder:text-locked focus:border-emerald focus:outline-none"
+              />
+              <button
+                onClick={() => void handleSaveTitle()}
+                disabled={savingTitle}
+                className="rounded-[10px] bg-emerald px-5 py-2.5 text-[12px] font-bold tracking-[.04em] text-cream disabled:opacity-40"
+              >
+                {savingTitle ? 'Saving…' : 'Save title'}
+              </button>
+              {titleStatus && (
+                <span className={`text-[12px] font-semibold ${titleStatus.ok ? 'text-emerald' : 'text-red-500'}`}>
+                  {titleStatus.msg}
+                </span>
+              )}
+            </div>
+            <p className="mt-1.5 text-[11px] text-muted">
+              Shown in the app as the lesson name, with “{defaultTitle}” beneath it. Leave blank to use “{defaultTitle}”.
+            </p>
           </div>
         </div>
 
@@ -360,8 +418,6 @@ export function AdminScreen() {
 
             <RefAudioUploader lessonCode={lessonCode} />
 
-            <LangRefAudioUploader language={selectedUser?.language ?? ''} />
-
             <LearnerEditor
               user={selectedUser ?? null}
               onSaved={(updated) => {
@@ -379,8 +435,6 @@ export function AdminScreen() {
               language={selectedUser?.language ?? ''}
               lessonNr={lessonNr}
             />
-
-            <CsvSentenceUploader />
           </>
         )}
       </div>

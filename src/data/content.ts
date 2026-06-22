@@ -1,9 +1,12 @@
 import { AUDIO_STEPS, type Step } from '../tokens';
-import { getLessonAudio } from './lessonAudio';
+import { getLessonAudio, getLessonTitle } from './lessonAudio';
 
 export interface PracticeLesson {
   code: string;
+  /** Display title — the custom DB title when set, else the static "Lesson N". */
   title: string;
+  /** The static "Lesson N" label, kept so a custom title can show it as a sublabel. */
+  defaultTitle?: string;
   language: string;
   /** canonical step → audio URL. Only steps present here are playable. */
   audio: Partial<Record<Step, string>>;
@@ -109,20 +112,29 @@ export function lessonsForLanguage(language: string): PracticeLesson[] {
 }
 
 /**
- * Loads a lesson's audio URLs from Supabase lesson_audio, overlaying them on
- * the static lesson entry. Falls back to the static audio map if Supabase is
- * unreachable. Returns undefined if the lesson code is not registered.
+ * Loads a lesson's audio URLs from Supabase lesson_audio plus its custom title,
+ * overlaying them on the static lesson entry. Falls back to the static entry if
+ * Supabase is unreachable. Returns undefined if the lesson code is not registered.
+ *
+ * `title` becomes the custom DB title when one is set; `defaultTitle` always
+ * holds the static "Lesson N" so callers can show it as a sublabel.
  */
 export async function getPracticeLessonWithAudio(code: string): Promise<PracticeLesson | undefined> {
   const base = getPracticeLesson(code);
   if (!base) return undefined;
 
-  const rows = await getLessonAudio(code);
-  if (!rows) return base;
+  const [rows, customTitle] = await Promise.all([getLessonAudio(code), getLessonTitle(code)]);
 
   const audio: Partial<Record<Step, string>> = { ...base.audio };
-  for (const step of AUDIO_STEPS) {
-    if (rows[step]?.audio_url) audio[step] = rows[step].audio_url;
+  if (rows) {
+    for (const step of AUDIO_STEPS) {
+      if (rows[step]?.audio_url) audio[step] = rows[step].audio_url;
+    }
   }
-  return { ...base, audio };
+  return {
+    ...base,
+    audio,
+    defaultTitle: base.title,
+    title: customTitle && customTitle !== base.title ? customTitle : base.title,
+  };
 }

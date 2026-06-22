@@ -7,7 +7,7 @@ import { PulseDot } from '../components/MicIndicator';
 import { useSession } from '../session';
 import { lessonsForLanguage, type PracticeLesson } from '../data/content';
 import { lessonProgress, isLessonUnlockComplete } from '../lib/progress';
-import { getUploadedLessonCodes } from '../data/lessonAudio';
+import { getUploadedLessonCodes, getLessonTitles } from '../data/lessonAudio';
 import { STEPS } from '../tokens';
 
 function LockIcon({ size = 18 }: { size?: number }) {
@@ -27,7 +27,17 @@ function LockIcon({ size = 18 }: { size?: number }) {
 }
 
 /** Unlocked lesson — progress-aware, tappable. */
-function LessonRow({ userId, lesson, onOpen }: { userId: string; lesson: PracticeLesson; onOpen: () => void }) {
+function LessonRow({
+  userId,
+  lesson,
+  customTitle,
+  onOpen,
+}: {
+  userId: string;
+  lesson: PracticeLesson;
+  customTitle?: string;
+  onOpen: () => void;
+}) {
   const { completedSteps, currentStep } = lessonProgress(userId, lesson.code);
   const done = completedSteps.length;
   const total = lesson.audioStepCount;
@@ -35,6 +45,8 @@ function LessonRow({ userId, lesson, onOpen }: { userId: string; lesson: Practic
   const label = finished
     ? 'complete'
     : (currentStep ?? STEPS[0]).toLowerCase();
+  const renamed = !!customTitle && customTitle !== lesson.title;
+  const displayTitle = renamed ? customTitle! : lesson.title;
 
   return (
     <button
@@ -49,7 +61,12 @@ function LessonRow({ userId, lesson, onOpen }: { userId: string; lesson: Practic
         <span className="block text-[10.5px] font-bold tracking-[.08em] text-coral">
           {lesson.code} · {finished ? 'COMPLETE' : done > 0 ? 'IN PROGRESS' : 'START'}
         </span>
-        <span className="block font-serif text-[19px] leading-[1.15] text-heading">{lesson.title}</span>
+        <span className="block font-serif text-[19px] leading-[1.15] text-heading">{displayTitle}</span>
+        {renamed && (
+          <span className="mt-[2px] block text-[10.5px] font-semibold tracking-[.04em] text-muted">
+            {lesson.title}
+          </span>
+        )}
       </span>
       <span className="text-right">
         <span className="block text-sm font-extrabold text-emerald">
@@ -62,7 +79,9 @@ function LessonRow({ userId, lesson, onOpen }: { userId: string; lesson: Practic
 }
 
 /** Locked lesson — visible but not enterable. Tapping does nothing. */
-function LockedLessonRow({ lesson }: { lesson: PracticeLesson }) {
+function LockedLessonRow({ lesson, customTitle }: { lesson: PracticeLesson; customTitle?: string }) {
+  const renamed = !!customTitle && customTitle !== lesson.title;
+  const displayTitle = renamed ? customTitle! : lesson.title;
   return (
     <div className="relative mb-[11px] overflow-hidden rounded-2xl border border-teal/[.12] bg-cream-panel/30 px-4 py-[15px]">
       <div className="flex items-center gap-3.5">
@@ -73,7 +92,12 @@ function LockedLessonRow({ lesson }: { lesson: PracticeLesson }) {
           <span className="block text-[10.5px] font-bold tracking-[.08em] text-muted/40">
             {lesson.code}
           </span>
-          <span className="block font-serif text-[19px] leading-[1.15] text-heading/35">{lesson.title}</span>
+          <span className="block font-serif text-[19px] leading-[1.15] text-heading/35">{displayTitle}</span>
+          {renamed && (
+            <span className="mt-[2px] block text-[10.5px] font-semibold tracking-[.04em] text-muted/40">
+              {lesson.title}
+            </span>
+          )}
         </span>
         <span className="flex flex-col items-end gap-1.5">
           <span className="h-4 w-7 rounded bg-teal/[.12]" />
@@ -95,10 +119,17 @@ export function LessonsScreen() {
   const navigate = useNavigate();
   const { user } = useSession();
   const [uploadedCodes, setUploadedCodes] = useState<Set<string> | null>(null);
+  const [titles, setTitles] = useState<Record<string, string>>({});
 
   useEffect(() => {
     void getUploadedLessonCodes().then(setUploadedCodes);
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    const codes = lessonsForLanguage(user.language).map((l) => l.code);
+    void getLessonTitles(codes).then(setTitles);
+  }, [user?.language]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!user) return <Navigate to="/" replace />;
 
@@ -136,12 +167,13 @@ export function LessonsScreen() {
                     key={l.code}
                     userId={user.id}
                     lesson={l}
+                    customTitle={titles[l.code]}
                     onOpen={() => navigate('/practice', { state: { lessonCode: l.code, startAt: 'GRASP' } })}
                   />
                 );
               }
 
-              return <LockedLessonRow key={l.code} lesson={l} />;
+              return <LockedLessonRow key={l.code} lesson={l} customTitle={titles[l.code]} />;
             })}
             <div className="mt-2 flex items-center gap-2 px-1 text-[11px] text-muted">
               <PulseDot size={9} />
