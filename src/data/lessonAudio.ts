@@ -173,6 +173,86 @@ export async function deleteRefAudio(lessonCode: string, slot: RefSlot): Promise
   return error ? { error: error.message } : {};
 }
 
+// ─── Reference audio per LANGUAGE (language_ref_audio) ──────────────────────
+//
+// A reference recording that applies across all of a language's lessons, rather
+// than to a single lesson-step. Files live in the same public lesson-audio
+// bucket (under _lang/<language>/) and are retrieved via public URL, exactly
+// like step audio. The per-lesson ref_l2/ref_l1 uploaders are untouched.
+
+export interface LanguageRefAudioRow {
+  language: string;
+  slot: RefSlot;
+  audio_url: string;
+  file_name: string | null;
+  updated_at: string;
+}
+
+export async function getLanguageRefAudio(
+  language: string,
+): Promise<Partial<Record<RefSlot, LanguageRefAudioRow>>> {
+  if (!adminClient || !language) return {};
+  const { data, error } = await adminClient
+    .from('language_ref_audio')
+    .select('language, slot, audio_url, file_name, updated_at')
+    .eq('language', language);
+  if (error || !data) return {};
+  const result: Partial<Record<RefSlot, LanguageRefAudioRow>> = {};
+  for (const r of data as LanguageRefAudioRow[]) result[r.slot] = r;
+  return result;
+}
+
+export async function uploadLanguageRefAudio(
+  language: string,
+  slot: RefSlot,
+  file: File,
+  onProgress?: (pct: number) => void,
+): Promise<{ url: string } | { error: string }> {
+  if (!adminClient) return { error: 'Supabase not configured' };
+  if (!language) return { error: 'No language selected' };
+
+  const ext = file.name.split('.').pop() ?? 'mp3';
+  const objectPath = `_lang/${language}/${slot}.${ext}`;
+
+  onProgress?.(5);
+
+  const { error: upErr } = await adminClient.storage
+    .from(AUDIO_BUCKET)
+    .upload(objectPath, file, { contentType: file.type || 'audio/mpeg', upsert: true });
+
+  if (upErr) return { error: upErr.message };
+  onProgress?.(70);
+
+  const { data: pub } = adminClient.storage.from(AUDIO_BUCKET).getPublicUrl(objectPath);
+  const audioUrl = pub.publicUrl;
+
+  const { error: dbErr } = await adminClient.from('language_ref_audio').upsert(
+    { language, slot, audio_url: audioUrl, file_name: file.name, updated_at: new Date().toISOString() },
+    { onConflict: 'language,slot' },
+  );
+
+  if (dbErr) return { error: dbErr.message };
+  onProgress?.(100);
+  return { url: audioUrl };
+}
+
+export async function deleteLanguageRefAudio(
+  language: string,
+  slot: RefSlot,
+): Promise<{ error?: string }> {
+  if (!adminClient) return { error: 'Supabase not configured' };
+
+  await adminClient.storage.from(AUDIO_BUCKET).remove([`_lang/${language}/${slot}.mp3`]);
+
+  const { error } = await adminClient
+    .from('language_ref_audio')
+    .delete()
+    .eq('language', language)
+    .eq('slot', slot);
+
+  return error ? { error: error.message } : {};
+}
+
 // ─── Sentence import ──────────────────────────────────────────────────────────
 
 export interface SentenceImportRow {

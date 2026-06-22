@@ -12,6 +12,7 @@ import { USERS, displayName, type User } from '../data/mock';
 import { SentenceUploader } from './admin/SentenceUploader';
 import { CsvSentenceUploader } from './admin/CsvSentenceUploader';
 import { RefAudioUploader } from './admin/RefAudioUploader';
+import { LangRefAudioUploader } from './admin/LangRefAudioUploader';
 import { LearnerEditor } from './admin/LearnerEditor';
 
 // Fixed cohort suffix for this programme cohort.
@@ -358,6 +359,8 @@ export function AdminScreen() {
             </div>
 
             <RefAudioUploader lessonCode={lessonCode} />
+
+            <LangRefAudioUploader language={selectedUser?.language ?? ''} />
 
             <LearnerEditor
               user={selectedUser ?? null}
