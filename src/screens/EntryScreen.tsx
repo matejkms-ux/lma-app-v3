@@ -36,7 +36,15 @@ export function EntryScreen() {
       <StatusBar tone="dark" />
 
       <div className="px-7 pb-2 pt-9">
-        <div className="text-[11px] font-bold tracking-[.42em] text-teal">L · M · A</div>
+        <div className="flex items-center justify-between">
+          <div className="text-[11px] font-bold tracking-[.42em] text-teal">L · M · A</div>
+          <button
+            onClick={() => navigate('/admin')}
+            className="text-[11px] font-semibold tracking-[.08em] text-teal/70 hover:text-teal"
+          >
+            ⚙ Admin
+          </button>
+        </div>
         <div className="mt-[18px] font-serif text-[36px] italic leading-[1.06] text-cream">
           Welcome back,
           <br />
