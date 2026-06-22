@@ -212,3 +212,101 @@ export async function upsertSentences(
 
   return error ? { error: error.message } : {};
 }
+
+// ─── Bulk CSV import (sentences across one or more lessons) ──────────────────
+
+/**
+ * Reverse of the admin LANG_CODE map — used to derive a lesson's language and
+ * number from a well-formed lesson_code during bulk CSV import (the CSV carries
+ * lesson_code per row but no language, and sentences FK → lessons.lesson_code).
+ */
+const CODE_LANG: Record<string, string> = {
+  de: 'GERMAN',
+  ja: 'JAPANESE',
+  km: 'KHMER',
+  th: 'THAI',
+  es: 'SPANISH',
+  fr: 'FRENCH',
+  zh: 'MANDARIN',
+  ar: 'ARABIC',
+};
+
+export interface ParsedLessonCode {
+  language: string;
+  lessonNr: number;
+}
+
+/**
+ * A lesson_code is well-formed when it is `<prefix>-<2-letter-lang>-<number>`
+ * and the language segment is a known code (e.g. JERODC2604-th-001). Returns the
+ * derived language + lesson number, or null when malformed.
+ */
+export function parseLessonCode(code: string): ParsedLessonCode | null {
+  const m = /^([A-Za-z0-9]+)-([a-z]{2})-(\d{1,4})$/.exec(code.trim());
+  if (!m) return null;
+  const language = CODE_LANG[m[2]];
+  if (!language) return null;
+  return { language, lessonNr: parseInt(m[3], 10) };
+}
+
+export interface BulkSentenceRow {
+  lesson_code: string;
+  sentence_nr: number;
+  l1: string;
+  l2: string;
+  l2_translit: string | null;
+}
+
+/**
+ * Bulk-upsert sentences that already carry their own lesson_code + sentence_nr
+ * (from a CSV). Ensures a lessons row exists for each distinct code first — only
+ * creating ones that are missing, so existing lesson metadata is left intact —
+ * then upserts every sentence on (lesson_code, sentence_nr).
+ */
+export async function upsertSentencesBulk(
+  rows: BulkSentenceRow[],
+): Promise<{ error?: string; lessons?: number; sentences?: number }> {
+  if (!adminClient) return { error: 'Supabase not configured' };
+  if (!rows.length) return { error: 'No rows to import' };
+
+  const distinct = Array.from(new Set(rows.map((r) => r.lesson_code)));
+
+  const { data: existing, error: selErr } = await adminClient
+    .from('lessons')
+    .select('lesson_code')
+    .in('lesson_code', distinct);
+  if (selErr) return { error: selErr.message };
+
+  const have = new Set((existing ?? []).map((r: { lesson_code: string }) => r.lesson_code));
+  const toCreate = distinct
+    .filter((c) => !have.has(c))
+    .map((c) => {
+      const parsed = parseLessonCode(c);
+      return {
+        lesson_code: c,
+        language: parsed?.language ?? 'UNKNOWN',
+        title: `Lesson ${parsed?.lessonNr ?? 1}`,
+      };
+    });
+
+  if (toCreate.length) {
+    const { error: insErr } = await adminClient
+      .from('lessons')
+      .upsert(toCreate, { onConflict: 'lesson_code' });
+    if (insErr) return { error: insErr.message };
+  }
+
+  const { error } = await adminClient.from('sentences').upsert(
+    rows.map((r) => ({
+      lesson_code: r.lesson_code,
+      sentence_nr: r.sentence_nr,
+      l1: r.l1,
+      l2: r.l2,
+      l2_translit: r.l2_translit || null,
+    })),
+    { onConflict: 'lesson_code,sentence_nr' },
+  );
+  if (error) return { error: error.message };
+
+  return { lessons: distinct.length, sentences: rows.length };
+}

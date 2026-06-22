@@ -10,6 +10,7 @@ import {
 } from '../data/lessonAudio';
 import { USERS, displayName, type User } from '../data/mock';
 import { SentenceUploader } from './admin/SentenceUploader';
+import { CsvSentenceUploader } from './admin/CsvSentenceUploader';
 import { RefAudioUploader } from './admin/RefAudioUploader';
 import { LearnerEditor } from './admin/LearnerEditor';
 
@@ -375,6 +376,8 @@ export function AdminScreen() {
               language={selectedUser?.language ?? ''}
               lessonNr={lessonNr}
             />
+
+            <CsvSentenceUploader />
           </>
         )}
       </div>
