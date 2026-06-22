@@ -165,7 +165,6 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
   }, [hasAudio]);
 
   const onPlay = useCallback(() => { void recorder.start(); }, [recorder]);
-  const onStop = useCallback(() => { recorder.cancel(); }, [recorder]);
 
   const onEnded = useCallback(async () => {
     const take = await recorder.stop();
@@ -297,7 +296,6 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
               <AudioPlayer
                 src={url}
                 onPlay={onPlay}
-                onStop={onStop}
                 onEnded={onEnded}
                 onPlayingChange={setPlaying}
               />

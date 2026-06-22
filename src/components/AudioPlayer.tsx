@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 
 /**
- * The forward-only audio player (v3 brief §2), now real. Two controls only:
- *   - Play
- *   - Stop → resets to the very start; you must press play again.
- * There is no scrubbing and no seek-back. Reaching the end fires `onEnded`, which
- * is the gate that clears the step.
+ * Audio player (spec §5): two controls — reverse and a play/pause toggle. There
+ * is no hard-stop; pausing keeps the position, and reverse seeks back a few
+ * seconds. Reaching the end fires `onEnded`, the gate that clears the step.
  */
+const REVERSE_SECONDS = 5;
+
 function fmt(secs: number): string {
   if (!Number.isFinite(secs) || secs < 0) secs = 0;
   const m = Math.floor(secs / 60);
@@ -18,13 +18,11 @@ export function AudioPlayer({
   src,
   onEnded,
   onPlay,
-  onStop,
   onPlayingChange,
 }: {
   src: string;
   onEnded?: () => void;
   onPlay?: () => void;
-  onStop?: () => void;
   onPlayingChange?: (playing: boolean) => void;
 }) {
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -43,32 +41,33 @@ export function AudioPlayer({
     }
   }, [src]);
 
-  // Surface play/stop to the parent (drives the orb animation).
+  // Surface play/pause to the parent (drives the orb animation).
   useEffect(() => {
     onPlayingChange?.(playing);
   }, [playing, onPlayingChange]);
 
-  const play = () => {
-    void audioRef.current?.play().catch(() => {
-      /* autoplay/permission edge — leave UI as-is */
-    });
+  const togglePlay = () => {
+    const a = audioRef.current;
+    if (!a) return;
+    if (a.paused) {
+      void a.play().catch(() => {
+        /* autoplay/permission edge — leave UI as-is */
+      });
+    } else {
+      a.pause(); // pause keeps position — no reset
+    }
   };
 
-  const stop = () => {
+  const reverse = () => {
     const a = audioRef.current;
-    if (a) {
-      a.pause();
-      a.currentTime = 0;
-    }
-    setPlaying(false);
-    setCur(0);
-    onStop?.();
+    if (!a) return;
+    a.currentTime = Math.max(0, a.currentTime - REVERSE_SECONDS);
   };
 
   const pct = dur > 0 ? Math.min(100, (cur / dur) * 100) : 0;
 
   return (
-    <div className="flex shrink-0 items-center gap-3.5 px-6">
+    <div className="flex shrink-0 items-center gap-3 px-6">
       <audio
         ref={audioRef}
         src={src}
@@ -89,11 +88,18 @@ export function AudioPlayer({
         }}
       />
       <button
-        onClick={() => (playing ? stop() : play())}
-        className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-cream text-base text-emerald"
-        aria-label={playing ? 'Stop' : 'Play'}
+        onClick={reverse}
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-cream/40 text-[13px] text-cream"
+        aria-label={`Reverse ${REVERSE_SECONDS} seconds`}
       >
-        {playing ? '■' : '▶'}
+        ↺
+      </button>
+      <button
+        onClick={togglePlay}
+        className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-cream text-base text-emerald"
+        aria-label={playing ? 'Pause' : 'Play'}
+      >
+        {playing ? '❚❚' : '▶'}
       </button>
       <div className="flex-1">
         <div className="h-[5px] overflow-hidden rounded-[3px] bg-teal/[.22]">
@@ -101,7 +107,7 @@ export function AudioPlayer({
         </div>
         <div className="mt-1.5 flex justify-between text-[10px] font-bold tracking-[.1em] text-teal-dim">
           <span>{fmt(cur)}</span>
-          <span>{playing ? 'STOP RESETS' : 'FORWARD ONLY'}</span>
+          <span>{playing ? 'PLAYING' : 'PAUSED'}</span>
           <span>{fmt(dur)}</span>
         </div>
       </div>
