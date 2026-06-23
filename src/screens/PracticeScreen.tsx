@@ -19,7 +19,7 @@ import {
 import { getSentences } from '../data/api';
 import { getRecording, saveRecording, uploadRecording } from '../lib/recordings';
 import { lifetimeReps, addRepEvent, getStepStars, setStepStars, setStepAutoScore, REPS_PER_PLAY } from '../lib/progress';
-import { assessPronunciation, isUnavailable, LOCALE_BY_LANGUAGE } from '../lib/assess';
+import { assessPronunciation, transcribeScore, isUnavailable, LOCALE_BY_LANGUAGE } from '../lib/assess';
 import { JUDGED_STEPS } from '../lib/scoring';
 import { STEPS, AUDIO_STEPS, type Step } from '../tokens';
 
@@ -198,7 +198,12 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
       const referenceText = sentences.map((s) => (isGrasp ? s.l1 : s.l2)).join(' ');
       const locale = isGrasp ? 'en-US' : (LOCALE_BY_LANGUAGE[lesson.language] ?? 'en-US');
       setAutoScore('scoring');
-      const r = await assessPronunciation(take.blob, referenceText, locale);
+      let r = await assessPronunciation(take.blob, referenceText, locale);
+      // Pronunciation assessment unsupported for this locale (e.g. Khmer) →
+      // fall back to transcription-based scoring (word accuracy).
+      if (isUnavailable(r) && r.reason === 'locale_unsupported') {
+        r = await transcribeScore(take.blob, referenceText, locale);
+      }
       if (isUnavailable(r)) {
         setAutoScore('unavailable');
       } else {

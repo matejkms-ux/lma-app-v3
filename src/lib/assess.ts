@@ -125,3 +125,28 @@ export async function assessPronunciation(
     return { auto_unavailable: true, reason: 'client_error' };
   }
 }
+
+/**
+ * Transcription-based scoring (fallback for locales pronunciation assessment
+ * doesn't cover, e.g. Khmer): Azure speech-to-text transcribes the take and the
+ * server scores transcript-vs-reference similarity. Captures word accuracy, not
+ * fine pronunciation. Same result shape as assessPronunciation.
+ */
+export async function transcribeScore(
+  blob: Blob,
+  referenceText: string,
+  locale: string,
+): Promise<AssessResult | AssessUnavailable> {
+  try {
+    const pcm = await blobToPcm16kMono(blob);
+    const res = await fetch('/.netlify/functions/transcribe-score', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ audioBase64: toBase64(pcm), referenceText, locale }),
+    });
+    if (!res.ok) return { auto_unavailable: true, reason: `http_${res.status}` };
+    return (await res.json()) as AssessResult | AssessUnavailable;
+  } catch {
+    return { auto_unavailable: true, reason: 'client_error' };
+  }
+}
