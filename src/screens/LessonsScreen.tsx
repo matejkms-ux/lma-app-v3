@@ -40,12 +40,15 @@ function LessonRow({
   onOpen: () => void;
 }) {
   const { completedSteps, currentStep } = lessonProgress(userId, lesson.code);
-  // Progress is over all steps: the audio steps + FREESTYLE (counts once a
-  // qualifying take exists).
+  // The counter is over the SIX canonical steps (GRASP→…→FREESTYLE), matching the
+  // player's "X/6" — so every lesson reads /6 regardless of how many clips it has.
+  const total = STEPS.length;
   const audioTotal = lesson.audioStepCount;
-  const total = audioTotal + 1;
-  const done = Math.min(completedSteps.length, audioTotal) + (freestyleDone ? 1 : 0);
-  const finished = total > 0 && done >= total;
+  const completedCount = Math.min(completedSteps.length, audioTotal) + (freestyleDone ? 1 : 0);
+  const finished = completedCount >= total || (audioTotal > 0 && completedCount >= audioTotal + 1);
+  // Numerator = current step position (1-based), so a fresh lesson shows 1/6.
+  const position = finished ? total : STEPS.indexOf(currentStep ?? STEPS[0]) + 1;
+  const done = position;
   const label = finished ? 'complete' : (currentStep ?? STEPS[0]).toLowerCase();
   const renamed = !!lesson.defaultTitle && lesson.title !== lesson.defaultTitle;
 
@@ -164,6 +167,31 @@ export function LessonsScreen() {
                 <LockedLessonRow key={l.code} lesson={l} />
               );
             })}
+
+            {/* Final reading test — German only */}
+            {user.language === 'GERMAN' && (
+              <button
+                onClick={() => navigate('/reading-test')}
+                className="mb-[11px] mt-3 flex w-full items-center gap-3.5 rounded-2xl border-2 border-emerald bg-emerald px-4 py-[15px] text-left"
+              >
+                <span className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full bg-white/20 text-[15px]">
+                  📖
+                </span>
+                <span className="flex-1">
+                  <span className="block text-[10.5px] font-bold tracking-[.08em] text-teal">
+                    FINAL TEST · ADVENTURE 1
+                  </span>
+                  <span className="block font-serif text-[19px] leading-[1.15] text-cream">
+                    Read &amp; Respond
+                  </span>
+                  <span className="block text-[11px] text-teal">
+                    3,000 words · 20 min timer
+                  </span>
+                </span>
+                <span className="text-cream/70 text-xl">→</span>
+              </button>
+            )}
+
             <div className="mt-2 flex items-center gap-2 px-1 text-[11px] text-muted">
               <PulseDot size={9} />
               Coral marks the lesson you're inside right now.

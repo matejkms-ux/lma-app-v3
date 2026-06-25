@@ -7,6 +7,7 @@ import { OverviewScreen } from './screens/OverviewScreen';
 import { ActivitiesScreen } from './screens/ActivitiesScreen';
 import { SentencesScreen } from './screens/SentencesScreen';
 import { AdminScreen } from './screens/AdminScreen';
+import { ReadingTestScreen } from './screens/ReadingTestScreen';
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
       <Route path="/activities" element={<ActivitiesScreen />} />
       <Route path="/sentences" element={<SentencesScreen />} />
       <Route path="/admin" element={<AdminScreen />} />
+      <Route path="/reading-test" element={<ReadingTestScreen />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

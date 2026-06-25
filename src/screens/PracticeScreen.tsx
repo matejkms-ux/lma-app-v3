@@ -25,6 +25,14 @@ import { assessPronunciation, transcribeScore, isUnavailable, LOCALE_BY_LANGUAGE
 import { JUDGED_STEPS } from '../lib/scoring';
 import { STEPS, type Step } from '../tokens';
 
+/**
+ * Full plays required before a step counts as complete (and so unlocks the next).
+ * SHADOW and READ are the production steps — they must be played TWICE before the
+ * learner moves on; every other step clears on a single full play.
+ */
+const REQUIRED_REPS: Partial<Record<Step, number>> = { SHADOW: 2, READ: 2 };
+const requiredReps = (s: Step): number => REQUIRED_REPS[s] ?? 1;
+
 export function PracticeScreen() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -107,10 +115,20 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
   const [playing, setPlaying] = useState(false);
   const [stars, setStarsState] = useState<number | null>(null);
 
-  const [sentences, setSentences] = useState<Array<{ l1: string; l2: string; l2_translit: string | null }>>([]);
+  const [sentences, setSentences] = useState<
+    Array<{ l1: string; l2: string; l2_translit: string | null; l2_translit_1: string | null; l2_translit_2: string | null }>
+  >([]);
   useEffect(() => {
     void getSentences(lesson.code).then((rows) =>
-      setSentences(rows.map((r) => ({ l1: r.l1, l2: r.l2, l2_translit: r.l2_translit || null }))),
+      setSentences(
+        rows.map((r) => ({
+          l1: r.l1,
+          l2: r.l2,
+          l2_translit: r.l2_translit || null,
+          l2_translit_1: r.l2_translit_1 || null,
+          l2_translit_2: r.l2_translit_2 || null,
+        })),
+      ),
     );
   }, [lesson.code]);
 
@@ -129,7 +147,9 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
   // When the lesson becomes complete we auto-show a congrats screen and offer the
   // next lesson (which is now unlocked). `lessonComplete` is the single source of
   // truth: every audio step done AND a qualifying freestyle take.
-  const lessonComplete = api.allDone && freestyleComplete;
+  const allAudioDone =
+    api.audioSteps.length > 0 && api.audioSteps.every((s) => api.passes[s] >= requiredReps(s));
+  const lessonComplete = allAudioDone && freestyleComplete;
   const [showCongrats, setShowCongrats] = useState(false);
   const [nextLesson, setNextLesson] = useState<PracticeLesson | null>(null);
 
@@ -175,13 +195,14 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
   }, []);
 
   // A step is unlock-complete when it has no audio (pass-through) OR it has been
-  // completed once (played to the end). This is the SAME bar as the "DONE" badge,
-  // so the button can never disagree with what the screen says. Star rating is an
-  // optional self-assessment and never blocks progress.
+  // played to the end the REQUIRED number of times (1 for most steps, 2 for SHADOW
+  // and READ). This is the SAME bar as the "DONE" badge, so the button can never
+  // disagree with what the screen says. Star rating is an optional self-assessment
+  // and never blocks progress.
   const isUnlockComplete = useCallback((s: Step): boolean => {
     if (!lesson.audio[s]) return true;
-    return api.isCompleted(s);
-  }, [lesson.audio, api]);
+    return api.passes[s] >= requiredReps(s);
+  }, [lesson.audio, api.passes]);
 
   // GRASP is always unlocked; every other step requires the previous to be unlock-complete.
   const isUnlocked = useCallback((s: Step): boolean => {
@@ -190,9 +211,9 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
     return isUnlockComplete(STEPS[idx - 1]);
   }, [isUnlockComplete]);
 
-  const stepDone = api.isCompleted(api.step);
   const url = api.currentUrl;
   const hasAudio = Boolean(url);
+  const stepDone = hasAudio && api.passes[api.step] >= requiredReps(api.step);
   const isCurrentStepUnlocked = isUnlocked(api.step);
 
   // NEXT is available once the current step is unlock-complete (which unlocks the next).
@@ -259,7 +280,7 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
     switch (cfg.body) {
       case 'dualWave': return <ShadowBody />;
       case 'melody':   return <HumBody />;
-      case 'text':     return <ReadBody sentences={sentences} />;
+      case 'text':     return <ReadBody sentences={sentences} language={lesson.language} />;
       default:         return <GraspBody active={playing} />;
     }
   };
@@ -421,6 +442,10 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
               <span className="text-[11px] font-extrabold tracking-[.06em] text-cream">
                 +{REPS_PER_PLAY} REPS · DONE
               </span>
+            </span>
+          ) : requiredReps(api.step) > 1 ? (
+            <span className="text-[11px] font-bold tracking-[.06em] text-teal">
+              PLAY {requiredReps(api.step)}× TO UNLOCK · {api.passes[api.step]}/{requiredReps(api.step)} DONE
             </span>
           ) : (
             <span className="text-[11px] font-bold tracking-[.06em] text-teal">

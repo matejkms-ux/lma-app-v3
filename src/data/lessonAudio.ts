@@ -8,6 +8,37 @@ export const adminClient = supabase;
 
 export const AUDIO_BUCKET = 'lesson-audio';
 
+// ─── Lesson versioning ──────────────────────────────────────────────────────
+//
+// A lesson_code can have several versions (lessons/sentences/lesson_audio all
+// carry a `version`); exactly one lessons row per code is `is_active`. The app is
+// version-aware: it always serves the ACTIVE version's title, sentences and audio.
+// Codes with no lessons row (catalog-only) default to version 1.
+
+/** Active version for a single lesson_code (is_active row); defaults to 1. */
+export async function getActiveVersion(lessonCode: string): Promise<number> {
+  if (!adminClient || !lessonCode) return 1;
+  const { data } = await adminClient
+    .from('lessons')
+    .select('version')
+    .eq('lesson_code', lessonCode)
+    .eq('is_active', true)
+    .limit(1)
+    .maybeSingle();
+  return (data as { version: number | null } | null)?.version ?? 1;
+}
+
+/** Map of lesson_code → active version, for the whole catalog. Absent ⇒ 1. */
+export async function getActiveVersionMap(): Promise<Record<string, number>> {
+  if (!adminClient) return {};
+  const { data } = await adminClient.from('lessons').select('lesson_code, version').eq('is_active', true);
+  const map: Record<string, number> = {};
+  for (const r of (data ?? []) as { lesson_code: string; version: number | null }[]) {
+    map[r.lesson_code] = r.version ?? 1;
+  }
+  return map;
+}
+
 export interface LessonAudioRow {
   lesson_code: string;
   step: Step;
@@ -36,10 +67,12 @@ export async function getUploadedLessonCodes(): Promise<Set<string>> {
 /** Fetch all uploaded step audio for a lesson. */
 export async function getLessonAudio(lessonCode: string): Promise<Record<Step, LessonAudioRow> | null> {
   if (!adminClient) return null;
+  const version = await getActiveVersion(lessonCode);
   const { data, error } = await adminClient
     .from('lesson_audio')
     .select('lesson_code, step, audio_url, file_name, updated_at')
-    .eq('lesson_code', lessonCode);
+    .eq('lesson_code', lessonCode)
+    .eq('version', version);
   if (error || !data) return null;
   return Object.fromEntries(data.map((r) => [r.step, r])) as Record<Step, LessonAudioRow>;
 }
@@ -51,11 +84,15 @@ export async function getLessonAudio(lessonCode: string): Promise<Record<Step, L
  */
 export async function getLessonStepIndex(): Promise<Record<string, Step[]>> {
   if (!adminClient) return {};
-  const { data, error } = await adminClient.from('lesson_audio').select('lesson_code, step');
+  const [{ data, error }, active] = await Promise.all([
+    adminClient.from('lesson_audio').select('lesson_code, step, version'),
+    getActiveVersionMap(),
+  ]);
   if (error || !data) return {};
   const idx: Record<string, Step[]> = {};
-  for (const r of data as { lesson_code: string; step: string }[]) {
+  for (const r of data as { lesson_code: string; step: string; version: number | null }[]) {
     if (!(AUDIO_STEPS as readonly string[]).includes(r.step)) continue;
+    if ((r.version ?? 1) !== (active[r.lesson_code] ?? 1)) continue; // active version only
     (idx[r.lesson_code] ??= []).push(r.step as Step);
   }
   return idx;
@@ -337,10 +374,13 @@ export function parseLessonCode(code: string): ParsedLessonCode | null {
 /** The custom title stored in the DB for a lesson, or null if none. */
 export async function getLessonTitle(lessonCode: string): Promise<string | null> {
   if (!adminClient || !lessonCode) return null;
+  // A code may have several version rows — read the active one's title.
   const { data, error } = await adminClient
     .from('lessons')
     .select('title')
     .eq('lesson_code', lessonCode)
+    .eq('is_active', true)
+    .limit(1)
     .maybeSingle();
   if (error || !data) return null;
   return (data as { title: string | null }).title ?? null;
@@ -349,10 +389,12 @@ export async function getLessonTitle(lessonCode: string): Promise<string | null>
 /** Custom titles for many lessons at once, as a { lesson_code: title } map. */
 export async function getLessonTitles(lessonCodes: string[]): Promise<Record<string, string>> {
   if (!adminClient || lessonCodes.length === 0) return {};
+  // Only the active version's title per code (avoids two-version duplicates).
   const { data, error } = await adminClient
     .from('lessons')
     .select('lesson_code, title')
-    .in('lesson_code', lessonCodes);
+    .in('lesson_code', lessonCodes)
+    .eq('is_active', true);
   if (error || !data) return {};
   const map: Record<string, string> = {};
   for (const r of data as Array<{ lesson_code: string; title: string | null }>) {

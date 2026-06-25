@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ModelWaveform, LiveWaveform } from '../../components/Waveform';
+import { ModelWaveform, LiveWaveform, StaticWaveform } from '../../components/Waveform';
 import { PulseDot } from '../../components/MicIndicator';
 
 /**
@@ -44,7 +44,7 @@ export function GraspBody({ active = false }: { active?: boolean }) {
   );
 }
 
-/** HUM — model melody contour (teal) + your hum (coral). Decorative until HUM audio lands. */
+/** HUM — model melody contour (teal) + your hum (gray/static until HUM recording is wired). */
 export function HumBody() {
   return (
     <div className="flex flex-1 flex-col justify-center gap-3.5 px-[22px]">
@@ -60,12 +60,12 @@ export function HumBody() {
           />
         </svg>
       </div>
-      <div className="rounded-[14px] border border-coral/40 bg-coral/[.08] p-3.5">
+      <div className="rounded-[14px] border border-rule bg-cream-panel/60 p-3.5">
         <div className="mb-2.5 flex items-center gap-2.5">
-          <PulseDot />
-          <span className="text-[10px] font-bold tracking-[.14em] text-coral">YOUR HUM · MIC OPEN</span>
+          <span className="h-3 w-3 shrink-0 rounded-full bg-locked" />
+          <span className="text-[10px] font-bold tracking-[.14em] text-locked">YOUR HUM · COMING SOON</span>
         </div>
-        <LiveWaveform />
+        <StaticWaveform />
       </div>
     </div>
   );
@@ -90,35 +90,75 @@ export function ShadowBody() {
   );
 }
 
-/** READ — scrollable sentence list. L2 shown by default; toggle to transliteration. */
-export function ReadBody({ sentences }: { sentences: Array<{ l2: string; l2_translit: string | null }> }) {
-  const [showTranslit, setShowTranslit] = useState(false);
+/**
+ * READ — scrollable sentence list with up to THREE transliteration levels.
+ *
+ * The level set adapts to the language and to which fields are populated:
+ *   Japanese → Kanji (l2) · Hiragana (l2_translit_1) · Rōmaji (l2_translit_2)
+ *   Thai / Khmer → Script (l2) · Roman (l2_translit_2)   [no level-1 in data]
+ *   German etc. → single level (l2), no toggle.
+ * A non-native level is only offered when at least one sentence carries a distinct
+ * value for it, so we never show an empty or duplicate tab.
+ */
+type ReadSentence = {
+  l2: string;
+  l2_translit: string | null;
+  l2_translit_1: string | null;
+  l2_translit_2: string | null;
+};
 
-  // Determine if any sentence actually has a distinct transliteration.
-  const hasTranslit = sentences.some((s) => s.l2_translit && s.l2_translit !== s.l2);
+export function ReadBody({
+  sentences,
+  language,
+}: {
+  sentences: ReadSentence[];
+  language?: string;
+}) {
+  const isJa = (language ?? '').toUpperCase() === 'JAPANESE';
+
+  // Candidate levels (native first), labelled for the learner's language.
+  const candidates: Array<{ label: string; get: (s: ReadSentence) => string | null }> = [
+    { label: isJa ? 'Kanji' : 'Script', get: (s) => s.l2 },
+    {
+      label: isJa ? 'Hiragana' : 'Reading',
+      // fall back to the legacy single translit if level-1 is empty
+      get: (s) => s.l2_translit_1 || (isJa ? s.l2_translit : null),
+    },
+    {
+      label: isJa ? 'Rōmaji' : 'Roman',
+      get: (s) => s.l2_translit_2 || (!isJa ? s.l2_translit : null),
+    },
+  ];
+
+  // Keep the native level always; keep others only when they add distinct content.
+  const levels = candidates.filter((lvl, idx) => {
+    if (idx === 0) return true;
+    return sentences.some((s) => {
+      const v = lvl.get(s);
+      return v && v !== s.l2;
+    });
+  });
+
+  const [level, setLevel] = useState(0);
+  const active = levels[Math.min(level, levels.length - 1)];
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden px-[22px]">
-      {/* Toggle — only shown when transliteration exists */}
-      {hasTranslit && (
+      {/* Level toggle — only when more than one level exists */}
+      {levels.length > 1 && (
         <div className="mb-2 flex shrink-0 justify-end">
           <div className="flex overflow-hidden rounded-full border border-teal/[.28]">
-            <button
-              onClick={() => setShowTranslit(false)}
-              className={`px-3 py-1 text-[10px] font-bold tracking-[.08em] transition-colors ${
-                !showTranslit ? 'bg-teal/20 text-cream' : 'text-teal/50'
-              }`}
-            >
-              L2
-            </button>
-            <button
-              onClick={() => setShowTranslit(true)}
-              className={`px-3 py-1 text-[10px] font-bold tracking-[.08em] transition-colors ${
-                showTranslit ? 'bg-teal/20 text-cream' : 'text-teal/50'
-              }`}
-            >
-              TRANSLIT
-            </button>
+            {levels.map((lvl, i) => (
+              <button
+                key={lvl.label}
+                onClick={() => setLevel(i)}
+                className={`px-3 py-1 text-[10px] font-bold tracking-[.08em] transition-colors ${
+                  i === level ? 'bg-teal/20 text-cream' : 'text-teal/50'
+                }`}
+              >
+                {lvl.label}
+              </button>
+            ))}
           </div>
         </div>
       )}
@@ -129,7 +169,7 @@ export function ReadBody({ sentences }: { sentences: Array<{ l2: string; l2_tran
           </li>
         ) : (
           sentences.map((s, i) => {
-            const display = showTranslit && s.l2_translit ? s.l2_translit : s.l2;
+            const display = active.get(s) || s.l2;
             return (
               <li
                 key={i}
