@@ -2,6 +2,22 @@
 
 Context for Claude working in this repo. Read `README.md` and `PROJECT.md` too.
 
+> **Status note (2026-06-25).** Some details below are out of date — current reality:
+> - **Six** steps, not five: GRASP → HUM → SHADOW → READ → RECALL → **FREESTYLE**
+>   (`STEPS` in `tokens.ts`; the first five are `AUDIO_STEPS`). FREESTYLE has no
+>   reference audio and finishes the lesson with a >=50s take
+>   (`FREESTYLE_COMPLETE_SECONDS` in `lib/recordings.ts`).
+> - **Progress syncs to Supabase** (`lib/progress.ts` `initProgressSync`) — not
+>   "100% local". Local keys: `lma:progress|reps|stars:<id>` + a `lma:sb:<id>`
+>   snapshot of the last Supabase fetch.
+> - **The lesson catalog is DERIVED FROM THE DB**, scoped per learner by lesson-code
+>   prefix (`getLessonCatalog` in `data/content.ts`). There is no static
+>   `PRACTICE_LESSONS` list anymore — it had drifted and hidden real lessons.
+> - A step clears (and Next / next-lesson unlock) on **one full play** — the same
+>   bar as the "DONE" badge.
+> - **Recall clips:** the generator now does `L1 -> gap -> L2` once (was revealing
+>   L2 twice). EXISTING clips in Storage must be regenerated to pick this up.
+
 ## What this is
 
 **LMA Practice Player** — a mobile-first language-practice app. Every sentence is
