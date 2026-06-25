@@ -134,6 +134,33 @@ export function HomeScreen() {
             </div>
           </div>
         </div>
+
+        {/* Study plan — only shown for learners with a structured program */}
+        {user?.plan && (
+          <div className="mt-3.5 rounded-[18px] border border-rule bg-white px-4 py-4">
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="text-[10px] font-bold tracking-[.1em] text-muted">YOUR PROGRAM</div>
+                <div className="mt-[3px] font-serif text-base text-heading">{user.plan.programName}</div>
+              </div>
+              <div className="text-[10px] font-semibold text-muted">{user.plan.totalWeeks}w</div>
+            </div>
+            <div className="mt-3 space-y-0">
+              {user.plan.contexts.map((ctx, i) => (
+                <div
+                  key={ctx.id}
+                  className={`flex items-center justify-between py-2 ${i > 0 ? 'border-t border-rule' : ''}`}
+                >
+                  <div>
+                    <div className="text-[12px] font-semibold text-heading">{ctx.label}</div>
+                    <div className="text-[10px] text-muted">{ctx.note}</div>
+                  </div>
+                  <span className="text-[12px] font-bold text-emerald">{ctx.weeklyHours}h/wk</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* CTA */}

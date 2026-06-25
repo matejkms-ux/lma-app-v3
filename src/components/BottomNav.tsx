@@ -71,15 +71,6 @@ export function BottomNav({ active }: { active: Tab }) {
         );
       })}
 
-      {/* Admin (always available) */}
-      <button
-        onClick={() => navigate('/admin')}
-        className="flex flex-col items-center gap-[5px] px-3 text-teal-dim"
-      >
-        <span className="flex h-5 w-5 items-center justify-center text-[15px] leading-none">⚙</span>
-        <span className="text-[10px] font-semibold">Admin</span>
-      </button>
-
       {/* Switch learner */}
       <button
         onClick={handleSwitch}

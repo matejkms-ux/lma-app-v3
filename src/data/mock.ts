@@ -3,6 +3,21 @@
  * Shapes mirror the flat data model so swapping to live data is a fetch swap.
  */
 
+export interface StudyContext {
+  id: string;
+  label: string;
+  /** Average hours available per week in this context. */
+  weeklyHours: number;
+  /** Short human note shown in the plan card (e.g. "4×60min + 1×45min/wk"). */
+  note: string;
+}
+
+export interface LearnerPlan {
+  programName: string;
+  totalWeeks: number;
+  contexts: StudyContext[];
+}
+
 export interface User {
   id: string;
   /** Full birth name: firstName + " " + lastNames. */
@@ -13,13 +28,20 @@ export interface User {
   calledName?: string;
   language: string;
   username?: string;
+  /** Structured study plan — set per learner; undefined when not yet defined. */
+  plan?: LearnerPlan;
 }
 
 export interface Sentence {
   id: string;
   sentenceNr: number;
   l2: string;
+  /** Legacy single transliteration. Superseded by the two levels below. */
   l2_translit: string;
+  /** Level 1 transliteration — for Japanese this is the all-hiragana reading (furigana). */
+  l2_translit_1?: string | null;
+  /** Level 2 transliteration — for Japanese this is romaji; for Thai/Khmer the romanization. */
+  l2_translit_2?: string | null;
   l1: string;
   /** Per-sentence reference audio URL (may be absent). */
   l2_audio_url?: string | null;
@@ -37,10 +59,23 @@ export interface Lesson {
 }
 
 export const USERS: User[] = [
-  { id: 'u3', name: 'Anamarija Cvelbar', firstName: 'Anamarija', lastNames: 'Cvelbar',                      language: 'GERMAN',   username: 'ANAMARIJAC2604-de' },
+  {
+    id: 'u3', name: 'Anamarija Cvelbar', firstName: 'Anamarija', lastNames: 'Cvelbar',
+    language: 'GERMAN', username: 'ANAMARIJAC2604-de',
+    plan: {
+      programName: 'German 4-Week Program',
+      totalWeeks: 4,
+      contexts: [
+        { id: 'alone',   label: 'Focused solo',    weeklyHours: 7,    note: '1h/day · all steps' },
+        { id: 'walking', label: 'Walking w/ Hanna', weeklyHours: 4.75, note: '4×60min + 1×45min/wk' },
+        { id: 'baby',    label: 'With baby',        weeklyHours: 12,   note: '4h with Hanna · 8h self-directed' },
+      ],
+    },
+  },
   { id: 'u4', name: 'Jerod Cox',         firstName: 'Jerod',     lastNames: 'Cox',                           language: 'THAI',     username: 'JERODC2604-th'    },
   { id: 'u2', name: 'Tom Roberge',       firstName: 'Tom',       lastNames: 'Roberge',                       language: 'KHMER',    username: 'TOMR2504-km'      },
   { id: 'u1', name: 'Won-Chak Leung',    firstName: 'Won-Chak',  lastNames: 'Leung',    calledName: 'Charles', language: 'JAPANESE', username: 'WONCHAKL2401-ja'  },
+  { id: 'u5', name: 'Jason Oberbillig',  firstName: 'Jason',     lastNames: 'Oberbillig',                       language: 'JAPANESE', username: 'JASONOC2606-ja'   },
 ];
 
 /**
