@@ -8,7 +8,7 @@ One simple CSV (10 sentences for one learner)  ->  SEVEN MP3s for that set:
     hum-NNN.mp3      L2 -> 1.5s -> L2 -> 1.5s
     shadow-NNN.mp3   L2 -> 1.0s -> L2 -> 1.0s                  (independent of HUM)
     read-NNN.mp3     L2 -> 2.0s -> L2 -> 1.0s
-    recall-NNN.mp3   L1 -> gap -> L2 -> gap -> L2 -> gap
+    recall-NNN.mp3   L1 -> gap -> L2 -> gap
     ref-NNN.mp3      every L2 sentence, clean, in order        (scoring reference)
     ref-en-NNN.mp3   every L1 meaning, clean, in order
 
@@ -43,6 +43,23 @@ or add "th" to AZURE_LANGS/AZURE_VOICE_MAP.
 """
 
 import os, sys, io, csv
+
+# --- auto-load keys from a .env next to this script (gitignored; never commit it) ---
+# So you never have to re-supply ELEVENLABS_API_KEY / AZURE_SPEECH_KEY / AZURE_SPEECH_REGION.
+# Real environment variables, if already set, take precedence over the file.
+def _load_dotenv():
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+    if not os.path.exists(path):
+        return
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            k, v = line.split("=", 1)
+            k, v = k.strip(), v.strip().strip('"').strip("'")
+            os.environ.setdefault(k, v)
+_load_dotenv()
 
 try:
     import requests
@@ -155,7 +172,8 @@ def build_step(step, rows):
         elif step == "shadow":out += l2 + sil(SHADOW_GAP) + l2 + sil(SHADOW_GAP)
         elif step == "read":  out += l2 + sil(READ_GAP) + l2 + sil(READ_TAIL)
         elif step == "recall":
-            g = rgap(r["l2"]); out += l1 + sil(g) + l2 + sil(g) + l2 + sil(g)
+            # L1 prompt -> gap to recall from memory -> reveal L2 once (no double).
+            g = rgap(r["l2"]); out += l1 + sil(g) + l2 + sil(g)
     return out
 
 def build_ref(rows, l1=False):

@@ -1,5 +1,12 @@
 import { AUDIO_STEPS, type Step } from '../tokens';
-import { getLessonAudio, getLessonTitle } from './lessonAudio';
+import {
+  getLessonAudio,
+  getLessonStepIndex,
+  getSentenceLessonCodes,
+  getLessonTitle,
+  getLessonTitles,
+  parseLessonCode,
+} from './lessonAudio';
 
 export interface PracticeLesson {
   code: string;
@@ -12,121 +19,111 @@ export interface PracticeLesson {
   audio: Partial<Record<Step, string>>;
   /** reps awarded for finishing a step's audio. */
   pointsPerStep: number;
-  /**
-   * How many steps have (or will have) audio for this lesson.
-   * Used as the denominator in the lesson counter before audio is async-loaded.
-   */
+  /** How many of this lesson's steps have audio (denominator for the counter). */
   audioStepCount: number;
 }
 
-export const PRACTICE_LESSONS: PracticeLesson[] = [
-  {
-    code: 'ANAMARIJAC2604-de-001',
-    title: 'Lesson 1',
-    language: 'GERMAN',
-    audio: {},
-    pointsPerStep: 10,
-    audioStepCount: 5,
-  },
-  {
-    code: 'ANAMARIJAC2604-de-002',
-    title: 'Lesson 2',
-    language: 'GERMAN',
-    audio: {},
-    pointsPerStep: 1,
-    audioStepCount: 0,
-  },
-  {
-    code: 'ANAMARIJAC2604-de-003',
-    title: 'Lesson 3',
-    language: 'GERMAN',
-    audio: {},
-    pointsPerStep: 1,
-    audioStepCount: 0,
-  },
-  {
-    code: 'ANAMARIJAC2604-de-004',
-    title: 'Lesson 4',
-    language: 'GERMAN',
-    audio: {},
-    pointsPerStep: 1,
-    audioStepCount: 0,
-  },
-  {
-    code: 'JERODC2604-th-001',
-    title: 'Lesson 1',
-    language: 'THAI',
-    audio: {},
-    pointsPerStep: 1,
-    audioStepCount: 5,
-  },
-  {
-    code: 'JERODC2604-th-003',
-    title: 'Lesson 3',
-    language: 'THAI',
-    audio: {},
-    pointsPerStep: 1,
-    audioStepCount: 0,
-  },
-  {
-    code: 'JERODC2604-th-004',
-    title: 'Lesson 4',
-    language: 'THAI',
-    audio: {},
-    pointsPerStep: 1,
-    audioStepCount: 0,
-  },
-  {
-    code: 'TOMR2504-km-001',
-    title: 'Lesson 1',
-    language: 'KHMER',
-    audio: {},
-    pointsPerStep: 1,
-    audioStepCount: 5,
-  },
-  {
-    code: 'WONCHAKL2401-ja-001',
-    title: 'Lesson 1',
-    language: 'JAPANESE',
-    audio: {},
-    pointsPerStep: 1,
-    audioStepCount: 0,
-  },
-];
+const DEFAULT_POINTS_PER_STEP = 10;
 
-export function getPracticeLesson(code: string): PracticeLesson | undefined {
-  return PRACTICE_LESSONS.find((l) => l.code === code);
+/**
+ * The catalog is DERIVED FROM THE DATABASE — there is no hand-maintained list, so
+ * it can never drift out of sync with what's actually uploaded (the old static
+ * `PRACTICE_LESSONS` array caused lessons to go missing, e.g. JERODC2604-th-002,
+ * and made ghosts of lessons that were never uploaded). A lesson is real when it
+ * has step audio or sentences.
+ *
+ * Lessons are SCOPED PER LEARNER: a lesson belongs to a user when its code is
+ * prefixed with that user's `scope` (their username, e.g. `JERODC2604-th`). This
+ * keeps one learner from seeing another's lessons even though audio is stored in a
+ * shared bucket. Malformed/legacy codes (ISL001, case-mismatched dupes) fail to
+ * parse and are skipped. Cached per scope for synchronous reads.
+ */
+const _catalog: Record<string, PracticeLesson[]> = {};
+
+/** A lesson's owning scope — the code minus its trailing `-<number>`. */
+export function lessonScope(code: string): string {
+  return code.replace(/-\d{1,4}$/, '');
 }
 
-/** The lessons available for a language. */
-export function lessonsForLanguage(language: string): PracticeLesson[] {
-  return PRACTICE_LESSONS.filter((l) => l.language === language);
+function buildLesson(code: string, audioSteps: Step[], title?: string): PracticeLesson | null {
+  const parsed = parseLessonCode(code);
+  if (!parsed) return null; // legacy / malformed code → not a real catalog lesson
+  const defaultTitle = `Lesson ${parsed.lessonNr}`;
+  return {
+    code,
+    title: title && title !== defaultTitle ? title : defaultTitle,
+    defaultTitle,
+    language: parsed.language,
+    audio: {},
+    pointsPerStep: DEFAULT_POINTS_PER_STEP,
+    audioStepCount: audioSteps.length,
+  };
 }
 
 /**
- * Loads a lesson's audio URLs from Supabase lesson_audio plus its custom title,
- * overlaying them on the static lesson entry. Falls back to the static entry if
- * Supabase is unreachable. Returns undefined if the lesson code is not registered.
- *
- * `title` becomes the custom DB title when one is set; `defaultTitle` always
- * holds the static "Lesson N" so callers can show it as a sublabel.
+ * Load a learner's lesson catalog (codes prefixed with `scope`) from the DB and
+ * cache it. `scope` is the user's username; an empty scope yields no lessons.
+ */
+export async function getLessonCatalog(scope: string): Promise<PracticeLesson[]> {
+  if (!scope) return [];
+  const [stepIndex, sentenceCodes] = await Promise.all([
+    getLessonStepIndex(),
+    getSentenceLessonCodes(),
+  ]);
+
+  const codes = new Set<string>([...Object.keys(stepIndex), ...sentenceCodes]);
+  const titles = await getLessonTitles([...codes]);
+
+  const mine: PracticeLesson[] = [];
+  for (const code of codes) {
+    if (!code.startsWith(`${scope}-`)) continue; // only this learner's lessons
+    const lesson = buildLesson(code, stepIndex[code] ?? [], titles[code]);
+    if (!lesson) continue;
+    mine.push(lesson);
+  }
+  mine.sort((a, b) => parseLessonCode(a.code)!.lessonNr - parseLessonCode(b.code)!.lessonNr);
+  _catalog[scope] = mine;
+  return mine;
+}
+
+/**
+ * Synchronous read of a learner's last-loaded catalog. Returns [] until
+ * `getLessonCatalog` has resolved for that scope (warmed on login + each screen).
+ */
+export function lessonsForUser(scope: string): PracticeLesson[] {
+  return _catalog[scope] ?? [];
+}
+
+/**
+ * Resolve a single lesson by code — with its audio URLs and custom title — directly
+ * from the DB. Works for ANY well-formed code, not a fixed list, so newly uploaded
+ * lessons open without a code change.
  */
 export async function getPracticeLessonWithAudio(code: string): Promise<PracticeLesson | undefined> {
-  const base = getPracticeLesson(code);
-  if (!base) return undefined;
+  const parsed = parseLessonCode(code);
+  if (!parsed) return undefined;
 
   const [rows, customTitle] = await Promise.all([getLessonAudio(code), getLessonTitle(code)]);
 
-  const audio: Partial<Record<Step, string>> = { ...base.audio };
+  const audio: Partial<Record<Step, string>> = {};
+  let audioStepCount = 0;
   if (rows) {
     for (const step of AUDIO_STEPS) {
-      if (rows[step]?.audio_url) audio[step] = rows[step].audio_url;
+      if (rows[step]?.audio_url) {
+        audio[step] = rows[step].audio_url;
+        audioStepCount++;
+      }
     }
   }
+
+  const defaultTitle = `Lesson ${parsed.lessonNr}`;
   return {
-    ...base,
+    code,
+    title: customTitle && customTitle !== defaultTitle ? customTitle : defaultTitle,
+    defaultTitle,
+    language: parsed.language,
     audio,
-    defaultTitle: base.title,
-    title: customTitle && customTitle !== base.title ? customTitle : base.title,
+    pointsPerStep: DEFAULT_POINTS_PER_STEP,
+    audioStepCount,
   };
 }

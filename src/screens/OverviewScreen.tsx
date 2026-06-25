@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { DeviceFrame } from '../components/DeviceFrame';
 import { StatusBar } from '../components/StatusBar';
@@ -6,7 +7,7 @@ import { SENTENCES, type Sentence } from '../data/mock';
 import { getSentences } from '../data/api';
 import { useAsync } from '../lib/useAsync';
 import { useSession } from '../session';
-import { lessonsForLanguage } from '../data/content';
+import { getLessonCatalog, lessonsForUser, type PracticeLesson } from '../data/content';
 
 function Summary() {
   const cells = [
@@ -85,7 +86,13 @@ function Row({ s, last }: { s: Sentence; last: boolean }) {
 /** Lesson overview & grades — the sentences with status + star grade. */
 export function OverviewScreen() {
   const { user } = useSession();
-  const lesson = user ? lessonsForLanguage(user.language)[0] : undefined;
+  const [lessons, setLessons] = useState<PracticeLesson[]>(() =>
+    user ? lessonsForUser(user.username ?? '') : [],
+  );
+  useEffect(() => {
+    if (user?.username) void getLessonCatalog(user.username).then(setLessons);
+  }, [user?.username]); // eslint-disable-line react-hooks/exhaustive-deps
+  const lesson = lessons[0];
   const lessonCode = lesson?.code ?? '';
   const { data: sentences } = useAsync(() => getSentences(lessonCode), SENTENCES);
 

@@ -12,8 +12,10 @@ import { usePractice } from '../practice/usePractice';
 import { useRecorder } from '../practice/useRecorder';
 import { useSession } from '../session';
 import {
+  getLessonCatalog,
   getPracticeLessonWithAudio,
-  lessonsForLanguage,
+  lessonScope,
+  lessonsForUser,
   type PracticeLesson,
 } from '../data/content';
 import { getSentences } from '../data/api';
@@ -21,7 +23,7 @@ import { getRecording, saveRecording, uploadRecording } from '../lib/recordings'
 import { lifetimeReps, addRepEvent, getStepStars, setStepStars, setStepAutoScore, REPS_PER_PLAY } from '../lib/progress';
 import { assessPronunciation, transcribeScore, isUnavailable, LOCALE_BY_LANGUAGE } from '../lib/assess';
 import { JUDGED_STEPS } from '../lib/scoring';
-import { STEPS, AUDIO_STEPS, type Step } from '../tokens';
+import { STEPS, type Step } from '../tokens';
 
 export function PracticeScreen() {
   const navigate = useNavigate();
@@ -37,15 +39,29 @@ export function PracticeScreen() {
 
   useEffect(() => {
     if (!user) return;
-    const code = stateCode ?? lessonsForLanguage(user.language)[0]?.code;
-    if (!code) {
-      setLoadingLesson(false);
-      return;
-    }
-    void getPracticeLessonWithAudio(code).then((l) => {
-      setLesson(l ?? null);
-      setLoadingLesson(false);
-    });
+    let alive = true;
+    void (async () => {
+      // Default to the language's first lesson, resolving the catalog from the DB
+      // when arriving without an explicit lessonCode (e.g. direct /practice load).
+      let code = stateCode;
+      if (!code) {
+        const scope = user.username ?? '';
+        const cat = lessonsForUser(scope);
+        code = (cat.length ? cat : await getLessonCatalog(scope))[0]?.code;
+      }
+      if (!code) {
+        if (alive) setLoadingLesson(false);
+        return;
+      }
+      const l = await getPracticeLessonWithAudio(code);
+      if (alive) {
+        setLesson(l ?? null);
+        setLoadingLesson(false);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
   }, [stateCode, user?.language]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!user) return <Navigate to="/" replace />;
@@ -103,19 +119,31 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
     null | 'scoring' | 'unavailable' | { stars: number; combined: number }
   >(null);
 
-  // Stars for the five audio steps — needed to compute unlock status reactively.
-  // FREESTYLE is excluded: it carries no rep/unlock state (its takes are rated
-  // individually and stored separately).
-  const [allStars, setAllStars] = useState<Record<Step, number | null>>(() =>
-    Object.fromEntries(AUDIO_STEPS.map((s) => [s, getStepStars(userId, lesson.code, s)])) as Record<Step, number | null>
-  );
-
   const [flash, setFlash] = useState<number | null>(null);
   const flashTimer = useRef<number | null>(null);
 
-  // FREESTYLE gate: the lesson can only be finished once a full 60s freestyle
-  // take exists (reported by the panel). Audio steps + this = lesson complete.
+  // FREESTYLE gate: the lesson is finished once a long-enough freestyle take
+  // exists (reported by the panel). Audio steps done + this = lesson complete.
   const [freestyleComplete, setFreestyleComplete] = useState(false);
+
+  // When the lesson becomes complete we auto-show a congrats screen and offer the
+  // next lesson (which is now unlocked). `lessonComplete` is the single source of
+  // truth: every audio step done AND a qualifying freestyle take.
+  const lessonComplete = api.allDone && freestyleComplete;
+  const [showCongrats, setShowCongrats] = useState(false);
+  const [nextLesson, setNextLesson] = useState<PracticeLesson | null>(null);
+
+  useEffect(() => {
+    if (lessonComplete) setShowCongrats(true);
+  }, [lessonComplete]);
+
+  // Resolve the next lesson (same learner) for the congrats CTA.
+  useEffect(() => {
+    void getLessonCatalog(lessonScope(lesson.code)).then((cat) => {
+      const i = cat.findIndex((l) => l.code === lesson.code);
+      setNextLesson(i >= 0 && i < cat.length - 1 ? cat[i + 1] : null);
+    });
+  }, [lesson.code]);
 
   const [takeUrl, setTakeUrl] = useState<string | null>(null);
   const [takePlaying, setTakePlaying] = useState(false);
@@ -146,12 +174,14 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
     if (flashTimer.current) window.clearTimeout(flashTimer.current);
   }, []);
 
-  // A step is unlock-complete when it has no audio (pass-through) OR
-  // the learner has 2+ passes OR 4+ stars on it.
+  // A step is unlock-complete when it has no audio (pass-through) OR it has been
+  // completed once (played to the end). This is the SAME bar as the "DONE" badge,
+  // so the button can never disagree with what the screen says. Star rating is an
+  // optional self-assessment and never blocks progress.
   const isUnlockComplete = useCallback((s: Step): boolean => {
     if (!lesson.audio[s]) return true;
-    return (api.passes[s] ?? 0) >= 2 || (allStars[s] ?? 0) >= 4;
-  }, [lesson.audio, api.passes, allStars]);
+    return api.isCompleted(s);
+  }, [lesson.audio, api]);
 
   // GRASP is always unlocked; every other step requires the previous to be unlock-complete.
   const isUnlocked = useCallback((s: Step): boolean => {
@@ -216,7 +246,6 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
   const handleRate = useCallback((n: number) => {
     setStepStars(userId, lesson.code, api.step, n);
     setStarsState(n);
-    setAllStars((prev) => ({ ...prev, [api.step]: n }));
   }, [userId, lesson.code, api.step]);
 
   const toggleTake = () => {
@@ -235,16 +264,6 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
     }
   };
 
-  // Hint text shown when NEXT is blocked by the unlock rule.
-  const unlockHint = useMemo(() => {
-    if (!hasAudio || canAdvance) return null;
-    const passes = api.passes[api.step] ?? 0;
-    const s = allStars[api.step] ?? 0;
-    if (passes === 0) return null; // first play not done yet — standard "play to end" prompt shows
-    if (passes === 1 && s < 4) return '1 more play or 4★ to unlock next step';
-    if (s < 4) return `${2 - passes} more play${passes === 1 ? '' : 's'} or 4★ to unlock`;
-    return null;
-  }, [hasAudio, canAdvance, api.passes, api.step, allStars]);
 
   return (
     <DeviceFrame tone="dark">
@@ -255,6 +274,44 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
           <div className="animate-pop rounded-[26px] bg-coral px-9 py-6 text-center shadow-2xl">
             <div className="font-serif text-[52px] font-extrabold leading-none text-cream">+{flash}</div>
             <div className="mt-1.5 text-[12px] font-bold tracking-[.2em] text-cream/90">REPS EARNED</div>
+          </div>
+        </div>
+      )}
+
+      {showCongrats && (
+        <div className="absolute inset-0 z-40 flex flex-col items-center justify-center gap-4 bg-emerald/[.97] px-9 text-center">
+          <div className="text-[44px] leading-none">🎉</div>
+          <div className="animate-pop font-serif text-[38px] italic leading-tight text-cream">
+            Lesson complete
+          </div>
+          <div className="text-[11px] font-bold tracking-[.18em] text-teal">
+            {lesson.code} · {lesson.title}
+          </div>
+          <div className="max-w-[260px] font-serif text-[15px] italic leading-[1.5] text-cream/90">
+            You worked every step and recorded a full freestyle. {lifetime} reps and climbing.
+          </div>
+          <div className="mt-3 flex w-full max-w-[250px] flex-col items-stretch gap-2.5">
+            {nextLesson ? (
+              <button
+                onClick={() => {
+                  setShowCongrats(false);
+                  navigate('/practice', { state: { lessonCode: nextLesson.code, startAt: 'GRASP' } });
+                }}
+                className="rounded-full bg-coral px-5 py-3 text-[13px] font-bold tracking-[.06em] text-cream active:scale-95"
+              >
+                Start {nextLesson.title} ›
+              </button>
+            ) : (
+              <div className="font-serif text-[13px] italic text-teal">
+                That's the last lesson for now — more on the way.
+              </div>
+            )}
+            <button
+              onClick={() => navigate('/lessons')}
+              className="rounded-full border border-teal/40 px-5 py-3 text-[12px] font-bold tracking-[.06em] text-teal active:scale-95"
+            >
+              Back to lessons
+            </button>
           </div>
         </div>
       )}
@@ -375,11 +432,6 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
           </span>
         </div>
 
-        {isCurrentStepUnlocked && unlockHint && (
-          <div className="mt-1.5 text-[10px] font-semibold tracking-[.06em] text-teal/50">
-            {unlockHint}
-          </div>
-        )}
 
         {autoScore && (
           <div className="mt-2 flex items-center gap-2 text-[11px] font-bold tracking-[.06em]">

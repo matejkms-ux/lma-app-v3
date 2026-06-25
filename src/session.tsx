@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { USERS, type User } from './data/mock';
 import { initProgressSync } from './lib/progress';
+import { getLessonCatalog } from './data/content';
 
 /**
  * Session — who's "in". Name-select sets the current user (no auth; v3 brief §4)
@@ -28,9 +29,13 @@ function restore(): User | null {
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(restore);
 
-  // Sync Supabase progress whenever the active user changes (login + page reload).
+  // Sync Supabase progress + warm the lesson catalog whenever the active user
+  // changes (login + page reload), so synchronous catalog reads are populated.
   useEffect(() => {
-    if (user) void initProgressSync(user.id);
+    if (user) {
+      void initProgressSync(user.id);
+      if (user.username) void getLessonCatalog(user.username);
+    }
   }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const value = useMemo<SessionValue>(

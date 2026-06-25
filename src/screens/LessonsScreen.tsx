@@ -5,9 +5,9 @@ import { StatusBar } from '../components/StatusBar';
 import { BottomNav } from '../components/BottomNav';
 import { PulseDot } from '../components/MicIndicator';
 import { useSession } from '../session';
-import { lessonsForLanguage, type PracticeLesson } from '../data/content';
+import { getLessonCatalog, type PracticeLesson } from '../data/content';
+// scope = the learner's username (lesson-code prefix)
 import { lessonProgress, isLessonUnlockComplete } from '../lib/progress';
-import { getUploadedLessonCodes, getLessonTitles } from '../data/lessonAudio';
 import { getCompletedFreestyleLessons } from '../lib/recordings';
 import { STEPS } from '../tokens';
 
@@ -31,28 +31,23 @@ function LockIcon({ size = 18 }: { size?: number }) {
 function LessonRow({
   userId,
   lesson,
-  customTitle,
   freestyleDone,
   onOpen,
 }: {
   userId: string;
   lesson: PracticeLesson;
-  customTitle?: string;
   freestyleDone?: boolean;
   onOpen: () => void;
 }) {
   const { completedSteps, currentStep } = lessonProgress(userId, lesson.code);
-  // Progress is over all 6 steps: the audio steps + FREESTYLE (counts once a
-  // full 60s take exists).
+  // Progress is over all steps: the audio steps + FREESTYLE (counts once a
+  // qualifying take exists).
   const audioTotal = lesson.audioStepCount;
   const total = audioTotal + 1;
   const done = Math.min(completedSteps.length, audioTotal) + (freestyleDone ? 1 : 0);
   const finished = total > 0 && done >= total;
-  const label = finished
-    ? 'complete'
-    : (currentStep ?? STEPS[0]).toLowerCase();
-  const renamed = !!customTitle && customTitle !== lesson.title;
-  const displayTitle = renamed ? customTitle! : lesson.title;
+  const label = finished ? 'complete' : (currentStep ?? STEPS[0]).toLowerCase();
+  const renamed = !!lesson.defaultTitle && lesson.title !== lesson.defaultTitle;
 
   return (
     <button
@@ -67,10 +62,10 @@ function LessonRow({
         <span className="block text-[10.5px] font-bold tracking-[.08em] text-coral">
           {lesson.code} · {finished ? 'COMPLETE' : done > 0 ? 'IN PROGRESS' : 'START'}
         </span>
-        <span className="block font-serif text-[19px] leading-[1.15] text-heading">{displayTitle}</span>
+        <span className="block font-serif text-[19px] leading-[1.15] text-heading">{lesson.title}</span>
         {renamed && (
           <span className="mt-[2px] block text-[10.5px] font-semibold tracking-[.04em] text-muted">
-            {lesson.title}
+            {lesson.defaultTitle}
           </span>
         )}
       </span>
@@ -85,9 +80,8 @@ function LessonRow({
 }
 
 /** Locked lesson — visible but not enterable. Tapping does nothing. */
-function LockedLessonRow({ lesson, customTitle }: { lesson: PracticeLesson; customTitle?: string }) {
-  const renamed = !!customTitle && customTitle !== lesson.title;
-  const displayTitle = renamed ? customTitle! : lesson.title;
+function LockedLessonRow({ lesson }: { lesson: PracticeLesson }) {
+  const renamed = !!lesson.defaultTitle && lesson.title !== lesson.defaultTitle;
   return (
     <div className="relative mb-[11px] overflow-hidden rounded-2xl border border-teal/[.12] bg-cream-panel/30 px-4 py-[15px]">
       <div className="flex items-center gap-3.5">
@@ -98,10 +92,10 @@ function LockedLessonRow({ lesson, customTitle }: { lesson: PracticeLesson; cust
           <span className="block text-[10.5px] font-bold tracking-[.08em] text-muted/40">
             {lesson.code}
           </span>
-          <span className="block font-serif text-[19px] leading-[1.15] text-heading/35">{displayTitle}</span>
+          <span className="block font-serif text-[19px] leading-[1.15] text-heading/35">{lesson.title}</span>
           {renamed && (
             <span className="mt-[2px] block text-[10.5px] font-semibold tracking-[.04em] text-muted/40">
-              {lesson.title}
+              {lesson.defaultTitle}
             </span>
           )}
         </span>
@@ -124,24 +118,17 @@ function LockedLessonRow({ lesson, customTitle }: { lesson: PracticeLesson; cust
 export function LessonsScreen() {
   const navigate = useNavigate();
   const { user } = useSession();
-  const [uploadedCodes, setUploadedCodes] = useState<Set<string> | null>(null);
-  const [titles, setTitles] = useState<Record<string, string>>({});
+  // null = still loading; [] = loaded, none for this language.
+  const [lessons, setLessons] = useState<PracticeLesson[] | null>(null);
   const [freestyleDone, setFreestyleDone] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    void getUploadedLessonCodes().then(setUploadedCodes);
-  }, []);
-
-  useEffect(() => {
     if (!user) return;
-    const codes = lessonsForLanguage(user.language).map((l) => l.code);
-    void getLessonTitles(codes).then(setTitles);
+    void getLessonCatalog(user.username ?? '').then(setLessons);
     void getCompletedFreestyleLessons(user.id).then(setFreestyleDone);
-  }, [user?.id, user?.language]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [user?.id, user?.username]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!user) return <Navigate to="/" replace />;
-
-  const lessons = lessonsForLanguage(user.language);
 
   return (
     <DeviceFrame tone="light">
@@ -151,48 +138,37 @@ export function LessonsScreen() {
         <div className="mt-1 font-serif text-[30px] italic text-heading">Your lessons</div>
       </div>
       <div className="scroll-region flex-1 px-5 pb-5 pt-1.5">
-        {lessons.length > 0 ? (
+        {lessons === null ? (
+          <div className="mt-10 px-2 text-center font-serif text-[15px] italic text-muted">Loading…</div>
+        ) : lessons.length === 0 ? (
+          <div className="mt-10 px-2 text-center font-serif text-[15px] italic text-muted">
+            No lessons are loaded for {user.language} yet.
+          </div>
+        ) : (
           <>
             {lessons.map((l, i) => {
-              // Hide lessons with no uploaded audio. While uploadedCodes is
-              // loading (null), nothing renders to avoid a flash.
-              if (!uploadedCodes?.has(l.code)) return null;
-
-              // Gate: the nearest preceding lesson that also has audio is the
-              // one the learner must pass to unlock this one.
-              const prevWithAudio = lessons
-                .slice(0, i)
-                .filter((prev) => uploadedCodes.has(prev.code))
-                .slice(-1)[0];
-
+              // Each lesson unlocks once the previous one is complete.
+              const prev = lessons[i - 1];
               const unlocked =
-                !prevWithAudio ||
-                isLessonUnlockComplete(user.id, prevWithAudio.code, prevWithAudio.audioStepCount);
+                !prev || isLessonUnlockComplete(user.id, prev.code, prev.audioStepCount);
 
-              if (unlocked) {
-                return (
-                  <LessonRow
-                    key={l.code}
-                    userId={user.id}
-                    lesson={l}
-                    customTitle={titles[l.code]}
-                    freestyleDone={freestyleDone.has(l.code)}
-                    onOpen={() => navigate('/practice', { state: { lessonCode: l.code, startAt: 'GRASP' } })}
-                  />
-                );
-              }
-
-              return <LockedLessonRow key={l.code} lesson={l} customTitle={titles[l.code]} />;
+              return unlocked ? (
+                <LessonRow
+                  key={l.code}
+                  userId={user.id}
+                  lesson={l}
+                  freestyleDone={freestyleDone.has(l.code)}
+                  onOpen={() => navigate('/practice', { state: { lessonCode: l.code, startAt: 'GRASP' } })}
+                />
+              ) : (
+                <LockedLessonRow key={l.code} lesson={l} />
+              );
             })}
             <div className="mt-2 flex items-center gap-2 px-1 text-[11px] text-muted">
               <PulseDot size={9} />
               Coral marks the lesson you're inside right now.
             </div>
           </>
-        ) : (
-          <div className="mt-10 px-2 text-center font-serif text-[15px] italic text-muted">
-            No lessons are loaded for {user.language} yet.
-          </div>
         )}
       </div>
       <BottomNav active="practice" />

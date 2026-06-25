@@ -4,7 +4,7 @@ import { DeviceFrame } from '../components/DeviceFrame';
 import { StatusBar } from '../components/StatusBar';
 import { BottomNav } from '../components/BottomNav';
 import { useSession } from '../session';
-import { lessonsForLanguage } from '../data/content';
+import { getLessonCatalog, lessonsForUser } from '../data/content';
 import { getSentences } from '../data/api';
 import { getLessonTitle } from '../data/lessonAudio';
 import {
@@ -54,9 +54,13 @@ export function SentencesScreen() {
   const { user } = useSession();
 
   const stateCode = (location.state as { lessonCode?: string } | null)?.lessonCode;
+  const [catReady, setCatReady] = useState(false);
+  useEffect(() => {
+    if (user?.username && !stateCode) void getLessonCatalog(user.username).then(() => setCatReady(true));
+  }, [user?.username, stateCode]); // eslint-disable-line react-hooks/exhaustive-deps
   const code = useMemo(
-    () => stateCode ?? (user ? lessonsForLanguage(user.language)[0]?.code : undefined),
-    [stateCode, user],
+    () => stateCode ?? (user ? lessonsForUser(user.username ?? '')[0]?.code : undefined),
+    [stateCode, user, catReady],
   );
 
   const [rows, setRows] = useState<Row[]>([]);

@@ -5,6 +5,7 @@ import {
   listFreestyleRecordings,
   updateFreestyleStars,
   uploadFreestyleRecording,
+  FREESTYLE_COMPLETE_SECONDS,
   type FreestyleTake,
 } from '../../lib/recordings';
 
@@ -18,7 +19,8 @@ import {
  * Recording reuses `useRecorder`, which already feature-detects MediaRecorder /
  * getUserMedia and degrades gracefully on iOS Safari and unsupported browsers.
  */
-const MAX_SECONDS = 60;
+const MAX_SECONDS = 60; // auto-stop cap
+const COMPLETE_SECONDS = FREESTYLE_COMPLETE_SECONDS; // a take this long finishes the lesson
 
 function fmt(secs: number): string {
   const s = Math.max(0, Math.floor(secs));
@@ -144,9 +146,10 @@ export function FreestylePanel({
     void a.play().catch(() => setPlayingId(null));
   }, [playingId]);
 
-  // Completion gate: a full-length take (reached the 60s cap) must exist. Early
-  // stops are kept in history but don't satisfy the lesson gate.
-  const complete = takes.some((t) => (t.duration_seconds ?? 0) >= MAX_SECONDS);
+  // Completion gate: a take of at least COMPLETE_SECONDS must exist. Recording
+  // auto-stops at the 60s cap, but anything past ~50s counts so a take that ends
+  // a beat early still finishes the lesson. Shorter stops are kept in history.
+  const complete = takes.some((t) => (t.duration_seconds ?? 0) >= COMPLETE_SECONDS);
   useEffect(() => {
     onCompletionChange?.(complete);
   }, [complete, onCompletionChange]);
@@ -205,8 +208,8 @@ export function FreestylePanel({
             }`}
           >
             {complete
-              ? 'FULL 60s TAKE SAVED ✓ · LESSON CAN BE FINISHED'
-              : 'RECORD A FULL 60s TAKE TO FINISH THE LESSON'}
+              ? 'FULL TAKE SAVED ✓ · LESSON COMPLETE'
+              : 'SPEAK ~50s+ (AUTO-STOPS AT 60s) TO FINISH THE LESSON'}
           </span>
         )}
       </div>

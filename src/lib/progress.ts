@@ -11,14 +11,13 @@
  * then Supabase async (best-effort). On load, initProgressSync fetches Supabase
  * and merges it into the local snapshot so any device sees accumulated progress.
  */
-import { createClient } from '@supabase/supabase-js';
 import { AUDIO_STEPS, type Step } from '../tokens';
+import { supabase } from './supabase';
 
 // ─── Supabase client ──────────────────────────────────────────────────────────
 
-const _url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-const _key = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
-const _db  = _url && _key ? createClient(_url, _key) : null;
+// Reuse the single shared browser client instead of creating a third one.
+const _db = supabase;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -136,12 +135,11 @@ export function isLessonUnlockComplete(userId: string, code: string, audioStepCo
   const { completedSteps } = lessonProgress(userId, code);
   // Nothing completed → not done.
   if (completedSteps.length === 0) return false;
-  // If the expected step count is known, all of them must be in completedSteps.
-  if (audioStepCount !== undefined && completedSteps.length < audioStepCount) return false;
-  // Every completed step must have 2+ plays or 4+ stars.
-  return completedSteps.every(
-    (s) => stepPassCount(userId, code, s) >= 2 || (getStepStars(userId, code, s) ?? 0) >= 4,
-  );
+  // Done when every audio step has been completed (played to the end once). This
+  // is the SAME bar as the per-step "DONE" badge and the Next button, so the UI
+  // can't say a step is done while the gate disagrees.
+  if (audioStepCount !== undefined) return completedSteps.length >= audioStepCount;
+  return true;
 }
 
 // ─── Public write API ─────────────────────────────────────────────────────────

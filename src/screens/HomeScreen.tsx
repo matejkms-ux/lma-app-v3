@@ -1,8 +1,9 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DeviceFrame } from '../components/DeviceFrame';
 import { StatusBar } from '../components/StatusBar';
 import { BottomNav } from '../components/BottomNav';
-import { lessonsForLanguage } from '../data/content';
+import { getLessonCatalog, lessonsForUser } from '../data/content';
 import { lessonProgress, lifetimeReps, repsToday, isLessonUnlockComplete, getStepStars } from '../lib/progress';
 import { STEPS, AUDIO_STEPS } from '../tokens';
 import { useSession } from '../session';
@@ -15,7 +16,11 @@ export function HomeScreen() {
   const name = user ? displayName(user) : 'adventurer';
   const language = user?.language ?? 'JAPANESE';
 
-  const lessons = lessonsForLanguage(language);
+  const scope = user?.username ?? '';
+  const [lessons, setLessons] = useState(() => lessonsForUser(scope));
+  useEffect(() => {
+    if (scope) void getLessonCatalog(scope).then(setLessons);
+  }, [scope]);
   const lesson = lessons[0];
   const reps = user ? lifetimeReps(user.id) : 0;
   const today = user ? repsToday(user.id) : 0;

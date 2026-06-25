@@ -116,6 +116,14 @@ export async function uploadRecording(
 export const FREESTYLE_BUCKET = 'freestyle-recordings';
 const FREESTYLE_STEP = 'FREESTYLE';
 
+/**
+ * A freestyle take of at least this many seconds finishes the lesson. Recording
+ * auto-stops at 60s, but anything past ~50s counts so a take that ends a beat
+ * early still completes. Single source of truth for FreestylePanel + the lessons
+ * list so they can't disagree.
+ */
+export const FREESTYLE_COMPLETE_SECONDS = 50;
+
 export interface FreestyleTake {
   id: string;
   storage_path: string;
@@ -216,8 +224,8 @@ export async function updateFreestyleStars(id: string, stars: number): Promise<v
 
 /**
  * The set of lesson codes for which this learner has a completed freestyle take
- * (a recording that reached the 60s cap). Used to count freestyle toward lesson
- * progress in the lessons list. Returns an empty set when Supabase is unavailable.
+ * (a recording of at least FREESTYLE_COMPLETE_SECONDS). Used to count freestyle
+ * toward lesson progress in the lessons list. Empty set when Supabase is down.
  */
 export async function getCompletedFreestyleLessons(userId: string): Promise<Set<string>> {
   if (!useSupabase || !supabase) return new Set();
@@ -227,7 +235,7 @@ export async function getCompletedFreestyleLessons(userId: string): Promise<Set<
       .select('lesson_code')
       .eq('user_id', userId)
       .eq('step', FREESTYLE_STEP)
-      .gte('duration_seconds', 60);
+      .gte('duration_seconds', FREESTYLE_COMPLETE_SECONDS);
     if (error || !data) return new Set();
     return new Set((data as Array<{ lesson_code: string }>).map((r) => r.lesson_code));
   } catch {

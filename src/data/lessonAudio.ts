@@ -1,11 +1,10 @@
-import { createClient } from '@supabase/supabase-js';
-import type { Step } from '../tokens';
+import { AUDIO_STEPS, type Step } from '../tokens';
+import { supabase } from '../lib/supabase';
 
-const url = import.meta.env.VITE_SUPABASE_URL as string;
-const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
-
-// Direct client — always initialised when env vars are present.
-export const adminClient = url && anonKey ? createClient(url, anonKey) : null;
+// Reuse the single shared browser client (anon key, RLS-protected) rather than
+// spinning up a second one. Kept under the `adminClient` name so the rest of this
+// module (and AdminScreen) is unchanged; it is the anon client, nothing privileged.
+export const adminClient = supabase;
 
 export const AUDIO_BUCKET = 'lesson-audio';
 
@@ -43,6 +42,31 @@ export async function getLessonAudio(lessonCode: string): Promise<Record<Step, L
     .eq('lesson_code', lessonCode);
   if (error || !data) return null;
   return Object.fromEntries(data.map((r) => [r.step, r])) as Record<Step, LessonAudioRow>;
+}
+
+/**
+ * Map of lesson_code → the canonical AUDIO_STEPS that have an uploaded clip.
+ * (ref_l1 / ref_l2 rows are ignored — they aren't practice steps.) Used to build
+ * the lesson catalog straight from the DB.
+ */
+export async function getLessonStepIndex(): Promise<Record<string, Step[]>> {
+  if (!adminClient) return {};
+  const { data, error } = await adminClient.from('lesson_audio').select('lesson_code, step');
+  if (error || !data) return {};
+  const idx: Record<string, Step[]> = {};
+  for (const r of data as { lesson_code: string; step: string }[]) {
+    if (!(AUDIO_STEPS as readonly string[]).includes(r.step)) continue;
+    (idx[r.lesson_code] ??= []).push(r.step as Step);
+  }
+  return idx;
+}
+
+/** Distinct lesson codes that have at least one sentence row. */
+export async function getSentenceLessonCodes(): Promise<string[]> {
+  if (!adminClient) return [];
+  const { data, error } = await adminClient.from('sentences').select('lesson_code');
+  if (error || !data) return [];
+  return [...new Set((data as { lesson_code: string }[]).map((r) => r.lesson_code))];
 }
 
 /** Upload an MP3 file to storage and upsert the URL into lesson_audio. */
