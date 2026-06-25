@@ -7,6 +7,10 @@ import {
   deleteStepAudio,
   getLessonTitle,
   setLessonTitle,
+  getLessonStepIndex,
+  getSentenceLessonCodes,
+  getLessonTitles,
+  parseLessonCode,
   adminClient,
   type LessonAudioRow,
 } from '../data/lessonAudio';
@@ -95,6 +99,25 @@ export function AdminScreen() {
 
   const selectedUser = roster.find((u) => u.id === selectedId) ?? roster[0];
   const lessonCode = selectedUser ? buildLessonCode(selectedUser, lessonNr) : '';
+
+  // Lessons that have CONTENT (sentences) but NO voice yet — these are locked from
+  // learners, so prompt the admin to record/create them.
+  const [needsVoice, setNeedsVoice] = useState<{ code: string; nr: number; title: string }[]>([]);
+  useEffect(() => {
+    const scope = selectedUser?.username;
+    if (!scope) { setNeedsVoice([]); return; }
+    let alive = true;
+    void Promise.all([getLessonStepIndex(), getSentenceLessonCodes()]).then(async ([stepIndex, sentCodes]) => {
+      const mine = sentCodes.filter((c) => c.startsWith(`${scope}-`));
+      const missing = mine.filter((c) => !(stepIndex[c]?.length));
+      const titles = await getLessonTitles(missing);
+      const rows = missing
+        .map((c) => ({ code: c, nr: parseLessonCode(c)?.lessonNr ?? 0, title: titles[c] || '' }))
+        .sort((a, b) => a.nr - b.nr);
+      if (alive) setNeedsVoice(rows);
+    });
+    return () => { alive = false; };
+  }, [selectedUser?.username, lessonCode]);
 
   const patch = useCallback((step: Step, delta: Partial<StepState>) => {
     setStates((prev) => ({ ...prev, [step]: { ...prev[step], ...delta } }));
@@ -209,6 +232,39 @@ export function AdminScreen() {
       </div>
 
       <div className="mx-auto max-w-4xl px-6 py-8">
+        {/* Prompt: lessons that have content but no voice yet (locked from learners) */}
+        {needsVoice.length > 0 && (
+          <div className="mb-6 rounded-[18px] border border-coral/40 bg-coral/[.06] p-5">
+            <div className="flex items-center gap-2">
+              <span className="text-[15px]">🎙️</span>
+              <div className="text-sm font-bold text-heading">
+                {needsVoice.length} lesson{needsVoice.length > 1 ? 's' : ''} need{needsVoice.length > 1 ? '' : 's'} voice
+              </div>
+            </div>
+            <p className="mt-1 text-[12.5px] leading-relaxed text-muted">
+              These lessons have sentences but no audio, so they're <strong>locked</strong> for{' '}
+              {selectedUser ? displayName(selectedUser) : 'this learner'}. Record/create them so they unlock.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {needsVoice.slice(0, 12).map((l) => (
+                <button
+                  key={l.code}
+                  onClick={() => setLessonNr(l.nr)}
+                  className="rounded-full border border-coral/40 bg-white px-3 py-[5px] text-[11px] font-bold text-heading hover:bg-coral/10"
+                  title={l.title || l.code}
+                >
+                  {l.title || `Lesson ${l.nr}`}
+                </button>
+              ))}
+              {needsVoice.length > 12 && (
+                <span className="self-center text-[11px] font-semibold text-muted">
+                  +{needsVoice.length - 12} more
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Learner + lesson selector */}
         <div className="mb-8 rounded-[18px] border border-rule bg-white p-5">
           <div className="flex flex-wrap items-end gap-4">

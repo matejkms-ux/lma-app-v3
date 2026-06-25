@@ -161,7 +161,10 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
   useEffect(() => {
     void getLessonCatalog(lessonScope(lesson.code)).then((cat) => {
       const i = cat.findIndex((l) => l.code === lesson.code);
-      setNextLesson(i >= 0 && i < cat.length - 1 ? cat[i + 1] : null);
+      // Only offer the next lesson if it actually has voice — never send a learner
+      // into a voiceless lesson. A voiceless next lesson ends the run here.
+      const nxt = i >= 0 && i < cat.length - 1 ? cat[i + 1] : null;
+      setNextLesson(nxt && nxt.audioStepCount > 0 ? nxt : null);
     });
   }, [lesson.code]);
 

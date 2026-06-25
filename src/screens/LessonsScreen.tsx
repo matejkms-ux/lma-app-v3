@@ -82,8 +82,13 @@ function LessonRow({
   );
 }
 
-/** Locked lesson — visible but not enterable. Tapping does nothing. */
-function LockedLessonRow({ lesson }: { lesson: PracticeLesson }) {
+/**
+ * Locked lesson — visible but not enterable. Two reasons:
+ *  - sequential lock (finish the previous lesson first) → "LOCKED"
+ *  - no audio yet (not recorded) → "COMING SOON" — a learner must NEVER be able to
+ *    enter a voiceless lesson, so these are locked even if the previous is done.
+ */
+function LockedLessonRow({ lesson, comingSoon = false }: { lesson: PracticeLesson; comingSoon?: boolean }) {
   const renamed = !!lesson.defaultTitle && lesson.title !== lesson.defaultTitle;
   return (
     <div className="relative mb-[11px] overflow-hidden rounded-2xl border border-teal/[.12] bg-cream-panel/30 px-4 py-[15px]">
@@ -109,8 +114,10 @@ function LockedLessonRow({ lesson }: { lesson: PracticeLesson }) {
       </div>
       <div className="pointer-events-none absolute inset-0 flex items-center justify-end rounded-2xl bg-cream/25 pr-4">
         <div className="flex items-center gap-1.5 rounded-full border border-teal/[.22] bg-cream-panel/90 px-3 py-[5px]">
-          <span className="text-teal/50"><LockIcon size={12} /></span>
-          <span className="text-[10px] font-bold tracking-[.1em] text-teal/50">LOCKED</span>
+          {!comingSoon && <span className="text-teal/50"><LockIcon size={12} /></span>}
+          <span className="text-[10px] font-bold tracking-[.1em] text-teal/50">
+            {comingSoon ? 'COMING SOON' : 'LOCKED'}
+          </span>
         </div>
       </div>
     </div>
@@ -150,22 +157,27 @@ export function LessonsScreen() {
         ) : (
           <>
             {lessons.map((l, i) => {
-              // Each lesson unlocks once the previous one is complete.
+              // A lesson must have VOICE to be entered — never let a learner walk
+              // into a voiceless lesson (it would show empty "AUDIO COMING SOON").
+              const hasVoice = l.audioStepCount > 0;
+              // …and it unlocks sequentially, once the previous one is complete.
               const prev = lessons[i - 1];
-              const unlocked =
+              const sequentialOk =
                 !prev || isLessonUnlockComplete(user.id, prev.code, prev.audioStepCount);
 
-              return unlocked ? (
-                <LessonRow
-                  key={l.code}
-                  userId={user.id}
-                  lesson={l}
-                  freestyleDone={freestyleDone.has(l.code)}
-                  onOpen={() => navigate('/practice', { state: { lessonCode: l.code, startAt: 'GRASP' } })}
-                />
-              ) : (
-                <LockedLessonRow key={l.code} lesson={l} />
-              );
+              if (hasVoice && sequentialOk) {
+                return (
+                  <LessonRow
+                    key={l.code}
+                    userId={user.id}
+                    lesson={l}
+                    freestyleDone={freestyleDone.has(l.code)}
+                    onOpen={() => navigate('/practice', { state: { lessonCode: l.code, startAt: 'GRASP' } })}
+                  />
+                );
+              }
+              // No voice yet → "COMING SOON"; otherwise a normal sequential lock.
+              return <LockedLessonRow key={l.code} lesson={l} comingSoon={!hasVoice} />;
             })}
 
             {/* Final reading test — German only */}
