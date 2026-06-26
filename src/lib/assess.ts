@@ -46,7 +46,17 @@ export interface AssessUnavailable {
   reason: string;
 }
 
-export function isUnavailable(r: AssessResult | AssessUnavailable): r is AssessUnavailable {
+/** Unscripted speaking score (Final Conversation): pronunciation + fluency, no reference. */
+export interface SpeakingResult {
+  fluency: number;
+  pronunciation: number;
+  combined: number;
+  auto_stars: number;
+}
+
+export function isUnavailable(
+  r: AssessResult | SpeakingResult | AssessUnavailable,
+): r is AssessUnavailable {
   return (r as AssessUnavailable).auto_unavailable === true;
 }
 
@@ -147,6 +157,30 @@ export async function transcribeScore(
     });
     if (!res.ok) return { auto_unavailable: true, reason: `http_${res.status}` };
     return (await res.json()) as AssessResult | AssessUnavailable;
+  } catch {
+    return { auto_unavailable: true, reason: 'client_error' };
+  }
+}
+
+/**
+ * Score a FREE spoken answer (Final Conversation) — unscripted pronunciation +
+ * fluency in the given locale, no reference text. Grades how it's said, not what
+ * it means. Unsupported locales (Thai/Khmer) resolve to auto_unavailable, so the
+ * UI falls back to a self-rating. Never throws.
+ */
+export async function assessSpeaking(
+  blob: Blob,
+  locale: string,
+): Promise<SpeakingResult | AssessUnavailable> {
+  try {
+    const pcm = await blobToPcm16kMono(blob);
+    const res = await fetch('/.netlify/functions/assess-speaking', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ audioBase64: toBase64(pcm), locale }),
+    });
+    if (!res.ok) return { auto_unavailable: true, reason: `http_${res.status}` };
+    return (await res.json()) as SpeakingResult | AssessUnavailable;
   } catch {
     return { auto_unavailable: true, reason: 'client_error' };
   }

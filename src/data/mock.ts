@@ -82,6 +82,7 @@ export const USERS: User[] = [
   { id: 'u1', name: 'Won-Chak Leung',    firstName: 'Won-Chak',  lastNames: 'Leung',    calledName: 'Charles', language: 'JAPANESE', username: 'WONCHAKL2401-ja', adventure: { number: 1 } },
   { id: 'u5', name: 'Jason Oberbillig',  firstName: 'Jason',     lastNames: 'Oberbillig',                       language: 'JAPANESE', username: 'JASONO2308-ja',   adventure: { number: 1 } },
   { id: 'u7', name: 'Mehrad',            firstName: 'Mehrad',                                                   language: 'PORTUGUESE', username: 'MEHRAD2606-pt', adventure: { number: 1 } },
+  { id: 'u6', name: 'Neal Gustafson',    firstName: 'Neal',      lastNames: 'Gustafson',                     language: 'SPANISH',  username: 'NEALG2603-es',    adventure: { number: 1 } },
 ];
 
 /**

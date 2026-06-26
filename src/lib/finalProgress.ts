@@ -4,6 +4,8 @@
  * localStorage, keyed by userId + content scope. Star maps are index → 1–5★.
  */
 
+import { supabase } from './supabase';
+
 type StarMap = Record<number, number>;
 export type FinalModule = 'read' | 'podcast' | 'writing' | 'conversation' | 'session';
 
@@ -39,12 +41,56 @@ export function setConversationRating(u: string, s: string, prompt: number, star
   const key = k('convo', u, s); const m = readMap(key); m[prompt] = stars; writeMap(key, m);
 }
 
-/* ── Writing (free text) ── */
-export function getWriting(u: string, s: string): string {
-  try { return localStorage.getItem(k('writing', u, s)) ?? ''; } catch { return ''; }
+/* ── Writing (free text, one entry per prompt) ── */
+export type WritingMap = Record<number, string>;
+
+export function getWritingMap(u: string, s: string): WritingMap {
+  try {
+    const raw = localStorage.getItem(k('writing', u, s));
+    return raw ? (JSON.parse(raw) as WritingMap) : {};
+  } catch { return {}; }
 }
-export function setWriting(u: string, s: string, text: string) {
-  try { localStorage.setItem(k('writing', u, s), text); } catch { /* ignore */ }
+export function setWritingEntry(u: string, s: string, index: number, text: string) {
+  const key = k('writing', u, s);
+  const map = getWritingMap(u, s);
+  map[index] = text;
+  try { localStorage.setItem(key, JSON.stringify(map)); } catch { /* ignore */ }
+}
+
+/**
+ * Submit the learner's writing for human review by the Language Guide. The Final
+ * Writing module is never auto-scored — these rows are read by the guide. Always
+ * keeps a local copy; the Supabase upsert is best-effort (no-op when the client
+ * isn't configured), so the flow never breaks offline. Returns true on a
+ * successful remote save.
+ */
+export async function submitFinalWriting(
+  userId: string,
+  scope: string,
+  language: string,
+  locale: string,
+  entries: { promptIndex: number; prompt: string; answer: string }[],
+): Promise<boolean> {
+  if (!supabase || entries.length === 0) return false;
+  const rows = entries.map((e) => ({
+    user_id: userId,
+    scope,
+    language,
+    locale,
+    prompt_index: e.promptIndex,
+    prompt: e.prompt,
+    answer: e.answer,
+    word_count: e.answer.trim().split(/\s+/).filter(Boolean).length,
+    updated_at: new Date().toISOString(),
+  }));
+  try {
+    const { error } = await supabase
+      .from('final_writing_submissions')
+      .upsert(rows, { onConflict: 'user_id,scope,prompt_index' });
+    return !error;
+  } catch {
+    return false;
+  }
 }
 
 /* ── Per-module completion flags (drives the hub's ✓/locked state) ── */

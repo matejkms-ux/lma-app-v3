@@ -21,9 +21,21 @@ export interface FinalPodcast {
   checks: PodcastCheck[];
 }
 
-export interface FinalWriting { title: string; prompt: string; helper: string; minWords: number; }
-export interface FinalConversation { title: string; intro: string; prompts: string[]; }
-export interface FinalSession { title: string; note: string; roomPath: string; }
+/** One open writing prompt in the target language (human-judged, never auto-scored). */
+export interface WritingPrompt { prompt: string; helper?: string; minWords: number; }
+export interface FinalWriting { title: string; intro?: string; prompts: WritingPrompt[]; }
+
+/** One spoken question-prompt: the host/LC voice reads `text` (target language). */
+export interface ConversationPrompt { text: string; audioUrl: string; }
+export interface FinalConversation { title: string; intro: string; prompts: ConversationPrompt[]; }
+
+/**
+ * Live graduation session over the Zoom Video SDK. `sessionId` is the per-learner
+ * room key (topic = `lma-<sessionId>`; join route = `/session/<sessionId>`).
+ * `scheduledAt` is an ISO timestamp — the lightweight per-adventurer scheduling
+ * layer (data-driven; a real booking table is deferred — see FINAL-APP.md).
+ */
+export interface FinalSession { title: string; note: string; sessionId: string; scheduledAt?: string; durationMin?: number; }
 
 export interface FinalProgram {
   scope: string;          // = user.username
@@ -62,33 +74,44 @@ export const FINAL_PROGRAMS: Record<string, FinalProgram> = {
     podcast: {
       title: "Cuatro movimientos",
       subtitle: "Una conversación con Neal",
-      audioUrl: "https://wcrwnfvwydibhggislne.supabase.co/storage/v1/object/public/lesson-audio/NEALG2603-es-podcast/cuatro-movimientos.mp3?v=2",
+      audioUrl: "https://wcrwnfvwydibhggislne.supabase.co/storage/v1/object/public/lesson-audio/NEALG2603-es-podcast/cuatro-movimientos.mp3?v=3",
       hostVoiceId: "ewn5JTa3lNPY8QVuZJi6",
       learnerVoiceId: "cIBxLwfshLYhRB9lCXEg",
       checks: [
-      { n: 1, timeSec: 316.66, question: "¿Cómo describe Neal su manera de mirar el mundo cuando era niño?" },
-      { n: 2, timeSec: 528.53, question: "¿Por qué dice Neal que le atraía aquello que todavía no dominaba?" },
-      { n: 3, timeSec: 925.69, question: "Según Neal, ¿de dónde vienen realmente las mejores ideas?" },
-      { n: 4, timeSec: 978.73, question: "¿Por qué dice Neal que la creatividad es espiritual?" },
-      { n: 5, timeSec: 1297.97, question: "¿Qué descubrió Neal sobre el logro y la felicidad?" },
-      { n: 6, timeSec: 1509.23, question: "Según Neal, ¿cuáles son las cuatro cosas para las que estamos aquí?" }
+      { n: 1, timeSec: 315.3, question: "¿Cómo describe Neal su manera de mirar el mundo cuando era niño?" },
+      { n: 2, timeSec: 536.46, question: "¿Por qué dice Neal que le atraía aquello que todavía no dominaba?" },
+      { n: 3, timeSec: 930.73, question: "Según Neal, ¿de dónde vienen realmente las mejores ideas?" },
+      { n: 4, timeSec: 984.41, question: "¿Por qué dice Neal que la creatividad es espiritual?" },
+      { n: 5, timeSec: 1304.05, question: "¿Qué descubrió Neal sobre el logro y la felicidad?" },
+      { n: 6, timeSec: 1515.31, question: "Según Neal, ¿cuáles son las cuatro cosas para las que estamos aquí?" }
       ],
     },
     writing: {
       title: "Tu historia, en tus palabras",
-      prompt: "Después de leer y escuchar tu historia, escribe en español sobre uno de los cuatro movimientos de tu vida. ¿Cuál sientes más vivo hoy y por qué?",
-      helper: "Escribe libremente. No te preocupes por la perfección — escribe lo que de verdad piensas.",
-      minWords: 40,
+      intro: "Después de leer y escuchar tu historia, escribe en español. No hay respuestas correctas — tu guía leerá lo que escribas.",
+      prompts: [
+        { prompt: "Movimiento I — De niño, ¿qué te daba curiosidad? Describe un recuerdo en el que querías entender cómo funcionaba algo.", helper: "Escribe libremente, sin preocuparte por la perfección.", minWords: 40 },
+        { prompt: "Movimiento II — Cuenta una habilidad que decidiste aprender. ¿Qué se sintió ser principiante, y qué te enseñó sobre ti mismo?", helper: "Un ejemplo concreto vale más que una idea general.", minWords: 40 },
+        { prompt: "Movimientos III–IV — Hoy, ¿de dónde sientes que vienen tus mejores ideas, y qué significa para ti estar presente?", helper: "Escribe lo que de verdad piensas, en tus propias palabras.", minWords: 50 },
+      ],
     },
     conversation: {
       title: "Conversación final",
-      intro: "Estas son las preguntas que tu guía te hará. Practica respondiéndolas en voz alta, en español.",
-      prompts: ["¿Quién eras de niño? ¿Qué te daba curiosidad?", "Cuéntame una habilidad que aprendiste y qué te enseñó sobre ti.", "Para ti, ¿de dónde vienen las buenas ideas?", "¿Qué significa para ti estar presente?", "Si tuvieras que resumir tu filosofía de vida en una frase, ¿cuál sería?"],
+      intro: "Escucha cada pregunta, luego graba tu respuesta en voz alta, en español. Se evalúa tu pronunciación y fluidez — no el contenido.",
+      prompts: [
+        { text: "¿Quién eras de niño? ¿Qué te daba curiosidad?", audioUrl: "https://wcrwnfvwydibhggislne.supabase.co/storage/v1/object/public/lesson-audio/NEALG2603-es-conversation/q1.mp3" },
+        { text: "Cuéntame una habilidad que aprendiste y qué te enseñó sobre ti.", audioUrl: "https://wcrwnfvwydibhggislne.supabase.co/storage/v1/object/public/lesson-audio/NEALG2603-es-conversation/q2.mp3" },
+        { text: "Para ti, ¿de dónde vienen las buenas ideas?", audioUrl: "https://wcrwnfvwydibhggislne.supabase.co/storage/v1/object/public/lesson-audio/NEALG2603-es-conversation/q3.mp3" },
+        { text: "¿Qué significa para ti estar presente?", audioUrl: "https://wcrwnfvwydibhggislne.supabase.co/storage/v1/object/public/lesson-audio/NEALG2603-es-conversation/q4.mp3" },
+        { text: "Si tuvieras que resumir tu filosofía de vida en una frase, ¿cuál sería?", audioUrl: "https://wcrwnfvwydibhggislne.supabase.co/storage/v1/object/public/lesson-audio/NEALG2603-es-conversation/q5.mp3" },
+      ],
     },
     session: {
       title: "Sesión final",
-      note: "Tu última sesión en vivo con tu guía. Llega habiendo leído el ensayo, escuchado el podcast y practicado la conversación.",
-      roomPath: "/rooms",
+      note: "Tu última sesión en vivo con tu guía. Llega habiendo leído el ensayo, escuchado el podcast, escrito tus respuestas y practicado la conversación.",
+      sessionId: "NEALG2603-es",
+      scheduledAt: "2026-06-27T16:00:00Z",
+      durationMin: 30,
     },
   },
 };
