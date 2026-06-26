@@ -183,9 +183,12 @@ export async function setStepAutoScore(
   if (!_db) return;
   try {
     await _db.from('lesson_step_progress').upsert(
-      { user_id: userId, lesson_code: code, step, auto_combined: combined, auto_stars: stars,
+      // version is part of the PK (user_id,lesson_code,version,step). All live
+      // lessons are v1; onConflict MUST list all 4 PK cols or PostgREST throws
+      // 42P10 and the write is silently dropped. Thread real versions in when v2 lands.
+      { user_id: userId, lesson_code: code, step, version: 1, auto_combined: combined, auto_stars: stars,
         updated_at: new Date().toISOString() },
-      { onConflict: 'user_id,lesson_code,step' },
+      { onConflict: 'user_id,lesson_code,version,step' },
     );
   } catch { /* best-effort */ }
 }
@@ -212,8 +215,11 @@ async function _upsertRow(
   await _db
     .from('lesson_step_progress')
     .upsert(
-      { user_id: userId, lesson_code: code, step, reps, stars, pass_count: passCount, updated_at: new Date().toISOString() },
-      { onConflict: 'user_id,lesson_code,step' },
+      // version is part of the PK (user_id,lesson_code,version,step). onConflict
+      // must list all 4 cols or PostgREST throws 42P10 and the write is silently
+      // dropped by the caller's try/catch. All live lessons are v1.
+      { user_id: userId, lesson_code: code, step, version: 1, reps, stars, pass_count: passCount, updated_at: new Date().toISOString() },
+      { onConflict: 'user_id,lesson_code,version,step' },
     );
 }
 
