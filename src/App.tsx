@@ -10,6 +10,8 @@ import { ActivitiesScreen } from './screens/ActivitiesScreen';
 import { SentencesScreen } from './screens/SentencesScreen';
 import { AdminScreen } from './screens/AdminScreen';
 import { ReadingTestScreen } from './screens/ReadingTestScreen';
+import { FinalReadingScreen } from './screens/FinalReadingScreen';
+import { PodcastScreen } from './screens/PodcastScreen';
 import { ReaderScreen } from './screens/ReaderScreen';
 import { ReaderLessonScreen } from './screens/ReaderLessonScreen';
 import { HubScreen } from './screens/super/HubScreen';
@@ -24,6 +26,7 @@ import { WatchPlayerScreen } from './screens/super/WatchPlayerScreen';
 import { WatchQuizScreen } from './screens/super/WatchQuizScreen';
 // Lazy — keeps the heavy @zoom/videosdk out of the main bundle (loads only on /session/*).
 const VideoSessionScreen = lazy(() => import('./screens/VideoSessionScreen'));
+import VideoRosterScreen from './screens/VideoRosterScreen';
 
 export default function App() {
   return (
@@ -50,6 +53,8 @@ export default function App() {
         <Route path="/sentences" element={<SentencesScreen />} />
         <Route path="/admin" element={<AdminScreen />} />
         <Route path="/reading-test" element={<ReadingTestScreen />} />
+        <Route path="/final-reading" element={<FinalReadingScreen />} />
+        <Route path="/podcast" element={<PodcastScreen />} />
         <Route path="/reader" element={<ReaderScreen />} />
         <Route path="/reader-lesson" element={<ReaderLessonScreen />} />
         <Route
@@ -60,6 +65,7 @@ export default function App() {
             </Suspense>
           }
         />
+        <Route path="/rooms" element={<VideoRosterScreen />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </ErrorBoundary>
