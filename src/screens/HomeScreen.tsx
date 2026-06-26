@@ -27,6 +27,10 @@ export function HomeScreen() {
   const reps = user ? lifetimeReps(user.id) : 0;
   const today = user ? repsToday(user.id) : 0;
 
+  // Adventurer's own live room (participant) — username minus language, lowercased.
+  const sessionId = (user?.username ?? '').replace(/-[a-z]{2}$/i, '').toLowerCase();
+  const videoUrl = sessionId ? `https://lma-video-app.netlify.app/session/${sessionId}` : null;
+
   const available = lesson ? STEPS.filter((s) => lesson.audio[s]) : [];
   const progress = user && lesson ? lessonProgress(user.id, lesson.code) : null;
   const doneCount = progress ? available.filter((s) => progress.completedSteps.includes(s)).length : 0;
@@ -122,6 +126,22 @@ export function HomeScreen() {
               ))}
             </div>
           </button>
+        )}
+
+        {/* Live session — opens the adventurer's own room (participant) in the video app */}
+        {videoUrl && (
+          <a
+            href={videoUrl}
+            target="_blank"
+            rel="noopener"
+            className="mt-3.5 flex w-full items-center justify-between rounded-[18px] border border-rule bg-white p-4"
+          >
+            <div>
+              <div className="text-[11px] font-bold tracking-[.14em] text-muted">LIVE SESSION</div>
+              <div className="mt-[5px] font-serif text-[18px] text-heading">Join your video session</div>
+            </div>
+            <span className="text-sm font-bold text-coral">Join →</span>
+          </a>
         )}
 
         {/* Stats — real values from progress store */}
