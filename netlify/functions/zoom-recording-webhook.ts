@@ -63,15 +63,21 @@ export const handler = async (event: {
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (topic && supaUrl && serviceKey) {
       const admin = createClient(supaUrl, serviceKey);
+      // Upsert by topic: sessions aren't pre-created (topics are derived from
+      // usernames on the fly), so insert the row if it doesn't exist yet.
       await admin
         .from('video_sessions')
-        .update({
-          recording_status: 'available',
-          recording_url: video?.play_url ?? video?.download_url ?? null,
-          recording_file_id: video?.id ?? null,
-          recording_completed_at: new Date().toISOString(),
-        })
-        .eq('topic', topic);
+        .upsert(
+          {
+            topic,
+            status: 'ended',
+            recording_status: 'available',
+            recording_url: video?.play_url ?? video?.download_url ?? null,
+            recording_file_id: video?.id ?? null,
+            recording_completed_at: new Date().toISOString(),
+          },
+          { onConflict: 'topic' },
+        );
     }
   }
 
