@@ -3,9 +3,13 @@ import { useEffect, useRef, useState } from 'react';
 /**
  * Audio player (spec §5): two controls — reverse and a play/pause toggle. There
  * is no hard-stop; pausing keeps the position, and reverse seeks back a few
- * seconds. Reaching the end fires `onEnded`, the gate that clears the step.
+ * seconds. The step-clearing gate `onEnded` fires once per pass when playback
+ * reaches COMPLETE_FRACTION (95%) OR the natural end, whichever comes first — the
+ * learner doesn't have to sit through the last sliver. It re-arms on each replay,
+ * so steps that require two listens still need two genuine passes.
  */
 const REVERSE_SECONDS = 5;
+const COMPLETE_FRACTION = 0.95;
 
 function fmt(secs: number): string {
   if (!Number.isFinite(secs) || secs < 0) secs = 0;
@@ -32,12 +36,16 @@ export function AudioPlayer({
   const [playing, setPlaying] = useState(false);
   const [cur, setCur] = useState(0);
   const [dur, setDur] = useState(0);
+  // Whether the completion gate has already fired for the current pass. Re-armed
+  // whenever a fresh pass starts from before the threshold (incl. a replay).
+  const firedRef = useRef(false);
 
   // A new clip resets the transport.
   useEffect(() => {
     const a = audioRef.current;
     setPlaying(false);
     setCur(0);
+    firedRef.current = false;
     if (a) {
       a.pause();
       a.currentTime = 0;
@@ -83,15 +91,28 @@ export function AudioPlayer({
         src={src}
         preload="auto"
         playsInline
-        onPlay={() => {
+        onPlay={(e) => {
           setPlaying(true);
+          // Re-arm the gate for a fresh pass (replay seeks back to the start).
+          const a = e.currentTarget;
+          if (!a.duration || a.currentTime < a.duration * COMPLETE_FRACTION) {
+            firedRef.current = false;
+          }
           onPlay?.();
         }}
         onPause={() => setPlaying(false)}
         onTimeUpdate={(e) => {
           const a = e.currentTarget;
           setCur(a.currentTime);
-          if (a.duration > 0) onProgress?.(a.currentTime / a.duration);
+          if (a.duration > 0) {
+            onProgress?.(a.currentTime / a.duration);
+            // Count the pass as complete once 95% is reached — no need to sit
+            // through the final sliver. Fires once per pass.
+            if (!firedRef.current && a.currentTime / a.duration >= COMPLETE_FRACTION) {
+              firedRef.current = true;
+              onEnded?.();
+            }
+          }
         }}
         onLoadedMetadata={(e) => setDur(e.currentTarget.duration)}
         onError={() => {
@@ -105,7 +126,11 @@ export function AudioPlayer({
           setPlaying(false);
           setCur(0);
           onProgress?.(1);
-          onEnded?.();
+          // Natural end — fire the gate only if 95% didn't already trip it.
+          if (!firedRef.current) {
+            firedRef.current = true;
+            onEnded?.();
+          }
         }}
       />
       <button

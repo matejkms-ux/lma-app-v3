@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ModelWaveform, LiveWaveform, StaticWaveform } from '../../components/Waveform';
-import { PulseDot } from '../../components/MicIndicator';
+import { ModelWaveform, StaticWaveform, StaticCoralWaveform } from '../../components/Waveform';
 
 /**
  * The per-step centrepieces. These are the visual chassis for a step; the live
@@ -81,10 +80,10 @@ export function ShadowBody() {
       </div>
       <div className="rounded-[14px] border border-coral/40 bg-coral/[.08] p-3.5">
         <div className="mb-[9px] flex items-center gap-2.5">
-          <PulseDot />
-          <span className="text-[10px] font-bold tracking-[.14em] text-coral">YOUR VOICE · RECORDING</span>
+          <span className="h-3 w-3 shrink-0 rounded-full bg-coral" />
+          <span className="text-[10px] font-bold tracking-[.14em] text-coral">YOUR VOICE</span>
         </div>
-        <LiveWaveform />
+        <StaticCoralWaveform />
       </div>
     </div>
   );
@@ -93,8 +92,11 @@ export function ShadowBody() {
 /**
  * READ — scrollable sentence list. The native script is always shown; reading aids
  * stack BELOW each line and are added/removed with toggle chips (choice persists):
+ * Convention: l2_translit_1 is the PRIMARY transliteration (always filled when a
+ * language has a reading aid); l2_translit_2 is the optional SECOND one. What each
+ * slot is called varies by language:
  *   Japanese → Kanji (l2) + Furigana (l2_translit_1) + Rōmaji (l2_translit_2)
- *   Thai / Khmer → Script (l2) + Roman (l2_translit_2)
+ *   Thai / Khmer → Script (l2) + Roman (l2_translit_1)  — one transliteration only
  *   German etc. → script only, no chips.
  * An aid is offered only when at least one sentence carries a distinct value for it,
  * so we never show an empty or duplicate line. Defaults to all aids on.
@@ -130,7 +132,7 @@ export function ReadBody({
         { key: 'furigana', label: 'Furigana', get: (s: ReadSentence) => s.l2_translit_1 || s.l2_translit },
         { key: 'romaji', label: 'Rōmaji', get: (s: ReadSentence) => s.l2_translit_2 },
       ]
-    : [{ key: 'roman', label: 'Roman', get: (s: ReadSentence) => s.l2_translit_2 || s.l2_translit }];
+    : [{ key: 'roman', label: 'Roman', get: (s: ReadSentence) => s.l2_translit_1 || s.l2_translit_2 || s.l2_translit }];
 
   // Offer a toggle only for an aid that actually carries distinct content.
   const extras = allExtras.filter((e) =>

@@ -141,6 +141,8 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
 
   const [flash, setFlash] = useState<number | null>(null);
   const flashTimer = useRef<number | null>(null);
+  // After a rating we auto-advance to the next step; this holds that pending hop.
+  const advanceTimer = useRef<number | null>(null);
 
   // FREESTYLE gate: the lesson is finished once a long-enough freestyle take
   // exists (reported by the panel). Audio steps done + this = lesson complete.
@@ -197,6 +199,7 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
   useEffect(() => () => {
     if (takeUrlRef.current) URL.revokeObjectURL(takeUrlRef.current);
     if (flashTimer.current) window.clearTimeout(flashTimer.current);
+    if (advanceTimer.current) window.clearTimeout(advanceTimer.current);
   }, []);
 
   // A step is unlock-complete when it has no audio (pass-through) OR it has been
@@ -272,7 +275,14 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
   const handleRate = useCallback((n: number) => {
     setStepStars(userId, lesson.code, api.step, n);
     setStarsState(n);
-  }, [userId, lesson.code, api.step]);
+    // Rating a completed step is the gateway out of it — auto-advance to the next
+    // step after a beat (so the chosen star registers visually). NEXT still works
+    // as a manual fallback, and the next step must itself be listened to.
+    if (!api.isLast && isUnlockComplete(api.step)) {
+      if (advanceTimer.current) window.clearTimeout(advanceTimer.current);
+      advanceTimer.current = window.setTimeout(() => api.next(), 550);
+    }
+  }, [userId, lesson.code, api, isUnlockComplete]);
 
   const toggleTake = () => {
     const a = takeAudioRef.current;
@@ -503,7 +513,7 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
               </button>
             ))}
             <span className={`ml-1.5 text-[10px] font-bold tracking-[.1em] transition-opacity ${stars !== null ? 'text-coral/70' : 'text-teal/40'}`}>
-              {stars !== null ? `${stars}/5` : 'RATE THIS STEP'}
+              {stars !== null ? `${stars}/5` : api.isLast ? 'RATE THIS STEP' : 'RATE TO CONTINUE ›'}
             </span>
           </div>
         )}

@@ -42,6 +42,8 @@ export const fonts = {
   sans: "'Hanken Grotesk', system-ui, sans-serif",
   /** Japanese L2 text. */
   jp: "'Noto Serif JP', 'Newsreader', serif",
+  /** Khmer L2 text (Companion / Reader / Watch super-app content). */
+  khmer: "'Noto Serif Khmer', 'Newsreader', serif",
 } as const;
 
 export const radius = {

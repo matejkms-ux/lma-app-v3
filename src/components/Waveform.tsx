@@ -49,3 +49,14 @@ export function StaticWaveform() {
     </div>
   );
 }
+
+/** Coral, static — the "your take" slot before live capture is wired (no motion). */
+export function StaticCoralWaveform() {
+  return (
+    <div className="flex h-[38px] items-center gap-[3px]">
+      {MODEL_HEIGHTS.map((h, i) => (
+        <i key={i} className="flex-1 rounded-[2px] bg-coral" style={{ height: `${h}%` }} />
+      ))}
+    </div>
+  );
+}

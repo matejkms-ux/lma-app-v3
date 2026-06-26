@@ -10,6 +10,7 @@ export const LOCALE_BY_LANGUAGE: Record<string, string> = {
   GERMAN: 'de-DE',
   JAPANESE: 'ja-JP',
   SPANISH: 'es-ES',
+  PORTUGUESE: 'pt-PT',
   FRENCH: 'fr-FR',
   MANDARIN: 'zh-CN',
   ARABIC: 'ar-EG',

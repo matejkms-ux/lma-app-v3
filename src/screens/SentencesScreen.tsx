@@ -94,6 +94,18 @@ export function SentencesScreen() {
     return () => { alive = false; };
   }, [user?.id, code]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Stop playback on unmount — a detached <audio> keeps playing until GC,
+  // which is how a previous lesson bleeds under the next one.
+  useEffect(() => {
+    const a = audioRef.current;
+    return () => {
+      if (a) {
+        a.pause();
+        a.src = '';
+      }
+    };
+  }, []);
+
   if (!user) return <Navigate to="/" replace />;
 
   const rate = (sentenceId: string, step: JudgedStep, n: number) => {

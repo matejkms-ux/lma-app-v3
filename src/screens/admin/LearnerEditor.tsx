@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { upsertUser } from '../../data/api';
 import { displayName, type User } from '../../data/mock';
 
-const LANGUAGES = ['GERMAN', 'JAPANESE', 'KHMER', 'THAI', 'SPANISH', 'FRENCH', 'MANDARIN', 'ARABIC'];
+const LANGUAGES = ['GERMAN', 'JAPANESE', 'KHMER', 'THAI', 'SPANISH', 'PORTUGUESE', 'FRENCH', 'MANDARIN', 'ARABIC'];
 
 interface Props {
   user: User | null;
