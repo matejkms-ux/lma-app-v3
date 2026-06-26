@@ -4,7 +4,35 @@ import ZoomVideo, { VideoQuality } from '@zoom/videosdk';
 import { useSession } from '../session';
 import { fetchZoomSignature, topicForSession } from '../lib/zoom';
 import { STEP_CONFIG } from '../practice/steps';
-import { STEPS } from '../tokens';
+import { STEPS, colors, fonts, radius } from '../tokens';
+
+// Minimal line icons (LMA chrome, cream/coral on emerald). 22px, currentColor.
+const stroke = { fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' } as const;
+const IconMic = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" {...stroke}>
+    <rect x="9" y="2.5" width="6" height="11" rx="3" /><path d="M5 11a7 7 0 0 0 14 0" /><line x1="12" y1="18" x2="12" y2="21.5" />
+  </svg>
+);
+const IconMicOff = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" {...stroke}>
+    <rect x="9" y="2.5" width="6" height="11" rx="3" /><path d="M5 11a7 7 0 0 0 14 0" /><line x1="12" y1="18" x2="12" y2="21.5" /><line x1="3.5" y1="3.5" x2="20.5" y2="20.5" />
+  </svg>
+);
+const IconCam = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" {...stroke}>
+    <rect x="2.5" y="6.5" width="13" height="11" rx="2.5" /><path d="M15.5 10.5l6-3.5v10l-6-3.5" />
+  </svg>
+);
+const IconCamOff = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" {...stroke}>
+    <rect x="2.5" y="6.5" width="13" height="11" rx="2.5" /><path d="M15.5 10.5l6-3.5v10l-6-3.5" /><line x1="3" y1="3" x2="21" y2="21" />
+  </svg>
+);
+const IconLeave = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style={{ transform: 'rotate(135deg)' }}>
+    <path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11 11 0 0 0 3.5.56 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.2.2 2.4.56 3.5a1 1 0 0 1-.25 1L6.6 10.8z" />
+  </svg>
+);
 
 // The Zoom SDK registers these custom elements; declare them for JSX/TS.
 declare global {
@@ -55,6 +83,7 @@ export default function VideoSessionScreen() {
   const [videoOn, setVideoOn] = useState(true);
   const [audioMuted, setAudioMuted] = useState(false);
   const [mediaNote, setMediaNote] = useState<string | null>(null);
+  const [peerCount, setPeerCount] = useState(0);
   const joinedOnceRef = useRef(false);
   // Unique per tab so two opens never collide as the same Zoom identity
   // (duplicate identity → forced reconnect / OPERATION_CANCELLED).
@@ -125,6 +154,7 @@ export default function VideoSessionScreen() {
           if (u.userId !== me.userId && u.bVideoOn) {
             const el = await stream.attachVideo(u.userId, VideoQuality.Video_360P);
             mountVideo(peersRef.current, el);
+            setPeerCount((c) => c + 1);
           }
         }
       } catch (e) {
@@ -159,14 +189,19 @@ export default function VideoSessionScreen() {
       if (p.action === 'Start') {
         const el = await s.attachVideo(p.userId, VideoQuality.Video_360P);
         mountVideo(peersRef.current, el);
+        setPeerCount((c) => c + 1);
       } else if (p.action === 'Stop') {
         await s.detachVideo(p.userId);
+        setPeerCount((c) => Math.max(0, c - 1));
       }
     };
     const onUserRemoved = async (list: Array<{ userId: number }>) => {
       const s = stream();
       if (!s) return;
-      for (const u of list) await s.detachVideo(u.userId);
+      for (const u of list) {
+        await s.detachVideo(u.userId);
+        setPeerCount((c) => Math.max(0, c - 1));
+      }
     };
     const onConnection = (p: { state: string }) => {
       if (p.state === 'Closed') setJoined(false);
@@ -227,33 +262,133 @@ export default function VideoSessionScreen() {
     window.location.href = '/';
   }
 
+  // The L · M · A wordmark, matching EntryScreen.
+  const Wordmark = () => (
+    <div
+      style={{
+        position: 'absolute',
+        top: 22,
+        left: 26,
+        zIndex: 5,
+        fontFamily: fonts.sans,
+        fontSize: 11,
+        fontWeight: 700,
+        letterSpacing: '.42em',
+        color: colors.teal,
+      }}
+    >
+      L · M · A
+    </div>
+  );
+
   if (error) {
-    return <div style={{ padding: 32, color: '#e2725b' }}>Video session error: {error}</div>;
+    return (
+      <div
+        style={{
+          height: '100vh',
+          display: 'grid',
+          placeItems: 'center',
+          background: colors.emerald,
+          color: colors.cream,
+          fontFamily: fonts.sans,
+          padding: 32,
+        }}
+      >
+        <Wordmark />
+        <div style={{ maxWidth: 460, textAlign: 'center' }}>
+          <div style={{ fontFamily: fonts.serif, fontStyle: 'italic', fontSize: 28, lineHeight: 1.1 }}>
+            The session was interrupted.
+          </div>
+          <div style={{ marginTop: 12, fontSize: 13, color: colors.teal }}>{error}</div>
+          <button
+            onClick={() => (window.location.href = '/')}
+            style={{
+              marginTop: 24,
+              padding: '10px 22px',
+              borderRadius: radius.pill,
+              border: 'none',
+              cursor: 'pointer',
+              background: colors.coral,
+              color: colors.cream,
+              fontFamily: fonts.sans,
+              fontSize: 13,
+              fontWeight: 600,
+            }}
+          >
+            Back
+          </button>
+        </div>
+      </div>
+    );
   }
 
-  const ctrlBtn = (active: boolean): CSSProperties => ({
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+  const ctrlBtn: CSSProperties = {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
     border: 'none',
     cursor: 'pointer',
-    fontSize: 22,
-    color: '#fff',
-    background: active ? 'rgba(255,255,255,0.15)' : '#e2725b',
-  });
+    display: 'grid',
+    placeItems: 'center',
+    background: colors.emerald2,
+    color: colors.cream,
+    transition: 'background .15s, color .15s',
+  };
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: showPanel ? '1fr minmax(320px, 38%)' : '1fr', height: '100vh' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: showPanel ? '1fr minmax(320px, 38%)' : '1fr', height: '100vh', background: colors.emerald }}>
       {/* Video region — LMA owns this layout, not Zoom. */}
-      <section style={{ position: 'relative', background: '#11131a' }}>
+      <section style={{ position: 'relative', background: colors.emerald, overflow: 'hidden' }}>
+        <Wordmark />
+
         <video-player-container ref={peersRef} style={{ display: 'block', height: '100%', width: '100%' }} />
-        <video-player-container
-          ref={selfRef}
-          style={{ position: 'absolute', bottom: 16, right: 16, height: 160, width: 224, overflow: 'hidden', borderRadius: 12, background: '#000' }}
-        />
+
+        {/* Self view */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 96,
+            right: 20,
+            height: 150,
+            width: 210,
+            borderRadius: radius.card,
+            overflow: 'hidden',
+            background: colors.emerald2,
+            border: `1px solid ${colors.teal}40`,
+            boxShadow: '0 8px 24px rgba(0,0,0,.28)',
+          }}
+        >
+          <video-player-container ref={selfRef} style={{ display: 'block', height: '100%', width: '100%' }} />
+          <span
+            style={{
+              position: 'absolute',
+              left: 10,
+              bottom: 8,
+              fontFamily: fonts.sans,
+              fontSize: 10,
+              fontWeight: 600,
+              letterSpacing: '.08em',
+              color: colors.cream,
+              textShadow: '0 1px 3px rgba(0,0,0,.5)',
+            }}
+          >
+            {videoOn ? 'YOU' : 'CAMERA OFF'}
+          </span>
+        </div>
+
+        {/* Connecting / waiting states */}
         {!joined && (
-          <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', color: '#aab' }}>
-            Connecting…
+          <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', gap: 14, gridAutoFlow: 'row' }}>
+            <span className="animate-pulse" style={{ width: 12, height: 12, borderRadius: 6, background: colors.coral }} />
+            <div style={{ fontFamily: fonts.serif, fontStyle: 'italic', fontSize: 24, color: colors.cream }}>Connecting…</div>
+          </div>
+        )}
+        {joined && peerCount === 0 && (
+          <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', pointerEvents: 'none' }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontFamily: fonts.serif, fontStyle: 'italic', fontSize: 26, color: colors.cream }}>You’re in.</div>
+              <div style={{ marginTop: 8, fontFamily: fonts.sans, fontSize: 13, color: colors.teal }}>Waiting for the others to join…</div>
+            </div>
           </div>
         )}
 
@@ -261,16 +396,18 @@ export default function VideoSessionScreen() {
           <div
             style={{
               position: 'absolute',
-              top: 16,
+              top: 18,
               left: '50%',
               transform: 'translateX(-50%)',
               maxWidth: 560,
               padding: '10px 16px',
-              borderRadius: 10,
-              background: 'rgba(226,114,91,0.95)',
-              color: '#fff',
-              fontSize: 14,
+              borderRadius: radius.pill,
+              background: colors.coral,
+              color: colors.cream,
+              fontFamily: fonts.sans,
+              fontSize: 13,
               textAlign: 'center',
+              boxShadow: '0 6px 20px rgba(0,0,0,.28)',
             }}
           >
             {mediaNote}
@@ -286,36 +423,38 @@ export default function VideoSessionScreen() {
               left: '50%',
               transform: 'translateX(-50%)',
               display: 'flex',
-              gap: 16,
-              padding: '12px 20px',
-              borderRadius: 40,
-              background: 'rgba(0,0,0,0.45)',
-              backdropFilter: 'blur(8px)',
+              gap: 14,
+              padding: '12px 18px',
+              borderRadius: 36,
+              background: 'rgba(8,40,37,0.66)',
+              border: `1px solid ${colors.teal}26`,
+              backdropFilter: 'blur(10px)',
+              WebkitBackdropFilter: 'blur(10px)',
             }}
           >
             <button
               onClick={toggleAudio}
-              style={ctrlBtn(!audioMuted)}
+              style={{ ...ctrlBtn, color: audioMuted ? colors.coral : colors.cream }}
               title={audioMuted ? 'Unmute mic' : 'Mute mic'}
               aria-label={audioMuted ? 'Unmute mic' : 'Mute mic'}
             >
-              {audioMuted ? '🔇' : '🎤'}
+              {audioMuted ? <IconMicOff /> : <IconMic />}
             </button>
             <button
               onClick={toggleVideo}
-              style={ctrlBtn(videoOn)}
+              style={{ ...ctrlBtn, color: videoOn ? colors.cream : colors.coral }}
               title={videoOn ? 'Turn camera off' : 'Turn camera on'}
               aria-label={videoOn ? 'Turn camera off' : 'Turn camera on'}
             >
-              {videoOn ? '📹' : '🚫'}
+              {videoOn ? <IconCam /> : <IconCamOff />}
             </button>
             <button
               onClick={leave}
-              style={{ ...ctrlBtn(false), background: '#c0392b' }}
+              style={{ ...ctrlBtn, background: colors.coral, color: colors.cream }}
               title="Leave"
               aria-label="Leave"
             >
-              📞
+              <IconLeave />
             </button>
           </div>
         )}
@@ -323,12 +462,22 @@ export default function VideoSessionScreen() {
 
       {/* LMA practice panel — hidden by default; ?panel=1 to show (sync wiring later). */}
       {showPanel && (
-        <aside style={{ overflowY: 'auto', borderLeft: '1px solid #2a2e3a', padding: 24 }}>
-          <h2>Practice</h2>
-          <ol>
+        <aside
+          style={{
+            overflowY: 'auto',
+            borderLeft: `1px solid ${colors.teal}26`,
+            padding: 28,
+            background: colors.emerald2,
+            fontFamily: fonts.sans,
+            color: colors.cream,
+          }}
+        >
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.18em', color: colors.teal }}>PRACTICE</div>
+          <ol style={{ marginTop: 16, listStyle: 'none', padding: 0 }}>
             {STEPS.filter((s) => s !== 'FREESTYLE').map((s) => (
-              <li key={s} style={{ marginBottom: 8, fontSize: 14 }}>
-                <strong>{STEP_CONFIG[s].title}</strong> — {STEP_CONFIG[s].instruction}
+              <li key={s} style={{ marginBottom: 16 }}>
+                <div style={{ fontFamily: fonts.serif, fontStyle: 'italic', fontSize: 18, color: colors.cream }}>{STEP_CONFIG[s].title}</div>
+                <div style={{ marginTop: 2, fontSize: 13, lineHeight: 1.4, color: colors.teal }}>{STEP_CONFIG[s].instruction}</div>
               </li>
             ))}
           </ol>
