@@ -30,3 +30,10 @@ jobs:
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          # Build-time client vars (Vite inlines VITE_*). Public-safe (anon key,
+          # RLS-protected). VITE_APP_MODE=video makes "/" open the adventurer
+          # chooser; the practice app (no flag) keeps its normal entry.
+          VITE_APP_MODE: video
+          VITE_USE_SUPABASE: 'true'
+          VITE_SUPABASE_URL: https://wcrwnfvwydibhggislne.supabase.co
+          VITE_SUPABASE_ANON_KEY: sb_publishable_S4lUdBhJIwk9hLLmIDfp8Q_up_bMHzv
