@@ -153,7 +153,10 @@ def say(text, lang, is_l1=False):
         spoken, voice, eng, loc = text, AZURE_VOICE_MAP[lang], "az", AZURE_LOCALE[lang]
     else:
         voice = VOICE_MAP.get(lang) or sys.exit(f"No voice for language '{lang}'.")
-        spoken, eng, loc = f"[{LANG_NAMES.get(lang,lang)} accent] {text} …", "el", None
+        # PLAIN text only. eleven_v3 vocalizes BOTH a trailing " …" (→ stray ゴム/チョ)
+        # AND the "[… accent]" tag (→ a second voice) as audible junk between lines.
+        # Verified clean with plain text + a language-appropriate VOICE_MAP voice.
+        spoken, eng, loc = text, "el", None
     ck = (spoken, voice, eng)
     if ck in _CACHE: return _CACHE[ck]
     clip = _az(spoken, voice, loc) if eng == "az" else _el(spoken, voice, SPEED if is_l1 else L2_SPEED)
@@ -173,7 +176,10 @@ def build_step(step, rows):
         elif step == "read":  out += l2 + sil(READ_GAP) + l2 + sil(READ_TAIL)
         elif step == "recall":
             # L1 prompt -> gap to recall from memory -> reveal L2 once (no double).
-            g = rgap(r["l2"]); out += l1 + sil(g) + l2 + sil(g)
+            # Size the gap off the L1 (English) word count: it has spaces, so the
+            # count is real. Sizing off L2 broke for spaceless scripts (Thai, ja, km)
+            # — the whole sentence counted as 1 word, collapsing every gap to GMIN.
+            g = rgap(r["l1"]); out += l1 + sil(g) + l2 + sil(g)
     return out
 
 def build_ref(rows, l1=False):
