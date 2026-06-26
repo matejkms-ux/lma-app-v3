@@ -1,11 +1,12 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSession } from '../session';
 
-type Tab = 'home' | 'practice' | 'activities';
+type Tab = 'home' | 'practice' | 'read' | 'activities';
 
 const ROUTE: Record<Tab, string> = {
   home: '/home',
   practice: '/lessons',
+  read: '/reader',
   activities: '/activities',
 };
 
@@ -14,6 +15,16 @@ function HomeIcon() {
 }
 function PracticeIcon() {
   return <span className="h-5 w-5 rounded-full border-[1.8px] border-current" />;
+}
+function ReadIcon() {
+  return (
+    <span className="flex h-5 w-5 items-center justify-center">
+      <span className="h-[15px] w-[13px] rounded-[2px] border-[1.8px] border-current">
+        <span className="mx-auto mt-[3px] block h-[1.6px] w-[7px] rounded bg-current" />
+        <span className="mx-auto mt-[2px] block h-[1.6px] w-[7px] rounded bg-current" />
+      </span>
+    </span>
+  );
 }
 function ActivitiesIcon() {
   return (
@@ -28,6 +39,7 @@ function ActivitiesIcon() {
 const ITEMS: { tab: Tab; label: string; Icon: () => JSX.Element }[] = [
   { tab: 'home', label: 'Home', Icon: HomeIcon },
   { tab: 'practice', label: 'Practice', Icon: PracticeIcon },
+  { tab: 'read', label: 'Read', Icon: ReadIcon },
   { tab: 'activities', label: 'Activities', Icon: ActivitiesIcon },
 ];
 
@@ -44,6 +56,9 @@ export function BottomNav({ active }: { active: Tab }) {
     if (tab === active) return true;
     if (tab === 'practice') {
       return ['/lessons', '/practice', '/overview'].includes(location.pathname);
+    }
+    if (tab === 'read') {
+      return ['/reader', '/reader-lesson'].includes(location.pathname);
     }
     return false;
   };
