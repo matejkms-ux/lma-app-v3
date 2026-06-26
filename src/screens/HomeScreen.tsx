@@ -87,6 +87,13 @@ export function HomeScreen() {
                 </span>
               )}
             </div>
+            {adventure && (adventure.languagePair || adventureEndLabel(user?.adventure)) && (
+              <div className="mt-[3px] text-[10px] font-semibold text-muted">
+                {adventure.languagePair}
+                {adventure.languagePair && adventureEndLabel(user?.adventure) && ' · '}
+                {adventureEndLabel(user?.adventure)}
+              </div>
+            )}
             <div className="mt-[7px] font-serif text-[32px] italic leading-[1.06] text-heading">
               Welcome back,
               <br />
@@ -109,6 +116,28 @@ export function HomeScreen() {
             Every take is a rep. The reps are the road.
           </div>
         </div>
+
+        {/* Previous adventures — appears once the learner has finished at least one */}
+        {adventure && adventure.history.length > 0 && (
+          <div className="mt-3.5 rounded-[18px] border border-rule bg-white px-4 py-3.5">
+            <div className="text-[10px] font-bold tracking-[.1em] text-muted">PREVIOUS ADVENTURES</div>
+            <div className="mt-1.5 space-y-1">
+              {adventure.history.map((h) => (
+                <div key={h.number} className="flex items-center justify-between text-[11px]">
+                  <span className="font-semibold text-heading">
+                    Adventure {h.number}
+                    {h.languageTo && <span className="font-normal text-muted"> · {h.languageTo}</span>}
+                  </span>
+                  <span className="text-muted">
+                    {h.endDate
+                      ? new Date(`${h.endDate}T00:00:00`).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })
+                      : '—'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Continue lesson */}
         {lesson && (
@@ -206,39 +235,11 @@ export function HomeScreen() {
                 <div className="text-[10px] font-bold tracking-[.1em] text-muted">YOUR PROGRAM</div>
                 <div className="mt-[3px] font-serif text-base text-heading">{user.plan.programName}</div>
                 {adventure && (
-                  <div className="mt-[3px] text-[11px] font-semibold text-emerald">
-                    {adventure.label}
-                    {adventureEndLabel(user.adventure) && (
-                      <span className="text-muted"> · {adventureEndLabel(user.adventure)}</span>
-                    )}
-                  </div>
-                )}
-                {adventure?.languagePair && (
-                  <div className="mt-[2px] text-[10px] font-semibold text-muted">{adventure.languagePair}</div>
+                  <div className="mt-[3px] text-[11px] font-semibold text-emerald">{adventure.label}</div>
                 )}
               </div>
               <div className="text-[10px] font-semibold text-muted">{user.plan.totalWeeks}w</div>
             </div>
-
-            {/* Previous adventures — shown only once the learner has finished at least one */}
-            {adventure && adventure.history.length > 0 && (
-              <div className="mt-3 border-t border-rule pt-3">
-                <div className="text-[10px] font-bold tracking-[.1em] text-muted">PREVIOUS ADVENTURES</div>
-                <div className="mt-1.5 space-y-1">
-                  {adventure.history.map((h) => (
-                    <div key={h.number} className="flex items-center justify-between text-[11px]">
-                      <span className="font-semibold text-heading">
-                        Adventure {h.number}
-                        {h.languageTo && <span className="font-normal text-muted"> · {h.languageTo}</span>}
-                      </span>
-                      <span className="text-muted">
-                        {h.endDate ? new Date(`${h.endDate}T00:00:00`).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }) : '—'}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
             <div className="mt-3 space-y-0">
               {user.plan.contexts.map((ctx, i) => (
                 <div
