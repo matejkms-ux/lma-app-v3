@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ModelWaveform, LiveWaveform, StaticWaveform } from '../../components/Waveform';
 import { PulseDot } from '../../components/MicIndicator';
 
@@ -91,14 +91,13 @@ export function ShadowBody() {
 }
 
 /**
- * READ — scrollable sentence list with up to THREE transliteration levels.
- *
- * The level set adapts to the language and to which fields are populated:
- *   Japanese → Kanji (l2) · Hiragana (l2_translit_1) · Rōmaji (l2_translit_2)
- *   Thai / Khmer → Script (l2) · Roman (l2_translit_2)   [no level-1 in data]
- *   German etc. → single level (l2), no toggle.
- * A non-native level is only offered when at least one sentence carries a distinct
- * value for it, so we never show an empty or duplicate tab.
+ * READ — scrollable sentence list. The native script is always shown; reading aids
+ * stack BELOW each line and are added/removed with toggle chips (choice persists):
+ *   Japanese → Kanji (l2) + Furigana (l2_translit_1) + Rōmaji (l2_translit_2)
+ *   Thai / Khmer → Script (l2) + Roman (l2_translit_2)
+ *   German etc. → script only, no chips.
+ * An aid is offered only when at least one sentence carries a distinct value for it,
+ * so we never show an empty or duplicate line. Defaults to all aids on.
  */
 type ReadSentence = {
   l2: string;
@@ -115,51 +114,77 @@ export function ReadBody({
   language?: string;
 }) {
   const isJa = (language ?? '').toUpperCase() === 'JAPANESE';
+  const lang = (language ?? 'xx').toUpperCase();
 
-  // Candidate levels (native first), labelled for the learner's language.
-  const candidates: Array<{ label: string; get: (s: ReadSentence) => string | null }> = [
-    { label: isJa ? 'Kanji' : 'Script', get: (s) => s.l2 },
-    {
-      label: isJa ? 'Hiragana' : 'Reading',
-      // fall back to the legacy single translit if level-1 is empty
-      get: (s) => s.l2_translit_1 || (isJa ? s.l2_translit : null),
-    },
-    {
-      label: isJa ? 'Rōmaji' : 'Roman',
-      get: (s) => s.l2_translit_2 || (!isJa ? s.l2_translit : null),
-    },
-  ];
+  // Extra reading aids shown BELOW the native script, each independently toggleable.
+  // Japanese → up to two (Furigana, Rōmaji); Thai/Khmer → one (Roman). Keys are
+  // language-based (not content-based) so the default survives async sentence load.
+  const allExtras = isJa
+    ? [
+        { key: 'furigana', label: 'Furigana', get: (s: ReadSentence) => s.l2_translit_1 || s.l2_translit },
+        { key: 'romaji', label: 'Rōmaji', get: (s: ReadSentence) => s.l2_translit_2 },
+      ]
+    : [{ key: 'roman', label: 'Roman', get: (s: ReadSentence) => s.l2_translit_2 || s.l2_translit }];
 
-  // Keep the native level always; keep others only when they add distinct content.
-  const levels = candidates.filter((lvl, idx) => {
-    if (idx === 0) return true;
-    return sentences.some((s) => {
-      const v = lvl.get(s);
+  // Offer a toggle only for an aid that actually carries distinct content.
+  const extras = allExtras.filter((e) =>
+    sentences.some((s) => {
+      const v = e.get(s);
       return v && v !== s.l2;
-    });
-  });
+    }),
+  );
 
-  const [level, setLevel] = useState(0);
-  const active = levels[Math.min(level, levels.length - 1)];
+  // Which aids are on. Default: all of them (script + roman shown together), then
+  // the learner can remove any. Choice persists per language.
+  const storeKey = `lma:readTranslit:${lang}`;
+  const [enabled, setEnabled] = useState<Set<string>>(() => {
+    try {
+      const raw = localStorage.getItem(storeKey);
+      if (raw) return new Set(JSON.parse(raw) as string[]);
+    } catch {
+      /* storage unavailable */
+    }
+    return new Set(allExtras.map((e) => e.key));
+  });
+  useEffect(() => {
+    try {
+      localStorage.setItem(storeKey, JSON.stringify([...enabled]));
+    } catch {
+      /* ignore */
+    }
+  }, [enabled, storeKey]);
+
+  const toggle = (key: string) =>
+    setEnabled((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+
+  const activeExtras = extras.filter((e) => enabled.has(e.key));
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden px-[22px]">
-      {/* Level toggle — only when more than one level exists */}
-      {levels.length > 1 && (
-        <div className="mb-2 flex shrink-0 justify-end">
-          <div className="flex overflow-hidden rounded-full border border-teal/[.28]">
-            {levels.map((lvl, i) => (
+      {/* Add/remove the reading aids that show below each line */}
+      {extras.length > 0 && (
+        <div className="mb-2 flex shrink-0 flex-wrap items-center justify-end gap-1.5">
+          {extras.map((e) => {
+            const on = enabled.has(e.key);
+            return (
               <button
-                key={lvl.label}
-                onClick={() => setLevel(i)}
-                className={`px-3 py-1 text-[10px] font-bold tracking-[.08em] transition-colors ${
-                  i === level ? 'bg-teal/20 text-cream' : 'text-teal/50'
+                key={e.key}
+                onClick={() => toggle(e.key)}
+                aria-pressed={on}
+                className={`rounded-full border px-3 py-1 text-[10px] font-bold tracking-[.08em] transition-colors ${
+                  on ? 'border-teal/40 bg-teal/20 text-cream' : 'border-teal/[.28] text-teal/45'
                 }`}
               >
-                {lvl.label}
+                {on ? '✓ ' : '+ '}
+                {e.label}
               </button>
-            ))}
-          </div>
+            );
+          })}
         </div>
       )}
       <ol className="flex-1 space-y-2.5 overflow-y-auto py-1">
@@ -168,17 +193,23 @@ export function ReadBody({
             Sentences loading…
           </li>
         ) : (
-          sentences.map((s, i) => {
-            const display = active.get(s) || s.l2;
-            return (
-              <li
-                key={i}
-                className="rounded-[12px] border border-teal/[.18] bg-teal/[.06] px-4 py-3"
-              >
-                <div className="font-serif text-[17px] leading-[1.4] text-cream">{display}</div>
-              </li>
-            );
-          })
+          sentences.map((s, i) => (
+            <li
+              key={i}
+              className="rounded-[12px] border border-teal/[.18] bg-teal/[.06] px-4 py-3"
+            >
+              <div className="font-serif text-[17px] leading-[1.4] text-cream">{s.l2}</div>
+              {activeExtras.map((e) => {
+                const v = e.get(s);
+                if (!v || v === s.l2) return null;
+                return (
+                  <div key={e.key} className="mt-1 text-[13px] leading-[1.4] text-teal-dim">
+                    {v}
+                  </div>
+                );
+              })}
+            </li>
+          ))
         )}
       </ol>
     </div>
