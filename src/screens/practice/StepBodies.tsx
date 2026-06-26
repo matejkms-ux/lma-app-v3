@@ -88,6 +88,95 @@ export function ShadowBody() {
 }
 
 /**
+ * RECALL — produce from memory. The ENGLISH (L1) meaning is the on-screen prompt
+ * (always shown); the L2 stays hidden until the learner taps to reveal, so they say
+ * it first and then check — "say it before you reveal" (steps.ts). This fixes the
+ * learner report that RECALL showed no English at all, leaving nothing to recall FROM.
+ * The audio is L1 prompt → gap → L2 reveal; the list auto-scrolls with playback.
+ */
+type RecallSentence = {
+  l1: string;
+  l2: string;
+  l2_translit: string | null;
+  l2_translit_1: string | null;
+  l2_translit_2: string | null;
+};
+
+export function RecallBody({
+  sentences,
+  playing = false,
+  progress = 0,
+}: {
+  sentences: RecallSentence[];
+  /** RECALL clip is playing — drives the hands-free auto-scroll. */
+  playing?: boolean;
+  /** Playback position 0–1; the list glides to match. */
+  progress?: number;
+}) {
+  // Which lines have had their L2 revealed (per-line, like READ's translation toggle).
+  const [revealed, setRevealed] = useState<Set<number>>(new Set());
+  const toggle = (i: number) =>
+    setRevealed((prev) => {
+      const next = new Set(prev);
+      if (next.has(i)) next.delete(i);
+      else next.add(i);
+      return next;
+    });
+
+  // Same hands-free auto-scroll as READ: map playback fraction onto scrollTop.
+  const listRef = useRef<HTMLOListElement>(null);
+  useEffect(() => {
+    const el = listRef.current;
+    if (!el || !playing) return;
+    const max = el.scrollHeight - el.clientHeight;
+    if (max <= 0) return;
+    el.scrollTop = Math.max(0, Math.min(max, progress * max));
+  }, [playing, progress]);
+
+  return (
+    <div className="flex flex-1 flex-col overflow-hidden px-[22px]">
+      <ol ref={listRef} className="flex-1 space-y-1.5 overflow-y-auto py-1">
+        {sentences.length === 0 ? (
+          <li className="py-6 text-center font-serif text-[14px] italic text-teal/50">
+            Sentences loading…
+          </li>
+        ) : (
+          sentences.map((s, i) => {
+            const show = revealed.has(i);
+            const aids = [s.l2_translit_1, s.l2_translit_2, s.l2_translit].filter(
+              (v): v is string => Boolean(v) && v !== s.l2,
+            );
+            return (
+              <li key={i} className="rounded-[10px] border border-teal/[.18] bg-teal/[.06] px-3.5 py-2">
+                {/* English prompt — the cue you recall FROM */}
+                <div className="font-serif text-[14px] leading-[1.35] text-cream">{s.l1}</div>
+                {show ? (
+                  <>
+                    <div className="mt-1 text-[14px] leading-[1.35] text-teal">{s.l2}</div>
+                    {aids.map((v, k) => (
+                      <div key={k} className="mt-0.5 text-[11px] leading-[1.35] text-teal-dim">
+                        {v}
+                      </div>
+                    ))}
+                  </>
+                ) : (
+                  <button
+                    onClick={() => toggle(i)}
+                    className="mt-1 text-[10px] font-bold tracking-[.12em] text-teal/55"
+                  >
+                    SAY IT — THEN TAP TO REVEAL
+                  </button>
+                )}
+              </li>
+            );
+          })
+        )}
+      </ol>
+    </div>
+  );
+}
+
+/**
  * READ — scrollable sentence list. The native script is always shown; reading aids
  * stack BELOW each line and are added/removed with toggle chips (choice persists):
  * Convention: l2_translit_1 is the PRIMARY transliteration (always filled when a

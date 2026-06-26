@@ -6,7 +6,7 @@ import { StepIndicator } from '../components/StepIndicator';
 import { AudioPlayer } from '../components/AudioPlayer';
 import { PulseDot } from '../components/MicIndicator';
 import { MicNotice } from '../components/MicNotice';
-import { GraspBody, HumBody, ShadowBody, ReadBody } from './practice/StepBodies';
+import { GraspBody, HumBody, ShadowBody, ReadBody, RecallBody } from './practice/StepBodies';
 import { FreestylePanel } from './practice/FreestylePanel';
 import { STEP_CONFIG } from '../practice/steps';
 import { usePractice } from '../practice/usePractice';
@@ -296,6 +296,7 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
       case 'dualWave': return <ShadowBody />;
       case 'melody':   return <HumBody />;
       case 'text':     return <ReadBody sentences={sentences} language={lesson.language} playing={playing} progress={readProgress} />;
+      case 'recall':   return <RecallBody sentences={sentences} playing={playing} progress={readProgress} />;
       default:         return <GraspBody active={playing} />;
     }
   };
