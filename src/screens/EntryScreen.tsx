@@ -28,7 +28,7 @@ export function EntryScreen() {
 
   const enter = (user: (typeof roster)[number]) => {
     selectUser(user);
-    navigate('/hub');
+    navigate('/home');
   };
 
   return (

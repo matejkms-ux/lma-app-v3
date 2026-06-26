@@ -4,6 +4,7 @@ import { ModeIcon, type ModeIconName } from '../../superapp/icons';
 import { useSuperApp } from '../../superapp/store';
 import { useSession } from '../../session';
 import { displayName } from '../../data/mock';
+import { adventureKicker } from '../../data/adventure';
 import { finalProgramFor } from '../../data/finalContent';
 
 /**
@@ -25,6 +26,7 @@ export function HubScreen() {
   const { user } = useSession();
   const { reps, repsToday, knownWords, streak, dueToday } = useSuperApp();
   const first = user ? displayName(user).split(' ')[0] : 'adventurer';
+  const kicker = adventureKicker(user?.adventure);
   const hasFinal = Boolean(finalProgramFor(user?.username));
 
   const cards: ModeCard[] = [
@@ -37,7 +39,7 @@ export function HubScreen() {
   return (
     <SuperShell tab="home" tone="light">
       <div className="scroll-region flex-1 bg-cream px-[22px] pb-7 pt-16">
-        <div className="text-[12px] font-semibold uppercase tracking-[.12em] text-muted">Monday · Day 6 of 28</div>
+        <div className="text-[12px] font-semibold uppercase tracking-[.12em] text-muted">{kicker}</div>
         <div className="mt-2 font-serif text-[34px] font-medium leading-[1.05] text-heading">Morning, {first}</div>
 
         {/* Reps hero */}

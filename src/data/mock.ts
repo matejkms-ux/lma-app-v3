@@ -3,6 +3,8 @@
  * Shapes mirror the flat data model so swapping to live data is a fetch swap.
  */
 
+import type { Adventure } from './adventure';
+
 export interface StudyContext {
   id: string;
   label: string;
@@ -30,6 +32,8 @@ export interface User {
   username?: string;
   /** Structured study plan — set per learner; undefined when not yet defined. */
   plan?: LearnerPlan;
+  /** Adventure schedule (number + start date) — sourced from Airtable. */
+  adventure?: Adventure;
 }
 
 export interface Sentence {
@@ -71,12 +75,13 @@ export const USERS: User[] = [
         { id: 'baby',    label: 'With baby',        weeklyHours: 12,   note: '4h with Hanna · 8h self-directed' },
       ],
     },
+    adventure: { number: 1, startDate: '2026-06-26', totalDays: 28 },
   },
-  { id: 'u4', name: 'Jerod Cox',         firstName: 'Jerod',     lastNames: 'Cox',                           language: 'THAI',     username: 'JERODC2604-th'    },
-  { id: 'u2', name: 'Tom Roberge',       firstName: 'Tom',       lastNames: 'Roberge',                       language: 'KHMER',    username: 'TOMR2504-km'      },
-  { id: 'u1', name: 'Won-Chak Leung',    firstName: 'Won-Chak',  lastNames: 'Leung',    calledName: 'Charles', language: 'JAPANESE', username: 'WONCHAKL2401-ja'  },
-  { id: 'u5', name: 'Jason Oberbillig',  firstName: 'Jason',     lastNames: 'Oberbillig',                       language: 'JAPANESE', username: 'JASONO2308-ja'    },
-  { id: 'u7', name: 'Mehrad',            firstName: 'Mehrad',                                                   language: 'PORTUGUESE', username: 'MEHRAD2606-pt'  },
+  { id: 'u4', name: 'Jerod Cox',         firstName: 'Jerod',     lastNames: 'Cox',                           language: 'THAI',     username: 'JERODC2604-th',   adventure: { number: 1, startDate: '2026-06-25', totalDays: 42 } },
+  { id: 'u2', name: 'Tom Roberge',       firstName: 'Tom',       lastNames: 'Roberge',                       language: 'KHMER',    username: 'TOMR2504-km',     adventure: { number: 1 } },
+  { id: 'u1', name: 'Won-Chak Leung',    firstName: 'Won-Chak',  lastNames: 'Leung',    calledName: 'Charles', language: 'JAPANESE', username: 'WONCHAKL2401-ja', adventure: { number: 1 } },
+  { id: 'u5', name: 'Jason Oberbillig',  firstName: 'Jason',     lastNames: 'Oberbillig',                       language: 'JAPANESE', username: 'JASONO2308-ja',   adventure: { number: 1 } },
+  { id: 'u7', name: 'Mehrad',            firstName: 'Mehrad',                                                   language: 'PORTUGUESE', username: 'MEHRAD2606-pt', adventure: { number: 1 } },
 ];
 
 /**

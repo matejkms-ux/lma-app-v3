@@ -8,6 +8,7 @@ import { lessonProgress, lifetimeReps, repsToday, isLessonUnlockComplete, getSte
 import { STEPS, AUDIO_STEPS } from '../tokens';
 import { useSession } from '../session';
 import { displayName } from '../data/mock';
+import { adventureStatus } from '../data/adventure';
 
 /** Home — the adventure. Warm greeting, reps (now real) as the hero, current step, CTA. */
 export function HomeScreen() {
@@ -15,6 +16,7 @@ export function HomeScreen() {
   const { user } = useSession();
   const name = user ? displayName(user) : 'adventurer';
   const language = user?.language ?? 'JAPANESE';
+  const adventure = adventureStatus(user?.adventure);
 
   const scope = user?.username ?? '';
   const [lessons, setLessons] = useState(() => lessonsForUser(scope));
@@ -57,7 +59,10 @@ export function HomeScreen() {
       <div className="scroll-region flex-1 px-6 pb-5 pt-3.5">
         <div className="flex items-start justify-between">
           <div>
-            <div className="text-xs font-semibold tracking-[.04em] text-muted">{language}</div>
+            <div className="text-xs font-semibold tracking-[.04em] text-muted">
+              {language}
+              {adventure && <span className="text-coral"> · {adventure.label}</span>}
+            </div>
             <div className="mt-[7px] font-serif text-[32px] italic leading-[1.06] text-heading">
               Welcome back,
               <br />
@@ -142,6 +147,9 @@ export function HomeScreen() {
               <div>
                 <div className="text-[10px] font-bold tracking-[.1em] text-muted">YOUR PROGRAM</div>
                 <div className="mt-[3px] font-serif text-base text-heading">{user.plan.programName}</div>
+                {adventure && (
+                  <div className="mt-[3px] text-[11px] font-semibold text-emerald">{adventure.label}</div>
+                )}
               </div>
               <div className="text-[10px] font-semibold text-muted">{user.plan.totalWeeks}w</div>
             </div>

@@ -4,7 +4,7 @@ import { useSession } from '../session';
 type Tab = 'home' | 'practice' | 'read' | 'activities';
 
 const ROUTE: Record<Tab, string> = {
-  home: '/hub',
+  home: '/home',
   practice: '/lessons',
   read: '/reader',
   activities: '/activities',

@@ -1,5 +1,6 @@
 import { supabase, useSupabase } from '../lib/supabase';
 import { USERS, LESSONS, type User, type Lesson, type Sentence, type LearnerPlan } from './mock';
+import type { Adventure } from './adventure';
 import { getActiveVersion } from './lessonAudio';
 
 /** Roster for name-select. */
@@ -7,7 +8,7 @@ export async function getRoster(): Promise<User[]> {
   if (useSupabase && supabase) {
     const { data, error } = await supabase
       .from('users')
-      .select('id, name, first_name, last_names, called_name, language, username, plan')
+      .select('id, name, first_name, last_names, called_name, language, username, plan, adventure')
       .eq('role', 'adventurer')
       .order('name');
     if (!error && data && data.length) {
@@ -20,6 +21,7 @@ export async function getRoster(): Promise<User[]> {
         language: r.language as string,
         username: (r.username as string | null) ?? undefined,
         plan: (r.plan as LearnerPlan | null) ?? undefined,
+        adventure: (r.adventure as Adventure | null) ?? undefined,
       })) as User[];
     }
   }
