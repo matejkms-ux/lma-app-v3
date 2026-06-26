@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRecorder } from '../../practice/useRecorder';
 import { PulseDot } from '../../components/MicIndicator';
+import { MicNotice } from '../../components/MicNotice';
 import {
   listFreestyleRecordings,
   updateFreestyleStars,
@@ -44,6 +45,9 @@ export function FreestylePanel({
   const [recording, setRecording] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [saving, setSaving] = useState(false);
+  // Set when stop() yields no audio (mic produced nothing) so the failure is
+  // visible instead of the take silently vanishing.
+  const [captureFailed, setCaptureFailed] = useState(false);
 
   const startedAtRef = useRef<number | null>(null);
   const tickRef = useRef<number | null>(null);
@@ -96,7 +100,11 @@ export function FreestylePanel({
     startedAtRef.current = null;
     setRecording(false);
     const take = await recorder.stop();
-    if (!take) return;
+    if (!take) {
+      setCaptureFailed(true);
+      return;
+    }
+    setCaptureFailed(false);
     setLastTake(take.blob);
     setSaving(true);
     await uploadFreestyleRecording(userId, lesson, take.blob, seconds, null);
@@ -110,6 +118,7 @@ export function FreestylePanel({
       return;
     }
     setElapsed(0);
+    setCaptureFailed(false);
     void recorder.start();
   }, [recording, finish, recorder]);
 
@@ -160,6 +169,11 @@ export function FreestylePanel({
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden px-[22px]">
+      <MicNotice
+        status={recorder.status}
+        errorName={recorder.errorName}
+        onRetry={() => void recorder.prime()}
+      />
       {/* Record control */}
       <div className="flex shrink-0 flex-col items-center gap-2 pt-1">
         {unavailable ? (
@@ -193,6 +207,10 @@ export function FreestylePanel({
               </div>
             ) : saving ? (
               <span className="text-[11px] font-bold tracking-[.12em] text-teal">SAVING TAKE…</span>
+            ) : captureFailed && !denied ? (
+              <span className="text-[11px] font-bold tracking-[.12em] text-coral">
+                NO AUDIO CAPTURED · CHECK MIC &amp; TAP TO RETRY
+              </span>
             ) : (
               <span className="text-[11px] font-bold tracking-[.12em] text-teal">
                 {denied ? 'MIC OFF · enable to record' : 'TAP TO RECORD · UP TO 60s'}

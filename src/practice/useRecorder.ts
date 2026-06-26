@@ -38,6 +38,9 @@ function pickMime(): string {
 
 export function useRecorder() {
   const [status, setStatus] = useState<RecorderStatus>('idle');
+  /** DOMException name from the last failed getUserMedia (e.g. NotAllowedError,
+   * NotFoundError) — lets the UI distinguish "blocked" from "no mic found". */
+  const [errorName, setErrorName] = useState<string | null>(null);
   const recRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -68,10 +71,36 @@ export function useRecorder() {
       };
       recRef.current = rec;
       rec.start();
+      setErrorName(null);
       setStatus('recording');
-    } catch {
+    } catch (e) {
+      setErrorName((e as DOMException)?.name ?? 'Error');
       setStatus('denied');
       releaseStream();
+    }
+  }, []);
+
+  /**
+   * Explicitly request mic permission outside the play flow — backs a "Retry"
+   * button so a learner who was blocked can grant access and try again without
+   * leaving the step. Releases the stream immediately; recording still happens
+   * via start(). Returns true if permission is now granted.
+   */
+  const prime = useCallback(async (): Promise<boolean> => {
+    if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
+      setStatus('unsupported');
+      return false;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach((t) => t.stop());
+      setErrorName(null);
+      setStatus('idle');
+      return true;
+    } catch (e) {
+      setErrorName((e as DOMException)?.name ?? 'Error');
+      setStatus('denied');
+      return false;
     }
   }, []);
 
@@ -123,5 +152,5 @@ export function useRecorder() {
     setStatus((s) => (s === 'denied' || s === 'unsupported' ? s : 'idle'));
   }, []);
 
-  return { status, start, stop, cancel };
+  return { status, errorName, start, stop, cancel, prime };
 }

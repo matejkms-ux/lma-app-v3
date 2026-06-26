@@ -5,6 +5,7 @@ import { StatusBar } from '../components/StatusBar';
 import { StepIndicator } from '../components/StepIndicator';
 import { AudioPlayer } from '../components/AudioPlayer';
 import { PulseDot } from '../components/MicIndicator';
+import { MicNotice } from '../components/MicNotice';
 import { GraspBody, HumBody, ShadowBody, ReadBody } from './practice/StepBodies';
 import { FreestylePanel } from './practice/FreestylePanel';
 import { STEP_CONFIG } from '../practice/steps';
@@ -383,6 +384,11 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
         )
       ) : (
         <>
+      <MicNotice
+        status={recorder.status}
+        errorName={recorder.errorName}
+        onRetry={() => void recorder.prime()}
+      />
       {body()}
 
       {isCurrentStepUnlocked ? (
