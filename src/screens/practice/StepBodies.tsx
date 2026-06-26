@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ModelWaveform, StaticWaveform, StaticCoralWaveform } from '../../components/Waveform';
+import { ModelWaveform, StaticCoralWaveform } from '../../components/Waveform';
 
 /**
  * The per-step centrepieces. These are the visual chassis for a step; the live
@@ -43,13 +43,17 @@ export function GraspBody({ active = false }: { active?: boolean }) {
   );
 }
 
-/** HUM — model melody contour (teal) + your hum (gray/static until HUM recording is wired). */
+/**
+ * HUM — the model melody contour. The learner hums this shape along with the clip
+ * (the mic records via the player, same as every audio step). No per-hum capture
+ * UI is shown; pitch/melody feedback is tracked as a future feature.
+ */
 export function HumBody() {
   return (
-    <div className="flex flex-1 flex-col justify-center gap-3.5 px-[22px]">
-      <div>
-        <div className="mb-2 text-[9.5px] font-bold tracking-[.16em] text-teal">MODEL MELODY</div>
-        <svg viewBox="0 0 300 60" className="block h-[50px] w-full">
+    <div className="flex flex-1 flex-col items-center justify-center gap-4 px-[22px]">
+      <div className="w-full">
+        <div className="mb-2 text-center text-[9.5px] font-bold tracking-[.16em] text-teal">MODEL MELODY</div>
+        <svg viewBox="0 0 300 60" className="block h-[60px] w-full">
           <path
             d="M4 44 C 40 44,50 14,86 16 S 140 46,168 30 S 220 6,252 22 S 288 40,296 30"
             fill="none"
@@ -59,13 +63,7 @@ export function HumBody() {
           />
         </svg>
       </div>
-      <div className="rounded-[14px] border border-rule bg-cream-panel/60 p-3.5">
-        <div className="mb-2.5 flex items-center gap-2.5">
-          <span className="h-3 w-3 shrink-0 rounded-full bg-locked" />
-          <span className="text-[10px] font-bold tracking-[.14em] text-locked">YOUR HUM · COMING SOON</span>
-        </div>
-        <StaticWaveform />
-      </div>
+      <div className="font-serif text-[13px] italic text-teal">Hum the shape of the sound.</div>
     </div>
   );
 }

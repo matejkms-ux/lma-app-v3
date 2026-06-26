@@ -18,16 +18,6 @@ import { FinalConversationScreen } from './screens/FinalConversationScreen';
 import { FinalSessionScreen } from './screens/FinalSessionScreen';
 import { ReaderScreen } from './screens/ReaderScreen';
 import { ReaderLessonScreen } from './screens/ReaderLessonScreen';
-import { HubScreen } from './screens/super/HubScreen';
-import { CompanionCourseScreen } from './screens/super/CompanionCourseScreen';
-import { CompanionPlayerScreen } from './screens/super/CompanionPlayerScreen';
-import { ReaderLibraryScreen } from './screens/super/ReaderLibraryScreen';
-import { ReaderImportScreen } from './screens/super/ReaderImportScreen';
-import { ReadingScreen } from './screens/super/ReadingScreen';
-import { ReviewScreen } from './screens/super/ReviewScreen';
-import { WatchLibraryScreen } from './screens/super/WatchLibraryScreen';
-import { WatchPlayerScreen } from './screens/super/WatchPlayerScreen';
-import { WatchQuizScreen } from './screens/super/WatchQuizScreen';
 // Lazy — keeps the heavy @zoom/videosdk out of the main bundle (loads only on /session/*).
 const VideoSessionScreen = lazy(() => import('./screens/VideoSessionScreen'));
 import VideoRosterScreen from './screens/VideoRosterScreen';
@@ -46,17 +36,6 @@ export default function App() {
             )
           }
         />
-        {/* Super-app shell — the Adventure Hub and the four modes. */}
-        <Route path="/hub" element={<HubScreen />} />
-        <Route path="/companion" element={<CompanionCourseScreen />} />
-        <Route path="/companion/play" element={<CompanionPlayerScreen />} />
-        <Route path="/read" element={<ReaderLibraryScreen />} />
-        <Route path="/read/import" element={<ReaderImportScreen />} />
-        <Route path="/read/text" element={<ReadingScreen />} />
-        <Route path="/review" element={<ReviewScreen />} />
-        <Route path="/watch" element={<WatchLibraryScreen />} />
-        <Route path="/watch/play" element={<WatchPlayerScreen />} />
-        <Route path="/watch/quiz" element={<WatchQuizScreen />} />
         {/* Practice flow (wired to Supabase) + legacy screens, unchanged. */}
         <Route path="/home" element={<HomeScreen />} />
         <Route path="/lessons" element={<LessonsScreen />} />

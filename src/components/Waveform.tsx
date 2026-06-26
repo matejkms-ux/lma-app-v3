@@ -39,17 +39,6 @@ export function LiveWaveform() {
   );
 }
 
-/** Gray, static placeholder — used when voice capture isn't wired yet. */
-export function StaticWaveform() {
-  return (
-    <div className="flex h-[38px] items-center gap-[3px]">
-      {MODEL_HEIGHTS.map((h, i) => (
-        <i key={i} className="flex-1 rounded-[2px] bg-locked" style={{ height: `${h}%` }} />
-      ))}
-    </div>
-  );
-}
-
 /** Coral, static — the "your take" slot before live capture is wired (no motion). */
 export function StaticCoralWaveform() {
   return (
