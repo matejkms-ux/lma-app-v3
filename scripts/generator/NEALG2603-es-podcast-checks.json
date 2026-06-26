@@ -1,0 +1,38 @@
+{
+  "scope": "NEALG2603-es",
+  "lang": "es",
+  "durationSec": 1509.9,
+  "audioUrl": "https://wcrwnfvwydibhggislne.supabase.co/storage/v1/object/public/lesson-audio/NEALG2603-es-podcast/cuatro-movimientos.mp3",
+  "checks": [
+    {
+      "n": 1,
+      "timeSec": 316.66,
+      "question": "¿Cómo describe Neal su manera de mirar el mundo cuando era niño?"
+    },
+    {
+      "n": 2,
+      "timeSec": 528.53,
+      "question": "¿Por qué dice Neal que le atraía aquello que todavía no dominaba?"
+    },
+    {
+      "n": 3,
+      "timeSec": 925.69,
+      "question": "Según Neal, ¿de dónde vienen realmente las mejores ideas?"
+    },
+    {
+      "n": 4,
+      "timeSec": 978.73,
+      "question": "¿Por qué dice Neal que la creatividad es espiritual?"
+    },
+    {
+      "n": 5,
+      "timeSec": 1297.97,
+      "question": "¿Qué descubrió Neal sobre el logro y la felicidad?"
+    },
+    {
+      "n": 6,
+      "timeSec": 1509.23,
+      "question": "Según Neal, ¿cuáles son las cuatro cosas para las que estamos aquí?"
+    }
+  ]
+}

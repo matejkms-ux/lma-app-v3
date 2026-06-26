@@ -62,7 +62,7 @@ export const FINAL_PROGRAMS: Record<string, FinalProgram> = {
     podcast: {
       title: "Cuatro movimientos",
       subtitle: "Una conversación con Neal",
-      audioUrl: "https://wcrwnfvwydibhggislne.supabase.co/storage/v1/object/public/lesson-audio/NEALG2603-es-podcast/cuatro-movimientos.mp3",
+      audioUrl: "https://wcrwnfvwydibhggislne.supabase.co/storage/v1/object/public/lesson-audio/NEALG2603-es-podcast/cuatro-movimientos.mp3?v=2",
       hostVoiceId: "ewn5JTa3lNPY8QVuZJi6",
       learnerVoiceId: "cIBxLwfshLYhRB9lCXEg",
       checks: [
