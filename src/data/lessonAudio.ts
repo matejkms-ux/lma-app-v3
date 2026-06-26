@@ -348,6 +348,7 @@ const CODE_LANG: Record<string, string> = {
   km: 'KHMER',
   th: 'THAI',
   es: 'SPANISH',
+  pt: 'PORTUGUESE',
   fr: 'FRENCH',
   zh: 'MANDARIN',
   ar: 'ARABIC',

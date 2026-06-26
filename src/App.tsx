@@ -10,8 +10,12 @@ import { ActivitiesScreen } from './screens/ActivitiesScreen';
 import { SentencesScreen } from './screens/SentencesScreen';
 import { AdminScreen } from './screens/AdminScreen';
 import { ReadingTestScreen } from './screens/ReadingTestScreen';
+import { FinalHubScreen } from './screens/FinalHubScreen';
 import { FinalReadingScreen } from './screens/FinalReadingScreen';
 import { PodcastScreen } from './screens/PodcastScreen';
+import { FinalWritingScreen } from './screens/FinalWritingScreen';
+import { FinalConversationScreen } from './screens/FinalConversationScreen';
+import { FinalSessionScreen } from './screens/FinalSessionScreen';
 import { ReaderScreen } from './screens/ReaderScreen';
 import { ReaderLessonScreen } from './screens/ReaderLessonScreen';
 import { HubScreen } from './screens/super/HubScreen';
@@ -32,7 +36,16 @@ export default function App() {
   return (
     <ErrorBoundary>
       <Routes>
-        <Route path="/" element={<EntryScreen />} />
+        <Route
+          path="/"
+          element={
+            (import.meta.env.VITE_APP_MODE as string | undefined) === 'video' ? (
+              <VideoRosterScreen />
+            ) : (
+              <EntryScreen />
+            )
+          }
+        />
         {/* Super-app shell — the Adventure Hub and the four modes. */}
         <Route path="/hub" element={<HubScreen />} />
         <Route path="/companion" element={<CompanionCourseScreen />} />
@@ -53,8 +66,13 @@ export default function App() {
         <Route path="/sentences" element={<SentencesScreen />} />
         <Route path="/admin" element={<AdminScreen />} />
         <Route path="/reading-test" element={<ReadingTestScreen />} />
+        {/* LMA Final App — five modules over a per-adventurer content layer. */}
+        <Route path="/final" element={<FinalHubScreen />} />
         <Route path="/final-reading" element={<FinalReadingScreen />} />
         <Route path="/podcast" element={<PodcastScreen />} />
+        <Route path="/final-writing" element={<FinalWritingScreen />} />
+        <Route path="/final-conversation" element={<FinalConversationScreen />} />
+        <Route path="/final-session" element={<FinalSessionScreen />} />
         <Route path="/reader" element={<ReaderScreen />} />
         <Route path="/reader-lesson" element={<ReaderLessonScreen />} />
         <Route

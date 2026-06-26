@@ -4,6 +4,7 @@ import { ModeIcon, type ModeIconName } from '../../superapp/icons';
 import { useSuperApp } from '../../superapp/store';
 import { useSession } from '../../session';
 import { displayName } from '../../data/mock';
+import { finalProgramFor } from '../../data/finalContent';
 
 /**
  * S1 · Adventure Hub — the super-app landing. A warm greeting, reps gathered as

@@ -3,8 +3,8 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { DeviceFrame } from '../components/DeviceFrame';
 import { StatusBar } from '../components/StatusBar';
 import { useSession } from '../session';
-import { finalEssayForScope } from '../data/finalReading';
-import { getEssayRatings, setEssayRating, averageStars } from '../lib/finalProgress';
+import { finalProgramFor } from '../data/finalContent';
+import { getEssayRatings, setEssayRating, averageStars, markModuleDone } from '../lib/finalProgress';
 
 /** A 1–5 star self-rating row. Tapping a star sets the value. */
 function StarRow({ value, onRate }: { value: number | null; onRate: (n: number) => void }) {
@@ -29,7 +29,9 @@ function StarRow({ value, onRate }: { value: number | null; onRate: (n: number) 
 export function FinalReadingScreen() {
   const navigate = useNavigate();
   const { user } = useSession();
-  const essay = useMemo(() => finalEssayForScope(user?.username), [user?.username]);
+  const program = useMemo(() => finalProgramFor(user?.username), [user?.username]);
+  const essay = program?.essay ?? null;
+  const language = program?.language ?? '';
 
   const [page, setPage] = useState(0);
   const [ratings, setRatings] = useState<Record<number, number>>(() =>
@@ -47,7 +49,7 @@ export function FinalReadingScreen() {
           <div className="font-serif text-2xl italic text-heading">Nothing to read yet</div>
           <div className="text-sm text-muted">Your final essay isn't loaded for this learner yet.</div>
           <button
-            onClick={() => navigate('/activities')}
+            onClick={() => navigate('/final')}
             className="rounded-full border border-rule px-5 py-2 text-[12px] font-bold tracking-[.08em] text-muted"
           >
             ‹ BACK
@@ -92,7 +94,7 @@ export function FinalReadingScreen() {
         </div>
         <div className="px-5 pb-5">
           <button
-            onClick={() => navigate('/activities')}
+            onClick={() => navigate('/final')}
             className="w-full rounded-[15px] bg-emerald py-4 text-[15px] font-bold tracking-[.01em] text-cream"
           >
             Done
@@ -111,7 +113,7 @@ export function FinalReadingScreen() {
         <div className="flex items-center justify-between">
           <div className="min-w-0">
             <div className="text-[10px] font-bold tracking-[.16em] text-muted">
-              {essay.language} · FINAL READING
+              {language} · FINAL READING
             </div>
             <div className="mt-[2px] truncate font-serif text-[20px] italic leading-tight text-heading">
               {essay.title}
@@ -147,9 +149,12 @@ export function FinalReadingScreen() {
             {cur.heading}
           </h1>
           {cur.paragraphs.map((para, i) => (
-            <p key={i} className="mb-3 text-[15px] leading-[1.7] text-heading last:mb-0">
-              {para}
-            </p>
+            <div key={i} className="mb-3 last:mb-0">
+              <p className="text-[15px] leading-[1.7] text-heading">{para}</p>
+              {cur.translit?.[i] && (
+                <p className="mt-1 text-[12px] leading-[1.6] text-muted">{cur.translit[i]}</p>
+              )}
+            </div>
           ))}
         </div>
       </div>
@@ -178,7 +183,7 @@ export function FinalReadingScreen() {
           </button>
           {isLast ? (
             <button
-              onClick={() => setDone(true)}
+              onClick={() => { markModuleDone(user.id, user.username ?? '', 'read'); setDone(true); }}
               disabled={!allRated}
               className="flex-1 rounded-[15px] bg-emerald py-3.5 text-[15px] font-bold tracking-[.01em] text-cream disabled:opacity-40"
             >

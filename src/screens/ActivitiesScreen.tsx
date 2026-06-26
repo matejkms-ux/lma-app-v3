@@ -4,7 +4,7 @@ import { StatusBar } from '../components/StatusBar';
 import { BottomNav } from '../components/BottomNav';
 import { useSession } from '../session';
 import { lifetimeReps, repsToday, repEvents, type RepEvent } from '../lib/progress';
-import { finalEssayForScope, finalPodcastForScope } from '../data/finalReading';
+import { finalProgramFor } from '../data/finalContent';
 
 // Bar colour deepens left→right to read as progress over time.
 const BAR_COLORS = ['#CFE0D6', '#CFE0D6', '#9BC4B8', '#9BC4B8', '#5C9A8C', '#5C9A8C', '#0E635B', '#0E635B', '#0A554E', '#0A554E'];
@@ -45,8 +45,7 @@ export function ActivitiesScreen() {
   const navigate = useNavigate();
   if (!user) return <Navigate to="/" replace />;
 
-  const essay = finalEssayForScope(user.username);
-  const podcast = finalPodcastForScope(user.username);
+  const finalProgram = finalProgramFor(user.username);
   const language = user.language;
   const lifetime = lifetimeReps(user.id);
   const today = repsToday(user.id);
@@ -66,43 +65,24 @@ export function ActivitiesScreen() {
       </div>
 
       <div className="scroll-region flex-1 px-5 pb-5 pt-2">
-        {(essay || podcast) && (
+        {finalProgram && (
           <div className="mb-5">
             <div className="mx-0.5 mb-2.5 text-[11px] font-bold tracking-[.12em] text-muted">
-              FINAL WEEK
+              FINAL APP
             </div>
-            <div className="flex flex-col gap-2.5">
-              {essay && (
-                <button
-                  onClick={() => navigate('/final-reading')}
-                  className="flex items-center gap-3 rounded-[18px] border border-rule bg-white p-4 text-left active:scale-[.99]"
-                >
-                  <span className="text-[26px]">📖</span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-[14px] font-bold text-heading">Final reading</span>
-                    <span className="block truncate text-[12px] text-muted">
-                      “{essay.title}” · {essay.pages.length} pages · the day before your last session
-                    </span>
-                  </span>
-                  <span className="text-muted">›</span>
-                </button>
-              )}
-              {podcast && (
-                <button
-                  onClick={() => navigate('/podcast')}
-                  className="flex items-center gap-3 rounded-[18px] border border-rule bg-white p-4 text-left active:scale-[.99]"
-                >
-                  <span className="text-[26px]">🎧</span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-[14px] font-bold text-heading">Podcast · {podcast.title}</span>
-                    <span className="block truncate text-[12px] text-muted">
-                      {podcast.subtitle} · {podcast.checks} understanding checks
-                    </span>
-                  </span>
-                  <span className="text-muted">›</span>
-                </button>
-              )}
-            </div>
+            <button
+              onClick={() => navigate('/final')}
+              className="flex w-full items-center gap-3 rounded-[18px] border border-rule bg-white p-4 text-left active:scale-[.99]"
+            >
+              <span className="text-[26px]">🏁</span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[14px] font-bold text-heading">The final week</span>
+                <span className="block truncate text-[12px] text-muted">
+                  Read · Podcast · Writing · Conversation · Session
+                </span>
+              </span>
+              <span className="text-muted">›</span>
+            </button>
           </div>
         )}
         {hasActivity ? (

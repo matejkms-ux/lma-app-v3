@@ -29,6 +29,7 @@ const LANG_CODE: Record<string, string> = {
   KHMER: 'km',
   THAI: 'th',
   SPANISH: 'es',
+  PORTUGUESE: 'pt',
   FRENCH: 'fr',
   MANDARIN: 'zh',
   ARABIC: 'ar',
