@@ -1,0 +1,32 @@
+name: Deploy to Netlify
+
+# Auto-deploy LMA Video App: every push to main builds and publishes to the
+# lma-video-app Netlify site (https://lma-video-app.netlify.app).
+# Requires repo secrets: NETLIFY_AUTH_TOKEN, NETLIFY_SITE_ID.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+concurrency:
+  group: netlify-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci
+      # --build runs the project's build command + bundles netlify/functions,
+      # exactly like a native Netlify build. --prod publishes to the live URL.
+      - name: Build & deploy to Netlify (production)
+        run: npx netlify-cli@26 deploy --build --prod
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
