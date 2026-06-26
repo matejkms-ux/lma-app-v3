@@ -32,7 +32,7 @@ export function FinalHubScreen() {
         <StatusBar tone="light" />
         <div className="flex flex-1 flex-col items-center justify-center gap-4 px-8 text-center">
           <div className="text-[40px]">🏁</div>
-          <div className="font-serif text-[24px] italic leading-snug text-heading">Final app coming soon</div>
+          <div className="font-serif text-[24px] italic leading-snug text-heading">Nothing here yet</div>
           <div className="text-sm text-muted">
             Your Final content (essay, podcast, conversation) isn't loaded yet. It's added once
             your life-story narration exists.

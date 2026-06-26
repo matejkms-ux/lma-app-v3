@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ModelWaveform, StaticCoralWaveform } from '../../components/Waveform';
+import { ModelWaveform } from '../../components/Waveform';
 
 /**
  * The per-step centrepieces. These are the visual chassis for a step; the live
@@ -68,21 +68,19 @@ export function HumBody() {
   );
 }
 
-/** SHADOW — dual waveform: model voice (teal) + your voice (coral). */
+/**
+ * SHADOW — the model voice to ride. Speak at the same time while the mic records
+ * (same as every audio step). Live voice-vs-model waveform comparison is a future
+ * feature; we don't fake one here.
+ */
 export function ShadowBody() {
   return (
-    <div className="flex flex-1 flex-col justify-center gap-3 px-[22px]">
-      <div className="rounded-[14px] border border-teal/[.22] p-3.5">
-        <div className="mb-[9px] text-[9.5px] font-bold tracking-[.16em] text-teal">MODEL VOICE</div>
+    <div className="flex flex-1 flex-col items-center justify-center gap-4 px-[22px]">
+      <div className="w-full rounded-[14px] border border-teal/[.22] p-4">
+        <div className="mb-2.5 text-center text-[9.5px] font-bold tracking-[.16em] text-teal">MODEL VOICE</div>
         <ModelWaveform />
       </div>
-      <div className="rounded-[14px] border border-coral/40 bg-coral/[.08] p-3.5">
-        <div className="mb-[9px] flex items-center gap-2.5">
-          <span className="h-3 w-3 shrink-0 rounded-full bg-coral" />
-          <span className="text-[10px] font-bold tracking-[.14em] text-coral">YOUR VOICE</span>
-        </div>
-        <StaticCoralWaveform />
-      </div>
+      <div className="font-serif text-[13px] italic text-teal">Ride the voice — speak at the same time.</div>
     </div>
   );
 }
