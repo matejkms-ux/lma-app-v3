@@ -222,7 +222,7 @@ function ReadPhase({ audio, sentences }: { audio: string; sentences: ReaderSente
                   active ? 'text-coral' : 'text-cream'
                 }`}
               >
-                {s.de}
+                {s.l2}
               </span>
               {show && (
                 <span className="mt-1 block text-[14px] italic leading-snug text-teal">{s.en}</span>
