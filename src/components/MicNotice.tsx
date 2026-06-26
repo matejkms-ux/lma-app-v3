@@ -1,15 +1,20 @@
 import { useMemo, useState } from 'react';
-import { detectMicEnv } from '../lib/micEnv';
+import { detectMicEnv, SUPPORTED_BROWSERS } from '../lib/micEnv';
 import type { RecorderStatus } from '../practice/useRecorder';
 
 /**
- * Loud, actionable mic-trouble banner. Recording used to fail silently — the take
- * was dropped and the learner never knew why. This names the reason (in-app
- * browser, blocked permission, unsupported) and tells them exactly how to fix it,
- * with a Retry that re-requests permission in place.
+ * Mic-trouble + supported-browser guidance. Recording used to fail silently — the
+ * take was dropped and the learner never knew why. This component:
+ *  - names a hard block (in-app browser, blocked permission, unsupported) and how
+ *    to fix it, with a Retry that re-requests permission in place; and
+ *  - when nothing is wrong, shows a one-time, dismissible advisory telling people
+ *    which browsers recording works in (so they don't start in an in-app browser).
  *
- * Renders nothing when the mic is fine, so it's safe to mount unconditionally.
+ * Safe to mount unconditionally — renders nothing once the advisory is dismissed
+ * and there's no problem.
  */
+const DISMISS_KEY = 'lma:browserHintDismissed';
+
 export function MicNotice({
   status,
   errorName,
@@ -21,9 +26,23 @@ export function MicNotice({
 }) {
   const env = useMemo(() => detectMicEnv(), []);
   const [copied, setCopied] = useState(false);
+  const [advisoryDismissed, setAdvisoryDismissed] = useState(() => {
+    try {
+      return localStorage.getItem(DISMISS_KEY) === '1';
+    } catch {
+      return false;
+    }
+  });
 
-  // Decide what (if anything) to show. A hard environmental block wins; otherwise
-  // a runtime denial/unsupported from an actual record attempt.
+  const dismissAdvisory = () => {
+    try {
+      localStorage.setItem(DISMISS_KEY, '1');
+    } catch {
+      /* storage unavailable — just hide for this session */
+    }
+    setAdvisoryDismissed(true);
+  };
+
   let title = '';
   let hint = '';
   let showRetry = false;
@@ -33,7 +52,6 @@ export function MicNotice({
     title = env.title;
     hint = env.hint;
     showCopyLink = env.block === 'inapp';
-    showRetry = env.block === 'insecure' || env.block === 'no-api' ? false : false;
   } else if (status === 'denied') {
     const noMic = errorName === 'NotFoundError' || errorName === 'OverconstrainedError';
     title = noMic ? 'No microphone found' : 'Microphone is blocked';
@@ -43,9 +61,28 @@ export function MicNotice({
     showRetry = true;
   } else if (status === 'unsupported') {
     title = 'This browser can’t record';
-    hint = 'Recording isn’t supported here. Open the app in Safari (iPhone) or Chrome (Android).';
+    hint = `Recording isn’t supported here. Open the app in ${SUPPORTED_BROWSERS}.`;
   } else {
-    return null;
+    // Nothing wrong — show the upfront, dismissible supported-browser advisory.
+    if (advisoryDismissed) return null;
+    return (
+      <div className="mx-6 mb-3 shrink-0 rounded-[14px] border border-teal/30 bg-teal/[.08] px-4 py-2.5">
+        <div className="flex items-start gap-2.5">
+          <span aria-hidden className="mt-px text-[14px] leading-none text-teal">🎙</span>
+          <div className="min-w-0 flex-1 text-[12px] leading-[1.45] text-cream/85">
+            For recording to work, use {SUPPORTED_BROWSERS} — not a browser opened from
+            inside another app (WhatsApp, Instagram…).
+          </div>
+          <button
+            onClick={dismissAdvisory}
+            className="-mr-1 -mt-1 shrink-0 px-1.5 py-0.5 text-[13px] leading-none text-teal/70 hover:text-cream"
+            aria-label="Dismiss"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+    );
   }
 
   const copyLink = () => {

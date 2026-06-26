@@ -66,9 +66,12 @@ export function detectMicEnv(): MicEnv {
     return {
       block: 'no-api',
       title: 'This browser can’t record',
-      hint: 'Recording isn’t supported here. Please open the app in Safari (iPhone) or Chrome (Android).',
+      hint: 'Recording isn’t supported here. Open the app in Safari, Chrome, Edge, or Firefox.',
     };
   }
 
   return { block: null, title: '', hint: '' };
 }
+
+/** Browsers where recording is known to work, named for the upfront advisory. */
+export const SUPPORTED_BROWSERS = 'Safari, Chrome, Edge, or Firefox';
