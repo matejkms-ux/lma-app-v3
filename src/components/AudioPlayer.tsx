@@ -87,6 +87,13 @@ export function AudioPlayer({
         onPause={() => setPlaying(false)}
         onTimeUpdate={(e) => setCur(e.currentTarget.currentTime)}
         onLoadedMetadata={(e) => setDur(e.currentTarget.duration)}
+        onError={() => {
+          // A clip that won't load/play (bad src, network, decode) must not throw
+          // out of the player — log it and reset the transport. The step can still
+          // be cleared by playback gating once a working clip arrives.
+          console.warn('Audio failed to load/play:', src);
+          setPlaying(false);
+        }}
         onEnded={() => {
           setPlaying(false);
           setCur(0);
