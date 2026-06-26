@@ -25,6 +25,7 @@ export function HubScreen() {
   const { user } = useSession();
   const { reps, repsToday, knownWords, streak, dueToday } = useSuperApp();
   const first = user ? displayName(user).split(' ')[0] : 'adventurer';
+  const hasFinal = Boolean(finalProgramFor(user?.username));
 
   const cards: ModeCard[] = [
     { title: 'Practice', status: 'Lesson 4 of 30', icon: 'practice', route: '/lessons' },
@@ -98,6 +99,23 @@ export function HubScreen() {
             </button>
           ))}
         </div>
+
+        {/* Final App — the capstone, shown once the learner has Final content. */}
+        {hasFinal && (
+          <button
+            onClick={() => navigate('/final')}
+            className="mt-3 flex w-full items-center justify-between rounded-[18px] border border-rule bg-cream-panel px-[18px] py-4 text-left"
+          >
+            <span className="flex items-center gap-3">
+              <span className="text-[24px]">🏁</span>
+              <span>
+                <span className="block font-serif text-[20px] font-medium text-heading">Final week</span>
+                <span className="block text-[12.5px] text-muted">Read · Podcast · Writing · Conversation · Session</span>
+              </span>
+            </span>
+            <span className="text-lg text-muted">→</span>
+          </button>
+        )}
       </div>
     </SuperShell>
   );
