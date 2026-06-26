@@ -10,10 +10,12 @@
     "preview": "vite preview",
     "typecheck": "tsc -b --noEmit",
     "import:sentences": "tsx scripts/import-sentences.ts",
-    "upload:audio": "tsx scripts/upload-audio.ts"
+    "upload:audio": "tsx scripts/upload-audio.ts",
+    "validate": "tsx scripts/validate-content.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.2",
+    "@zoom/videosdk": "^2.4.5",
     "lamejs": "^1.2.1",
     "microsoft-cognitiveservices-speech-sdk": "^1.50.0",
     "react": "^18.3.1",
