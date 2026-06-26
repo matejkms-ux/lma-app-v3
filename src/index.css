@@ -15,7 +15,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* The phone-frame shell: mobile-first, centred on larger screens. */
 .device-shell {
   width: 100%;
   max-width: 430px;
@@ -26,7 +25,14 @@ body {
   box-shadow: 0 0 80px rgba(0, 0, 0, 0.6);
 }
 
-/* Hide scrollbars inside scroll regions but keep scrolling. */
+/* On laptops and bigger - go full width */
+@media (min-width: 768px) {
+  .device-shell {
+    max-width: 100%;
+    box-shadow: none;
+  }
+}
+
 .scroll-region {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
