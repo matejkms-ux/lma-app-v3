@@ -8,7 +8,16 @@ import { lessonProgress, lifetimeReps, repsToday, isLessonUnlockComplete, getSte
 import { STEPS, AUDIO_STEPS } from '../tokens';
 import { useSession } from '../session';
 import { displayName } from '../data/mock';
-import { adventureStatus } from '../data/adventure';
+import { adventureStatus, adventureEndLabel } from '../data/adventure';
+import { finalProgramFor } from '../data/finalContent';
+
+/** Tailwind classes for the small adventure status chip, keyed by phase. */
+const PHASE_CHIP: Record<string, string> = {
+  active: 'bg-emerald text-teal',
+  upcoming: 'bg-rule text-muted',
+  completed: 'bg-coral/15 text-coral',
+  paused: 'bg-rule text-muted',
+};
 
 /** Home — the adventure. Warm greeting, reps (now real) as the hero, current step, CTA. */
 export function HomeScreen() {
@@ -51,6 +60,8 @@ export function HomeScreen() {
       ? (allRatedStars.reduce((sum, s) => sum + s, 0) / allRatedStars.length).toFixed(1)
       : null;
 
+  const finalProgram = finalProgramFor(user?.username);
+
   const openPractice = () => {
     if (lesson) navigate('/practice', { state: { lessonCode: lesson.code } });
     else navigate('/lessons');
@@ -63,9 +74,18 @@ export function HomeScreen() {
       <div className="scroll-region flex-1 px-6 pb-5 pt-3.5">
         <div className="flex items-start justify-between">
           <div>
-            <div className="text-xs font-semibold tracking-[.04em] text-muted">
-              {language}
-              {adventure && <span className="text-coral"> · {adventure.label}</span>}
+            <div className="flex items-center gap-2 text-xs font-semibold tracking-[.04em] text-muted">
+              <span>
+                {language}
+                {adventure && <span className="text-coral"> · {adventure.label}</span>}
+              </span>
+              {adventure && (
+                <span
+                  className={`rounded-full px-1.5 py-px text-[9px] font-bold uppercase tracking-[.08em] ${PHASE_CHIP[adventure.phase] ?? PHASE_CHIP.upcoming}`}
+                >
+                  {adventure.pill}
+                </span>
+              )}
             </div>
             <div className="mt-[7px] font-serif text-[32px] italic leading-[1.06] text-heading">
               Welcome back,
@@ -144,6 +164,24 @@ export function HomeScreen() {
           </a>
         )}
 
+        {/* Final App — the capstone; only for learners with a final program loaded */}
+        {finalProgram && (
+          <button
+            onClick={() => navigate('/final')}
+            className="mt-3.5 flex w-full items-center gap-3 rounded-[18px] border border-rule bg-white p-4 text-left active:scale-[.99]"
+          >
+            <span className="text-[26px]">🏁</span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[11px] font-bold tracking-[.14em] text-muted">FINAL WEEK</span>
+              <span className="mt-[3px] block font-serif text-[18px] text-heading">The final week</span>
+              <span className="block truncate text-[12px] text-muted">
+                Read · Podcast · Writing · Conversation · Session
+              </span>
+            </span>
+            <span className="text-muted">›</span>
+          </button>
+        )}
+
         {/* Stats — real values from progress store */}
         <div className="mt-3.5 flex gap-3">
           <div className="flex-1 rounded-[18px] border border-rule bg-white p-3.5">
@@ -168,11 +206,39 @@ export function HomeScreen() {
                 <div className="text-[10px] font-bold tracking-[.1em] text-muted">YOUR PROGRAM</div>
                 <div className="mt-[3px] font-serif text-base text-heading">{user.plan.programName}</div>
                 {adventure && (
-                  <div className="mt-[3px] text-[11px] font-semibold text-emerald">{adventure.label}</div>
+                  <div className="mt-[3px] text-[11px] font-semibold text-emerald">
+                    {adventure.label}
+                    {adventureEndLabel(user.adventure) && (
+                      <span className="text-muted"> · {adventureEndLabel(user.adventure)}</span>
+                    )}
+                  </div>
+                )}
+                {adventure?.languagePair && (
+                  <div className="mt-[2px] text-[10px] font-semibold text-muted">{adventure.languagePair}</div>
                 )}
               </div>
               <div className="text-[10px] font-semibold text-muted">{user.plan.totalWeeks}w</div>
             </div>
+
+            {/* Previous adventures — shown only once the learner has finished at least one */}
+            {adventure && adventure.history.length > 0 && (
+              <div className="mt-3 border-t border-rule pt-3">
+                <div className="text-[10px] font-bold tracking-[.1em] text-muted">PREVIOUS ADVENTURES</div>
+                <div className="mt-1.5 space-y-1">
+                  {adventure.history.map((h) => (
+                    <div key={h.number} className="flex items-center justify-between text-[11px]">
+                      <span className="font-semibold text-heading">
+                        Adventure {h.number}
+                        {h.languageTo && <span className="font-normal text-muted"> · {h.languageTo}</span>}
+                      </span>
+                      <span className="text-muted">
+                        {h.endDate ? new Date(`${h.endDate}T00:00:00`).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }) : '—'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             <div className="mt-3 space-y-0">
               {user.plan.contexts.map((ctx, i) => (
                 <div

@@ -13,7 +13,7 @@ export const colors = {
   emerald2: '#0E635B',
   /** The single live signal: mic open, recording, +N today, active dot. */
   coral: '#EF6A47',
-  /** Light ground — home, lesson select, lesson overview, activities. */
+  /** Light ground — home, lesson select, lesson overview. */
   cream: '#F8F0E2',
   /** Slightly warmer cream for raised panels on cream. */
   creamPanel: '#FBF5EA',

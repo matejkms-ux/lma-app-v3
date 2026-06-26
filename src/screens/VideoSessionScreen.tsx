@@ -84,6 +84,8 @@ export default function VideoSessionScreen() {
   const [audioMuted, setAudioMuted] = useState(false);
   const [mediaNote, setMediaNote] = useState<string | null>(null);
   const [peerCount, setPeerCount] = useState(0);
+  const [recording, setRecording] = useState(false);
+  const isHost = search.get('host') === '1';
   const joinedOnceRef = useRef(false);
   // Unique per tab so two opens never collide as the same Zoom identity
   // (duplicate identity → forced reconnect / OPERATION_CANCELLED).
@@ -149,6 +151,19 @@ export default function VideoSessionScreen() {
           );
         }
 
+        // Host (Companion) auto-starts cloud recording. Non-fatal: startCloudRecording
+        // returns an Error (or throws) when Cloud Recording isn't enabled on the Zoom
+        // account — the call just no-ops with a note rather than breaking the session.
+        if (role === 1) {
+          try {
+            const r = await client.getRecordingClient().startCloudRecording();
+            if (r === '') setRecording(true);
+            else setMediaNote('Recording unavailable — enable Cloud Recording on the Zoom Video SDK app.');
+          } catch {
+            setMediaNote('Recording unavailable — enable Cloud Recording on the Zoom Video SDK app.');
+          }
+        }
+
         // Render anyone already in the room (mid-join won't fire the event).
         for (const u of client.getAllUser()) {
           if (u.userId !== me.userId && u.bVideoOn) {
@@ -206,14 +221,19 @@ export default function VideoSessionScreen() {
     const onConnection = (p: { state: string }) => {
       if (p.state === 'Closed') setJoined(false);
     };
+    const onRecording = (p: { state: string }) => {
+      setRecording(p.state === 'Recording');
+    };
 
     client.on('peer-video-state-change', onPeerVideo);
     client.on('user-removed', onUserRemoved);
     client.on('connection-change', onConnection);
+    client.on('recording-change', onRecording);
     return () => {
       client.off('peer-video-state-change', onPeerVideo);
       client.off('user-removed', onUserRemoved);
       client.off('connection-change', onConnection);
+      client.off('recording-change', onRecording);
     };
   }, []);
 
@@ -258,7 +278,17 @@ export default function VideoSessionScreen() {
   }
 
   function leave() {
-    void clientRef.current?.leave();
+    const client = clientRef.current;
+    // Host stops cloud recording on leave (Zoom also auto-stops when the session
+    // ends → fires the recording.completed webhook).
+    if (client && isHost && recording) {
+      try {
+        void client.getRecordingClient().stopCloudRecording();
+      } catch {
+        /* no-op */
+      }
+    }
+    void client?.leave();
     window.location.href = '/';
   }
 
@@ -340,6 +370,33 @@ export default function VideoSessionScreen() {
       {/* Video region — LMA owns this layout, not Zoom. */}
       <section style={{ position: 'relative', background: colors.emerald, overflow: 'hidden' }}>
         <Wordmark />
+
+        {/* Recording indicator */}
+        {recording && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 20,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              zIndex: 5,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 7,
+              padding: '5px 12px',
+              borderRadius: 999,
+              background: 'rgba(8,40,37,0.6)',
+              fontFamily: fonts.sans,
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: '.12em',
+              color: colors.cream,
+            }}
+          >
+            <span className="animate-pulse" style={{ width: 8, height: 8, borderRadius: 4, background: colors.coral }} />
+            REC
+          </div>
+        )}
 
         <video-player-container ref={peersRef} style={{ display: 'block', height: '100%', width: '100%' }} />
 

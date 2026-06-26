@@ -1,13 +1,12 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSession } from '../session';
 
-type Tab = 'home' | 'practice' | 'read' | 'activities';
+type Tab = 'home' | 'practice' | 'read';
 
 const ROUTE: Record<Tab, string> = {
   home: '/home',
   practice: '/lessons',
   read: '/reader',
-  activities: '/activities',
 };
 
 function HomeIcon() {
@@ -26,25 +25,14 @@ function ReadIcon() {
     </span>
   );
 }
-function ActivitiesIcon() {
-  return (
-    <span className="flex h-5 w-5 items-end gap-[2.5px]">
-      <i className="w-[5px] rounded-[1px] bg-current" style={{ height: '40%' }} />
-      <i className="w-[5px] rounded-[1px] bg-current" style={{ height: '68%' }} />
-      <i className="w-[5px] rounded-[1px] bg-current" style={{ height: '100%' }} />
-    </span>
-  );
-}
-
 const ITEMS: { tab: Tab; label: string; Icon: () => JSX.Element }[] = [
   { tab: 'home', label: 'Home', Icon: HomeIcon },
   { tab: 'practice', label: 'Practice', Icon: PracticeIcon },
   { tab: 'read', label: 'Read', Icon: ReadIcon },
-  { tab: 'activities', label: 'Activities', Icon: ActivitiesIcon },
 ];
 
 /**
- * The bottom tab bar — Home / Practice / Activities / Switch learner.
+ * The bottom tab bar — Home / Practice / Read / Switch learner.
  * Appears only once you're "in"; the entry screen has none (v3 brief §2).
  */
 export function BottomNav({ active }: { active: Tab }) {

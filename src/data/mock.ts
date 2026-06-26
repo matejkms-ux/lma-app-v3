@@ -32,7 +32,7 @@ export interface User {
   username?: string;
   /** Structured study plan — set per learner; undefined when not yet defined. */
   plan?: LearnerPlan;
-  /** Adventure schedule (number + start date) — sourced from Airtable. */
+  /** Adventure schedule (number, dates, status, language pair, history) — sourced from Airtable. */
   adventure?: Adventure;
 }
 
@@ -75,14 +75,14 @@ export const USERS: User[] = [
         { id: 'baby',    label: 'With baby',        weeklyHours: 12,   note: '4h with Hanna · 8h self-directed' },
       ],
     },
-    adventure: { number: 1, startDate: '2026-06-26', totalDays: 28 },
+    adventure: { number: 1, startDate: '2026-06-26', totalDays: 28, status: 'active', languageFrom: 'English', languageTo: 'German' },
   },
-  { id: 'u4', name: 'Jerod Cox',         firstName: 'Jerod',     lastNames: 'Cox',                           language: 'THAI',     username: 'JERODC2604-th',   adventure: { number: 1, startDate: '2026-06-25', totalDays: 42 } },
-  { id: 'u2', name: 'Tom Roberge',       firstName: 'Tom',       lastNames: 'Roberge',                       language: 'KHMER',    username: 'TOMR2504-km',     adventure: { number: 1 } },
-  { id: 'u1', name: 'Won-Chak Leung',    firstName: 'Won-Chak',  lastNames: 'Leung',    calledName: 'Charles', language: 'JAPANESE', username: 'WONCHAKL2401-ja', adventure: { number: 1 } },
-  { id: 'u5', name: 'Jason Oberbillig',  firstName: 'Jason',     lastNames: 'Oberbillig',                       language: 'JAPANESE', username: 'JASONO2308-ja',   adventure: { number: 1 } },
-  { id: 'u7', name: 'Mehrad',            firstName: 'Mehrad',                                                   language: 'PORTUGUESE', username: 'MEHRAD2606-pt', adventure: { number: 1 } },
-  { id: 'u6', name: 'Neal Gustafson',    firstName: 'Neal',      lastNames: 'Gustafson',                     language: 'SPANISH',  username: 'NEALG2603-es',    adventure: { number: 1 } },
+  { id: 'u4', name: 'Jerod Cox',         firstName: 'Jerod',     lastNames: 'Cox',                           language: 'THAI',     username: 'JERODC2604-th',   adventure: { number: 1, startDate: '2026-06-25', totalDays: 42, status: 'active', languageFrom: 'English', languageTo: 'Thai' } },
+  { id: 'u2', name: 'Tom Roberge',       firstName: 'Tom',       lastNames: 'Roberge',                       language: 'KHMER',    username: 'TOMR2504-km',     adventure: { number: 1, languageFrom: 'English', languageTo: 'Khmer' } },
+  { id: 'u1', name: 'Won-Chak Leung',    firstName: 'Won-Chak',  lastNames: 'Leung',    calledName: 'Charles', language: 'JAPANESE', username: 'WONCHAKL2401-ja', adventure: { number: 1, languageFrom: 'English', languageTo: 'Japanese' } },
+  { id: 'u5', name: 'Jason Oberbillig',  firstName: 'Jason',     lastNames: 'Oberbillig',                       language: 'JAPANESE', username: 'JASONO2308-ja',   adventure: { number: 1, languageFrom: 'English', languageTo: 'Japanese' } },
+  { id: 'u7', name: 'Mehrad',            firstName: 'Mehrad',                                                   language: 'PORTUGUESE', username: 'MEHRAD2606-pt', adventure: { number: 1, languageFrom: 'English', languageTo: 'Portuguese' } },
+  { id: 'u6', name: 'Neal Gustafson',    firstName: 'Neal',      lastNames: 'Gustafson',                     language: 'SPANISH',  username: 'NEALG2603-es',    adventure: { number: 1, languageFrom: 'English', languageTo: 'Spanish' } },
 ];
 
 /**
@@ -138,6 +138,3 @@ export const RECENT_ACTIVITY = [
   { date: 'Jun 18', text: 'Audio uploaded for Lesson 1' },
   { date: 'Jun 17', text: 'Programme begins' },
 ];
-
-/** Bar heights for the "reps gathered" mini-chart on Activities (10 buckets). */
-export const REPS_CHART = [28, 42, 35, 58, 50, 74, 64, 88, 78, 100];

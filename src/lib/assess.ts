@@ -14,6 +14,7 @@ export const LOCALE_BY_LANGUAGE: Record<string, string> = {
   FRENCH: 'fr-FR',
   MANDARIN: 'zh-CN',
   ARABIC: 'ar-EG',
+  HEBREW: 'he-IL', // no Azure pronunciation assessment → SHADOW/RECALL fall back to STT word-accuracy (like Khmer)
   THAI: 'th-TH', // not supported by Azure → function returns auto_unavailable
   KHMER: 'km-KH', // not supported → auto_unavailable
 };

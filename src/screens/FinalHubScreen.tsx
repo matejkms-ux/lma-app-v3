@@ -38,7 +38,7 @@ export function FinalHubScreen() {
             your life-story narration exists.
           </div>
           <button
-            onClick={() => navigate('/activities')}
+            onClick={() => navigate('/home')}
             className="rounded-full border border-rule px-5 py-2 text-[12px] font-bold tracking-[.08em] text-muted"
           >
             ‹ BACK
@@ -114,10 +114,10 @@ export function FinalHubScreen() {
 
       <div className="px-5 pb-5">
         <button
-          onClick={() => navigate('/activities')}
+          onClick={() => navigate('/home')}
           className="w-full rounded-[15px] border border-rule py-3 text-[13px] font-bold tracking-[.04em] text-muted"
         >
-          ‹ Back to activities
+          ‹ Back to home
         </button>
       </div>
     </DeviceFrame>
