@@ -114,6 +114,7 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
   const cfg = STEP_CONFIG[api.step];
   const [lifetime, setLifetime] = useState(() => lifetimeReps(userId));
   const [playing, setPlaying] = useState(false);
+  const [readProgress, setReadProgress] = useState(0);
   const [stars, setStarsState] = useState<number | null>(null);
 
   const [sentences, setSentences] = useState<
@@ -284,7 +285,7 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
     switch (cfg.body) {
       case 'dualWave': return <ShadowBody />;
       case 'melody':   return <HumBody />;
-      case 'text':     return <ReadBody sentences={sentences} language={lesson.language} />;
+      case 'text':     return <ReadBody sentences={sentences} language={lesson.language} playing={playing} progress={readProgress} />;
       default:         return <GraspBody active={playing} />;
     }
   };
@@ -415,6 +416,7 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
                 onPlay={onPlay}
                 onEnded={onEnded}
                 onPlayingChange={setPlaying}
+                onProgress={setReadProgress}
               />
             </div>
           </>

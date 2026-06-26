@@ -19,11 +19,14 @@ export function AudioPlayer({
   onEnded,
   onPlay,
   onPlayingChange,
+  onProgress,
 }: {
   src: string;
   onEnded?: () => void;
   onPlay?: () => void;
   onPlayingChange?: (playing: boolean) => void;
+  /** Playback position as a 0–1 fraction (drives READ auto-scroll). */
+  onProgress?: (fraction: number) => void;
 }) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
@@ -85,7 +88,11 @@ export function AudioPlayer({
           onPlay?.();
         }}
         onPause={() => setPlaying(false)}
-        onTimeUpdate={(e) => setCur(e.currentTarget.currentTime)}
+        onTimeUpdate={(e) => {
+          const a = e.currentTarget;
+          setCur(a.currentTime);
+          if (a.duration > 0) onProgress?.(a.currentTime / a.duration);
+        }}
         onLoadedMetadata={(e) => setDur(e.currentTarget.duration)}
         onError={() => {
           // A clip that won't load/play (bad src, network, decode) must not throw
@@ -97,6 +104,7 @@ export function AudioPlayer({
         onEnded={() => {
           setPlaying(false);
           setCur(0);
+          onProgress?.(1);
           onEnded?.();
         }}
       />

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ModelWaveform, LiveWaveform, StaticWaveform } from '../../components/Waveform';
 import { PulseDot } from '../../components/MicIndicator';
 
@@ -109,9 +109,15 @@ type ReadSentence = {
 export function ReadBody({
   sentences,
   language,
+  playing = false,
+  progress = 0,
 }: {
   sentences: ReadSentence[];
   language?: string;
+  /** READ clip is playing — drives the hands-free auto-scroll. */
+  playing?: boolean;
+  /** Playback position 0–1; the list glides to match so reading flows. */
+  progress?: number;
 }) {
   const isJa = (language ?? '').toUpperCase() === 'JAPANESE';
   const lang = (language ?? 'xx').toUpperCase();
@@ -164,6 +170,22 @@ export function ReadBody({
 
   const activeExtras = extras.filter((e) => enabled.has(e.key));
 
+  // Hands-free flow: while the READ clip plays, the list scrolls so its position
+  // tracks the audio. We map the playback fraction straight onto scrollTop on
+  // each progress tick (~4Hz from the <audio> timeupdate) — over a clip the
+  // steps are a couple of pixels each, so it glides without any CSS smooth-scroll
+  // (which stalls when re-triggered every tick) or rAF (which the OS pauses when
+  // the tab is backgrounded). When there's no READ audio the step is a
+  // pass-through (playing stays false) and the learner just scrolls by hand.
+  const listRef = useRef<HTMLOListElement>(null);
+  useEffect(() => {
+    const el = listRef.current;
+    if (!el || !playing) return;
+    const max = el.scrollHeight - el.clientHeight;
+    if (max <= 0) return;
+    el.scrollTop = Math.max(0, Math.min(max, progress * max));
+  }, [playing, progress]);
+
   return (
     <div className="flex flex-1 flex-col overflow-hidden px-[22px]">
       {/* Add/remove the reading aids that show below each line */}
@@ -187,7 +209,10 @@ export function ReadBody({
           })}
         </div>
       )}
-      <ol className="flex-1 space-y-2.5 overflow-y-auto py-1">
+      <ol
+        ref={listRef}
+        className="flex-1 space-y-1.5 overflow-y-auto py-1"
+      >
         {sentences.length === 0 ? (
           <li className="py-6 text-center font-serif text-[14px] italic text-teal/50">
             Sentences loading…
@@ -196,14 +221,14 @@ export function ReadBody({
           sentences.map((s, i) => (
             <li
               key={i}
-              className="rounded-[12px] border border-teal/[.18] bg-teal/[.06] px-4 py-3"
+              className="rounded-[10px] border border-teal/[.18] bg-teal/[.06] px-3.5 py-2"
             >
-              <div className="font-serif text-[17px] leading-[1.4] text-cream">{s.l2}</div>
+              <div className="font-serif text-[14px] leading-[1.35] text-cream">{s.l2}</div>
               {activeExtras.map((e) => {
                 const v = e.get(s);
                 if (!v || v === s.l2) return null;
                 return (
-                  <div key={e.key} className="mt-1 text-[13px] leading-[1.4] text-teal-dim">
+                  <div key={e.key} className="mt-0.5 text-[11px] leading-[1.35] text-teal-dim">
                     {v}
                   </div>
                 );
