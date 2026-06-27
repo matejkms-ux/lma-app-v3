@@ -7,9 +7,14 @@ import { useEffect, useRef, useState } from 'react';
  * reaches COMPLETE_FRACTION (95%) OR the natural end, whichever comes first — the
  * learner doesn't have to sit through the last sliver. It re-arms on each replay,
  * so steps that require two listens still need two genuine passes.
+ *
+ * The gate is sized in SECONDS from the end (not a % of duration): clips now carry
+ * long trailing practice gaps, so a fixed 95% landed inside the last sentence's
+ * second repetition and cut it off. Completing ~1s from the end clears only true
+ * trailing silence regardless of clip length.
  */
 const REVERSE_SECONDS = 5;
-const COMPLETE_FRACTION = 0.95;
+const COMPLETE_TAIL_SECONDS = 1.0;
 
 function fmt(secs: number): string {
   if (!Number.isFinite(secs) || secs < 0) secs = 0;
@@ -95,7 +100,7 @@ export function AudioPlayer({
           setPlaying(true);
           // Re-arm the gate for a fresh pass (replay seeks back to the start).
           const a = e.currentTarget;
-          if (!a.duration || a.currentTime < a.duration * COMPLETE_FRACTION) {
+          if (!a.duration || a.duration - a.currentTime > COMPLETE_TAIL_SECONDS) {
             firedRef.current = false;
           }
           onPlay?.();
@@ -106,9 +111,9 @@ export function AudioPlayer({
           setCur(a.currentTime);
           if (a.duration > 0) {
             onProgress?.(a.currentTime / a.duration);
-            // Count the pass as complete once 95% is reached — no need to sit
-            // through the final sliver. Fires once per pass.
-            if (!firedRef.current && a.currentTime / a.duration >= COMPLETE_FRACTION) {
+            // Count the pass complete once within ~1s of the end — clears the
+            // trailing silence but never the last sentence. Fires once per pass.
+            if (!firedRef.current && a.duration - a.currentTime <= COMPLETE_TAIL_SECONDS) {
               firedRef.current = true;
               onEnded?.();
             }
