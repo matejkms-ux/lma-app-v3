@@ -63,8 +63,11 @@ export type Step = (typeof STEPS)[number];
 
 /**
  * The five steps that carry reference audio and feed the rep/progress/unlock
- * system. `lesson_audio` and `lesson_step_progress` only ever hold these — the
- * DB CHECK constraints reject anything else, so FREESTYLE is deliberately out.
+ * system. FREESTYLE has no reference audio, so it stays out of AUDIO_STEPS — but
+ * it IS a valid step value in the DB now: the `lesson_step_progress`,
+ * `lesson_audio` and `sentence_scores` step CHECKs all include it (migration
+ * 20260626140000_freestyle_step_in_checks). FREESTYLE takes/ratings live in
+ * `learner_recordings`.
  */
 export const AUDIO_STEPS = ['GRASP', 'HUM', 'SHADOW', 'READ', 'RECALL'] as const;
 export type AudioStep = (typeof AUDIO_STEPS)[number];
