@@ -35,7 +35,8 @@ STEP_MAP = {
     "0ref": "ref_l2", "0ref-en": "ref_l1",
 }
 ISO_LANG = {"de": "GERMAN", "fr": "FRENCH", "it": "ITALIAN", "es": "SPANISH",
-            "ru": "RUSSIAN", "zh": "MANDARIN", "ja": "JAPANESE", "th": "THAI", "km": "KHMER"}
+            "ru": "RUSSIAN", "zh": "MANDARIN", "ja": "JAPANESE", "th": "THAI", "km": "KHMER",
+            "pt": "PORTUGUESE"}
 
 
 def canon(h):

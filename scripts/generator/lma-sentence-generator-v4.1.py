@@ -5,7 +5,7 @@ LMA Sentence Generator — SIMPLE  (v4 · 2026-06-17 · MKMS)
 One simple CSV (10 sentences for one learner)  ->  SEVEN MP3s for that set:
 
     grasp-NNN.mp3    L2 -> 4s -> L1 -> 1s -> L2 -> 1s          (per sentence, concatenated)
-    hum-NNN.mp3      L2 -> 1.5s -> L2 -> 1.5s
+    hum-NNN.mp3      L2 -> gap -> L2 -> gap   (gap = max(HUM_GAP, clip length))
     shadow-NNN.mp3   L2 -> 1.0s -> L2 -> 1.0s                  (independent of HUM)
     read-NNN.mp3     L2 -> 2.0s -> L2 -> 1.0s
     recall-NNN.mp3   L1 -> gap -> L2 -> gap
@@ -79,19 +79,21 @@ VOICE_MAP = {                     # L2 voices per 2-letter ISO — REPLACE place
     "fr": "oQZyHVc6FnIvc9bYS5yl",
     "it": "nH7uLS5UdEnvKEOAXtlQ",
     "es": "cIBxLwfshLYhRB9lCXEg",
+    "pt": "ejarTsrf33xoVlH9hMuy",    # Luis — European Portuguese (pt-PT)
     "ru": "rQOBu7YxCDxGiFdTm28w",
     "zh": "REPLACE_ME_ZH",
     "ja": "3JDquces8E8bkmvbh6Bc",   # Otani
     "th": "REPLACE_ME_TH",
 }
-AZURE_LANGS     = {"km"}
-AZURE_VOICE_MAP = {"km": "km-KH-PisethNeural"}   # or km-KH-SreymomNeural
-AZURE_LOCALE    = {"km": "km-KH", "th": "th-TH"}
+AZURE_LANGS     = {"km", "he"}   # he: no native ElevenLabs Hebrew voice → route to Azure
+AZURE_VOICE_MAP = {"km": "km-KH-PisethNeural",   # or km-KH-SreymomNeural
+                   "he": "he-IL-AvriNeural"}     # male (matches Bryan); fem alt he-IL-HilaNeural
+AZURE_LOCALE    = {"km": "km-KH", "th": "th-TH", "he": "he-IL"}
 LANG_NAMES = {"de":"German","fr":"French","it":"Italian","es":"Spanish","ru":"Russian",
-              "zh":"Mandarin","ja":"Japanese","th":"Thai","km":"Khmer"}
+              "zh":"Mandarin","ja":"Japanese","th":"Thai","km":"Khmer","pt":"Portuguese","he":"Hebrew"}
 ISO = {"deu":"de","ger":"de","de":"de","fra":"fr","fre":"fr","fr":"fr","jpn":"ja","jp":"ja","ja":"ja",
        "tha":"th","th":"th","khm":"km","km":"km","rus":"ru","ru":"ru","ita":"it","it":"it",
-       "spa":"es","es":"es","zho":"zh","cmn":"zh","zh":"zh"}
+       "spa":"es","es":"es","zho":"zh","cmn":"zh","zh":"zh","por":"pt","pt":"pt"}
 
 GRASP_GAP1, GRASP_GAP2 = 4.0, 1.0
 HUM_GAP                = 2.5
@@ -171,7 +173,13 @@ def build_step(step, rows):
         l2 = say(r["l2"], r["lang"])
         if step in ("grasp","recall"): l1 = say(r["l1"], r["lang"], is_l1=True)
         if step == "grasp":   out += l2 + sil(GRASP_GAP1) + l1 + sil(GRASP_GAP2) + l2 + sil(GRASP_GAP2)
-        elif step == "hum":   out += l2 + sil(HUM_GAP) + l2 + sil(HUM_GAP)
+        elif step == "hum":
+            # Gap scales with the clip — a flat HUM_GAP is too short to hum back
+            # longer sentences. Give at least the clip's own length (len(l2)
+            # includes the 0.4s trail), with HUM_GAP as a floor for short lines.
+            # Clip-length-driven (not word-count) so spaceless scripts work too.
+            g = max(HUM_GAP, len(l2)/1000)
+            out += l2 + sil(g) + l2 + sil(g)
         elif step == "shadow":out += l2 + sil(SHADOW_GAP) + l2 + sil(SHADOW_GAP)
         elif step == "read":  out += l2 + sil(READ_GAP) + l2 + sil(READ_TAIL)
         elif step == "recall":
