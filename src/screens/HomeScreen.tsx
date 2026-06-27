@@ -4,13 +4,12 @@ import { DeviceFrame } from '../components/DeviceFrame';
 import { StatusBar } from '../components/StatusBar';
 import { BottomNav } from '../components/BottomNav';
 import { getLessonCatalog, lessonsForUser } from '../data/content';
-import { lessonProgress, lifetimeReps, repsToday, isLessonUnlockComplete, getStepStars } from '../lib/progress';
-import { STEPS, AUDIO_STEPS } from '../tokens';
+import { lessonProgress, lifetimeReps, repsToday } from '../lib/progress';
+import { STEPS } from '../tokens';
 import { useSession } from '../session';
 import { displayName } from '../data/mock';
 import { adventureStatus, adventureEndLabel } from '../data/adventure';
 import { finalProgramFor } from '../data/finalContent';
-import { correctionsFor } from '../data/corrections';
 
 /** Tailwind classes for the small adventure status chip, keyed by phase. */
 const PHASE_CHIP: Record<string, string> = {
@@ -52,23 +51,7 @@ export function HomeScreen() {
   const doneCount = progress ? available.filter((s) => progress.completedSteps.includes(s)).length : 0;
   const currentIdx = Math.min(doneCount, Math.max(0, available.length - 1));
 
-  // Real progress stats — only lessons with audio count toward "passed"
-  const practicableLessons = mainLessons.filter((l) => l.audioStepCount > 0);
-  const lessonsPassed = user
-    ? practicableLessons.filter((l) => isLessonUnlockComplete(user.id, l.code, l.audioStepCount)).length
-    : 0;
-  const allRatedStars = user
-    ? lessons.flatMap((l) =>
-        AUDIO_STEPS.map((s) => getStepStars(user.id, l.code, s)).filter((v): v is number => v !== null),
-      )
-    : [];
-  const avgGrade =
-    allRatedStars.length > 0
-      ? (allRatedStars.reduce((sum, s) => sum + s, 0) / allRatedStars.length).toFixed(1)
-      : null;
-
   const finalProgram = finalProgramFor(user?.username);
-  const corrections = correctionsFor(user?.username);
 
   const openPractice = () => {
     if (lesson) navigate('/practice', { state: { lessonCode: lesson.code } });
@@ -220,73 +203,6 @@ export function HomeScreen() {
           </a>
         )}
 
-        {/* Corrections — the learner's personal "say it naturally" feedback section.
-            Opens the Corrections hub; only shown for learners who have some. */}
-        {corrections.length > 0 && (
-          <button
-            onClick={() => navigate('/corrections')}
-            className="mt-3.5 flex w-full items-center gap-3 rounded-[18px] border border-rule bg-white p-4 text-left active:scale-[.99]"
-          >
-            <span className="text-[26px]">📩</span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-[11px] font-bold tracking-[.14em] text-muted">CORRECTIONS</span>
-              <span className="mt-[3px] block font-serif text-[18px] text-heading">From Matej</span>
-              <span className="block truncate text-[12px] text-muted">
-                {corrections.length} {corrections.length === 1 ? 'correction' : 'corrections'} · tap to open
-              </span>
-            </span>
-            <span className="text-muted">›</span>
-          </button>
-        )}
-
-        {/* Stats — real values from progress store. Hidden entirely until there's
-            something to show (no empty "0 of N" / "—" placeholders). */}
-        {(lessonsPassed > 0 || avgGrade !== null) && (
-        <div className="mt-3.5 flex gap-3">
-          <div className="flex-1 rounded-[18px] border border-rule bg-white p-3.5">
-            <div className="text-[10px] font-bold tracking-[.1em] text-muted">LESSONS PASSED</div>
-            <div className="mt-[3px] font-serif text-lg text-heading">
-              {lessonsPassed} of {practicableLessons.length}
-            </div>
-          </div>
-          <div className="flex-1 rounded-[18px] border border-rule bg-white p-3.5">
-            <div className="text-[10px] font-bold tracking-[.1em] text-muted">AVG GRADE</div>
-            <div className="mt-[3px] font-serif text-lg text-heading">
-              {avgGrade !== null ? `${avgGrade}★` : '—'}
-            </div>
-          </div>
-        </div>
-        )}
-
-        {/* Study plan — only shown for learners with a structured program */}
-        {user?.plan && (
-          <div className="mt-3.5 rounded-[18px] border border-rule bg-white px-4 py-4">
-            <div className="flex items-start justify-between">
-              <div>
-                <div className="text-[10px] font-bold tracking-[.1em] text-muted">YOUR PROGRAM</div>
-                <div className="mt-[3px] font-serif text-base text-heading">{user.plan.programName}</div>
-                {adventure && (
-                  <div className="mt-[3px] text-[11px] font-semibold text-emerald">{adventure.label}</div>
-                )}
-              </div>
-              <div className="text-[10px] font-semibold text-muted">{user.plan.totalWeeks}w</div>
-            </div>
-            <div className="mt-3 space-y-0">
-              {user.plan.contexts.map((ctx, i) => (
-                <div
-                  key={ctx.id}
-                  className={`flex items-center justify-between py-2 ${i > 0 ? 'border-t border-rule' : ''}`}
-                >
-                  <div>
-                    <div className="text-[12px] font-semibold text-heading">{ctx.label}</div>
-                    <div className="text-[10px] text-muted">{ctx.note}</div>
-                  </div>
-                  <span className="text-[12px] font-bold text-emerald">{ctx.weeklyHours}h/wk</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
       {/* CTA */}

@@ -64,7 +64,7 @@ export function CorrectionsScreen() {
         )}
       </div>
 
-      <BottomNav active="home" />
+      <BottomNav active="corrections" />
     </DeviceFrame>
   );
 }

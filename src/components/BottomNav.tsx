@@ -1,12 +1,14 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSession } from '../session';
+import { correctionsFor } from '../data/corrections';
 
-type Tab = 'home' | 'practice' | 'read';
+type Tab = 'home' | 'practice' | 'read' | 'corrections';
 
 const ROUTE: Record<Tab, string> = {
   home: '/home',
   practice: '/sentences',
   read: '/reader',
+  corrections: '/corrections',
 };
 
 function HomeIcon() {
@@ -25,11 +27,28 @@ function ReadIcon() {
     </span>
   );
 }
+function CorrectionsIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      className="h-5 w-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="2.5" y="4.5" width="15" height="11" rx="2" />
+      <path d="M3 6l7 5 7-5" />
+    </svg>
+  );
+}
 const ITEMS: { tab: Tab; label: string; Icon: () => JSX.Element }[] = [
   { tab: 'home', label: 'Home', Icon: HomeIcon },
   { tab: 'practice', label: 'Sentences', Icon: PracticeIcon },
   { tab: 'read', label: 'Read', Icon: ReadIcon },
 ];
+const CORRECTIONS_ITEM = { tab: 'corrections' as Tab, label: 'Corrections', Icon: CorrectionsIcon };
 
 /**
  * The bottom tab bar — Home / Practice / Read / Switch learner.
@@ -40,6 +59,9 @@ export function BottomNav({ active }: { active: Tab }) {
   const location = useLocation();
   const { user, signOut } = useSession();
 
+  // Corrections sits in the menu only for learners who have some.
+  const items = correctionsFor(user?.username).length > 0 ? [...ITEMS, CORRECTIONS_ITEM] : ITEMS;
+
   const isActive = (tab: Tab) => {
     if (tab === active) return true;
     if (tab === 'practice') {
@@ -48,6 +70,7 @@ export function BottomNav({ active }: { active: Tab }) {
     if (tab === 'read') {
       return ['/reader', '/reader-lesson'].includes(location.pathname);
     }
+    if (tab === 'corrections') return location.pathname === '/corrections';
     return false;
   };
 
@@ -58,7 +81,7 @@ export function BottomNav({ active }: { active: Tab }) {
 
   return (
     <div className="relative flex shrink-0 items-start justify-around border-t border-teal/20 bg-emerald pb-5 pt-3">
-      {ITEMS.map(({ tab, label, Icon }) => {
+      {items.map(({ tab, label, Icon }) => {
         const on = isActive(tab);
         return (
           <button
