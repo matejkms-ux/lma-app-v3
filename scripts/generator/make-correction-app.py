@@ -52,16 +52,16 @@ try:
 except ImportError:
     sys.exit("pip install requests --break-system-packages")
 
-def tts_b64(text, voice, key):
+def tts_bytes(text, voice, key, speed=0.85):
     r = requests.post(
         f"https://api.elevenlabs.io/v1/text-to-speech/{voice}",
         headers={"xi-api-key": key, "Content-Type": "application/json"},
         json={"text": text, "model_id": "eleven_v3",
-              "voice_settings": {"stability": 0.6, "similarity_boost": 0.75, "speed": 0.85}},
+              "voice_settings": {"stability": 0.6, "similarity_boost": 0.75, "speed": float(speed)}},
         timeout=120)
     if r.status_code != 200:
         sys.exit(f"ElevenLabs {r.status_code}: {r.text[:200]}")
-    return base64.b64encode(r.content).decode()
+    return r.content
 
 def plain(s):
     return _html.unescape(re.sub(r"<[^>]+>", "", s)).strip()
@@ -77,7 +77,7 @@ def opus_to_mp3_file(path, out_mp3):
                    capture_output=True)
     return f"{int(dur // 60)}:{int(dur % 60):02d}"
 
-def render(spec, audio_b64, original=None):
+def render(spec, audio_b64, original=None, full=None):
     cards = spec["cards"]
     card_html = []
     for i, c in enumerate(cards, 1):
@@ -113,6 +113,10 @@ def render(spec, audio_b64, original=None):
                 '<span id="po-x">Deine Aufnahme</span></button>') if original else ''
     orig_audio_tag = (f'<audio id="orig" preload="none" src="{original["url"]}"></audio>'
                       if original else '')
+    full_btn = ('<button class="playfull" id="playfull"><span class="play__i" aria-hidden="true"></span>'
+                '<span id="pf-x">Am Stück</span></button>') if full else ''
+    full_audio_tag = (f'<audio id="full" preload="none" src="{full["url"]}"></audio>'
+                      if full else '')
     sig_html = f'<p class="sig">{spec["sig"]}</p>' if spec.get("sig") else ''
     body = f'''<style>
   :root {{
@@ -149,7 +153,12 @@ def render(spec, audio_b64, original=None):
     border-radius:999px; padding:10px 16px; font-size:13px; font-weight:700; letter-spacing:.02em; }}
   .playorig:hover {{ background:rgba(143,192,184,.1); }}
   .playorig.is-playing {{ background:var(--teal); color:#0E1A17; }}
-  .playorig:focus-visible {{ outline:2px solid var(--cream); outline-offset:2px; }}
+  .playorig:focus-visible, .playfull:focus-visible {{ outline:2px solid var(--cream); outline-offset:2px; }}
+  .playfull {{ display:inline-flex; align-items:center; gap:9px; cursor:pointer;
+    border:1px solid rgba(121,210,155,.55); background:transparent; color:var(--green);
+    border-radius:999px; padding:10px 16px; font-size:13px; font-weight:700; letter-spacing:.02em; }}
+  .playfull:hover {{ background:var(--green-bg); }}
+  .playfull.is-playing {{ background:var(--green); color:#0E1A17; }}
   .playall {{ display:inline-flex; align-items:center; gap:9px; cursor:pointer; border:none;
     border-radius:999px; padding:11px 17px; font-size:13px; font-weight:700; letter-spacing:.02em;
     color:#0E1A17; background:var(--green); white-space:nowrap; }}
@@ -206,6 +215,7 @@ def render(spec, audio_b64, original=None):
     <span class="t"><b>Hör den Unterschied</b> — erst deine Aufnahme, dann richtig.</span>
     <div class="abtns">
       {orig_btn}
+      {full_btn}
       <button class="playall" id="playall"><span class="play__i" aria-hidden="true"></span><span id="pa-x">Alles anhören</span></button>
     </div>
   </div>
@@ -222,6 +232,7 @@ def render(spec, audio_b64, original=None):
 </div></div>
 
 {orig_audio_tag}
+{full_audio_tag}
 {audio_tags}
 
 <script>
@@ -236,6 +247,8 @@ def render(spec, audio_b64, original=None):
     document.getElementById('playall').classList.remove('is-playing');
     var pox=document.getElementById('po-x'); if(pox)pox.textContent='Deine Aufnahme';
     var pob=document.getElementById('playorig'); if(pob)pob.classList.remove('is-playing');
+    var pfx=document.getElementById('pf-x'); if(pfx)pfx.textContent='Am Stück';
+    var pfb=document.getElementById('playfull'); if(pfb)pfb.classList.remove('is-playing');
   }}
   function playOne(n, onend){{
     var a=document.getElementById('a'+n);
@@ -257,15 +270,18 @@ def render(spec, audio_b64, original=None):
       stop(); if(!same) playOne(n);
     }});
   }});
-  var pobtn=document.getElementById('playorig');
-  if(pobtn) pobtn.addEventListener('click',function(){{
-    var same=curBtn===this; stop(); if(same) return;
-    var a=document.getElementById('orig'); if(!a) return;
-    cur=a; curBtn=this; curCard=null;
-    this.classList.add('is-playing'); var x=document.getElementById('po-x'); if(x)x.textContent='Läuft…';
+  function playSolo(btn, audioId, xId){{
+    var same=curBtn===btn; stop(); if(same) return;
+    var a=document.getElementById(audioId); if(!a) return;
+    cur=a; curBtn=btn; curCard=null;
+    btn.classList.add('is-playing'); var x=document.getElementById(xId); if(x)x.textContent='Läuft…';
     a.onended=function(){{ stop(); }};
     a.play();
-  }});
+  }}
+  var pobtn=document.getElementById('playorig');
+  if(pobtn) pobtn.addEventListener('click',function(){{ playSolo(this,'orig','po-x'); }});
+  var pfbtn=document.getElementById('playfull');
+  if(pfbtn) pfbtn.addEventListener('click',function(){{ playSolo(this,'full','pf-x'); }});
   var order=[{order}];
   document.getElementById('playall').addEventListener('click',function(){{
     if(cur){{ stop(); return; }}
@@ -298,19 +314,27 @@ def main():
     key = _env("ELEVENLABS_API_KEY") or sys.exit("ELEVENLABS_API_KEY not set.")
     voice = spec["voice"]
     print(f"{spec['slug']}: {len(spec['cards'])} sentences, voice {voice}")
+    os.makedirs(PUBLIC_FEEDBACK, exist_ok=True)
     audio_b64 = {}
     for i, c in enumerate(spec["cards"], 1):
-        audio_b64[i] = tts_b64(plain(c["nat"]), voice, key)
+        audio_b64[i] = base64.b64encode(tts_bytes(plain(c["nat"]), voice, key)).decode()
         print(f"  {i:02d} audio ok")
+    # One smooth, continuous natural read-through of the whole corrected text — a
+    # separate streaming file (not inlined) so the page stays light.
+    full_text = " ".join(plain(c["nat"]) for c in spec["cards"])
+    full_name = f"{spec['slug']}-full.mp3"
+    open(os.path.join(PUBLIC_FEEDBACK, full_name), "wb").write(
+        tts_bytes(full_text, voice, key, spec.get("full_speed", 0.95)))
+    full = {"url": full_name}
+    print(f"  smooth full read-through -> public/feedback/{full_name}")
     original = None
     if spec.get("original_opus"):
         opath = os.path.join(os.path.dirname(os.path.abspath(sys.argv[1])), spec["original_opus"])
-        os.makedirs(PUBLIC_FEEDBACK, exist_ok=True)
         orig_name = f"{spec['slug']}-original.mp3"
         mmss = opus_to_mp3_file(opath, os.path.join(PUBLIC_FEEDBACK, orig_name))
         original = {"url": orig_name, "mmss": mmss}  # relative to /feedback/<slug>.html
         print(f"  original voice -> public/feedback/{orig_name} ({mmss})")
-    out_html = render(spec, audio_b64, original)
+    out_html = render(spec, audio_b64, original, full)
     os.makedirs(PUBLIC_FEEDBACK, exist_ok=True)
     out = os.path.join(PUBLIC_FEEDBACK, f"{spec['slug']}.html")
     open(out, "w", encoding="utf-8").write(out_html)
