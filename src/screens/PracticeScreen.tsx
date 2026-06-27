@@ -157,9 +157,9 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
   const [showCongrats, setShowCongrats] = useState(false);
   const [nextLesson, setNextLesson] = useState<PracticeLesson | null>(null);
 
-  useEffect(() => {
-    if (lessonComplete) setShowCongrats(true);
-  }, [lessonComplete]);
+  // Congrats is shown only when the learner explicitly taps FINISH — not
+  // automatically on the first qualifying freestyle take, so they can record
+  // multiple takes before deciding they're done.
 
   // Resolve the next lesson (same learner) for the congrats CTA.
   useEffect(() => {
@@ -565,7 +565,7 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
         </div>
         {api.isLast ? (
           <button
-            onClick={() => navigate('/home')}
+            onClick={() => setShowCongrats(true)}
             disabled={!(api.allDone && freestyleComplete)}
             className="rounded-full border border-teal/30 px-4 py-1.5 text-[11px] font-bold tracking-[.08em] text-teal disabled:opacity-30"
           >
