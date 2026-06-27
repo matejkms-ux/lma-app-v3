@@ -15,10 +15,18 @@ export interface EssayPage {
 export interface FinalEssay { title: string; subtitle: string; pages: EssayPage[]; }
 
 export interface PodcastCheck { n: number; timeSec: number; question: string; }
+export interface MilestonePodcast {
+  key: string;
+  label: string;
+  audioUrl: string;
+  durationMin: number;
+  checks: PodcastCheck[];
+}
 export interface FinalPodcast {
   title: string; subtitle: string; audioUrl: string;
   hostVoiceId: string; learnerVoiceId: string;
   checks: PodcastCheck[];
+  milestones?: MilestonePodcast[];
 }
 
 /** One open writing prompt in the target language (human-judged, never auto-scored). */
@@ -111,6 +119,135 @@ export const FINAL_PROGRAMS: Record<string, FinalProgram> = {
       note: "Tu última sesión en vivo con tu guía. Llega habiendo leído el ensayo, escuchado el podcast, escrito tus respuestas y practicado la conversación.",
       sessionId: "NEALG2603-es",
       scheduledAt: "2026-06-27T16:00:00Z",
+      durationMin: 30,
+    },
+  },
+
+  // ───────────────────────── Anamarija (German) ─────────────────────────
+  "ANAMARIJAC2604-de": {
+    scope: "ANAMARIJAC2604-de",
+    language: "GERMAN",
+    locale: "de-CH",
+    scriptType: "latin",
+    essay: {
+      title: "Mein neues Leben",
+      subtitle: "Die Geschichte von Ami: von Slowenien in die Schweiz",
+      pages: [
+        { roman: "I", heading: "Das helle Klassenzimmer", paragraphs: [
+          "Ich stehe in einem hellen Klassenzimmer und atme einmal tief ein. Durch die großen Fenster fällt das Morgenlicht auf die Tische, und überall liegen Pinsel, Stifte und Blätter bereit. Die Kinder sitzen vor mir und warten gespannt darauf, dass es endlich losgeht. Ich fühle mich ruhig, klar und ganz im Moment. Heute unterrichte ich zum ersten Mal eine ganze Kunststunde auf Deutsch, und vor einem Jahr hätte ich mir das kaum vorstellen können. Mein Herz klopft ein wenig schneller, aber es ist ein gutes Gefühl, eine angenehme Aufregung. Ich lächle die Kinder an, begrüße sie und beginne langsam und deutlich zu sprechen. „Heute mischen wir Farben und schauen, welche neuen Töne dabei entstehen\", sage ich. In diesem Moment weiß ich ganz genau, dass ich am richtigen Ort bin und genau das tue, was ich tun soll.",
+          "Während ich erkläre, merke ich, dass die Worte leichter kommen, als ich erwartet habe. Wenn mir einmal ein Wort fehlt, beschreibe ich es einfach mit anderen Worten, und die Kinder verstehen mich trotzdem. Genau diese kleine Lücke zwischen dem, was ich sagen will, und dem, was ich sagen kann, ist im letzten Jahr immer kleiner geworden. Ich zeige den Kindern, wie man eine Linie weich und mutig über das Papier zieht, und ich sage ihnen, dass jeder Fehler auf dem Blatt zu etwas Schönem werden kann. „Es gibt kein falsches Bild\", wiederhole ich oft, denn ich möchte, dass sich jedes Kind frei und sicher fühlt. In jedem Kind steckt etwas ganz Eigenes, und meine Aufgabe ist es, dieses Eigene zu sehen, zu unterstützen und eine echte Verbindung aufzubauen. Wenn die Kinder am Ende stolz auf ihr Werk sind, bin ich es auch, und so entsteht im Klassenzimmer langsam echtes Vertrauen.",
+          "Für die erste richtige Aufgabe in diesem Schuljahr habe ich mir etwas Persönliches überlegt. Jedes Kind soll ein kleines Selbstporträt gestalten, aber nicht mit dem Bleistift, sondern mit Farben, Formen und Mustern, die zu seinem Charakter passen. Ein Mädchen wählt viele warme Gelbtöne, weil sie sich fröhlich fühlt, und ein Junge malt sich selbst als mutigen Löwen. Ich gehe langsam von Tisch zu Tisch, stelle Fragen und höre den Kindern genau zu. Am Ende hängen wir alle Bilder nebeneinander an die Wand, und plötzlich erzählt die ganze Klasse eine gemeinsame Geschichte. In solchen Momenten vergesse ich völlig, dass Deutsch eigentlich gar nicht meine Muttersprache ist.",
+        ]},
+        { roman: "II", heading: "Wer ich bin und woher ich komme", paragraphs: [
+          "Mein Name ist Anamarija, aber die meisten Menschen nennen mich einfach Ami. Ich komme aus Slowenien, einem kleinen, grünen Land mit Bergen, Wäldern und ruhigen Flüssen. Ich bin die älteste Tochter meiner Eltern und habe eine sehr enge Beziehung zu ihnen. Sie haben mich immer ermutigt, das zu tun, was mich wirklich glücklich macht. Schon als Kind habe ich am liebsten gemalt, gezeichnet und gebastelt. Die Kunst war von Anfang an meine Sprache: Wenn mir die Worte fehlten, konnte ich mit Farben und Formen zeigen, was in mir vorging. In Slowenien habe ich später mehrere Jahre lang Kunst unterrichtet, und ich dachte lange, dass ich für immer dort bleiben würde. Doch das Leben hatte einen anderen Plan für mich.",
+          "Vor etwa drei Jahren haben mein Mann und ich angefangen, über das Auswandern nachzudenken. Am Anfang war ich überhaupt nicht bereit dazu, denn mein ganzes Leben war in Slowenien. Es war keine leichte Entscheidung für uns beide, und wir haben lange darüber gesprochen. Schließlich haben wir uns entschieden, in die Schweiz zu ziehen. Manchmal muss man einfach im Moment entscheiden, was sich richtig anfühlt; man kann eben nicht alles im Voraus wissen, und das ist auch in Ordnung. Wir haben unsere Koffer gepackt, viele Dinge zurückgelassen und sind losgefahren. So hat ein neues Kapitel in einem fremden Land begonnen.",
+        ]},
+        { roman: "III", heading: "Der schwierige Anfang", paragraphs: [
+          "Der Anfang in der Schweiz war ehrlich gesagt nicht leicht für mich. Mein Diplom aus Slowenien war hier zuerst nicht anerkannt, und plötzlich wusste ich nicht mehr, wie meine Zukunft aussehen sollte. Alles lief ganz anders, als ich es mir vorgestellt hatte: eine neue Sprache, eine neue Kultur und ein völlig neuer Alltag. Manchmal habe ich mich verloren und allein gefühlt, und ich musste erst lernen, geduldig mit mir selbst zu sein. In dieser Zeit hat mir mein Mann besonders geholfen, wieder an mich selbst zu glauben. Schritt für Schritt habe ich langsam wieder Boden unter den Füßen gefunden, und ich habe verstanden, dass schwierige Zeiten einfach zum Weg dazugehören.",
+          "Eines Tages habe ich beschlossen, nicht länger zu warten. Ich habe einen einzigen Tag ausgewählt und an diesem Tag alle meine Bewerbungen abgeschickt. Es hat mich viel Mut gekostet, diesen Schritt zu machen. Zuerst habe ich zwei Jahre lang Töpfern auf Englisch unterrichtet, und das hat mir gezeigt, dass ich auch in einem fremden Land unterrichten kann. Mit jedem kleinen Erfolg ist mein Selbstvertrauen ein Stück gewachsen. „Wenn schon, denn schon\", sage ich seither gern zu mir selbst.",
+          "Ich habe eine Stelle als Kunstlehrerin an einer internationalen, zweisprachigen Schule bekommen. Im August beginne ich mit meiner neuen Arbeit, und ich freue mich riesig auf meine Schülerinnen und Schüler. Mein Ziel ist klar: Ich möchte meinen Unterricht eines Tages ganz selbstbewusst und ganz natürlich auf Deutsch führen. Genau deshalb arbeite ich jeden Tag an meiner Sprache.",
+        ]},
+        { roman: "IV", heading: "Mein Mann und mein Sohn", paragraphs: [
+          "Mein Mann heißt Sebastian, und er ist nicht nur mein Partner, sondern auch mein bester Freund. Wir haben vor viereinhalb Jahren geheiratet und unsere Flitterwochen in Rom verbracht. Wir haben eine gute Ehe, und natürlich gehören auch schwierige Jahre dazu, denn das ist ganz normal. Seit wir uns kennengelernt haben, habe ich mich selbst auf eine neue Weise wiedergefunden, und er glaubt an mich, auch wenn ich manchmal an mir selbst zweifle. Zusammen haben wir schon viele Berge bewegt, und an seiner Seite fühle ich mich stark und sicher.",
+          "Mein Mann und ich sind ein wirklich starkes Team. Jeder von uns hat seine eigene Aufgabe im Alltag, und wenn einer von uns müde ist, übernimmt der andere. Die wichtigen Entscheidungen treffen wir immer gemeinsam. „Zusammen versetzen wir Berge\", das ist seit Jahren unser Motto.",
+          "Vor einigen Monaten ist unser Sohn Aaron zur Welt gekommen, und er ist das größte Wunder in meinem Leben. Seit er da ist, sehe ich die Welt mit ganz neuen Augen. Ich bin zum ersten Mal Mutter geworden, und jeden Tag entdecke ich etwas Neues an ihm. Wenn er lacht, vergesse ich sofort alle Sorgen. Mein größter Wunsch ist, dass er neugierig und mutig durchs Leben geht.",
+          "Der Alltag mit einem kleinen Baby ist oft ein richtiges Abenteuer. Am Morgen will Aaron, dass ich die Vorhänge öffne, denn er weiß ganz genau, dass dann der Tag beginnt. Bald wird er in die Kita gehen, und in der Schweizer Gesellschaft macht das wirklich Sinn. Manchmal frage ich mich, ob ich als Mutter alles richtig mache, und dann erinnere ich mich daran, dass Nähe und Aufmerksamkeit das Wichtigste sind.",
+        ]},
+        { roman: "V", heading: "Familie und Wurzeln", paragraphs: [
+          "Familie ist für mich der größte Schatz im ganzen Leben. Auch wenn meine Eltern weit weg sind, fühlen wir uns dank der Videoanrufe nah. Jetzt, wo wir nicht mehr im selben Land leben, schätzen wir die gemeinsame Zeit umso mehr. Mindestens einen Feiertag im Jahr versuchen wir mit der ganzen Familie zu verbringen, und jedes Jahr machen unsere beiden Familien zusammen Adventskränze. Solche kleinen Traditionen geben mir Halt und Wärme. Meine Schwiegermutter ist im Laufe der Zeit fast wie eine zweite Mutter für mich geworden. Egal, wo wir auf der Welt gerade sind, am Ende hält uns die Familie immer zusammen.",
+        ]},
+        { roman: "VI", heading: "Die Kunst und die Keramik", paragraphs: [
+          "Schon mein ganzes Leben lang ist die Kunst meine Sprache. Wenn mir die Worte fehlen, dann male oder zeichne ich einfach, und mit Farben kann ich Gefühle zeigen, die schwer in Worte zu fassen sind. Für mich bedeutet Kunst Freiheit und Ausdruck zugleich. Genau das möchte ich auch meinen Schülern beibringen, denn kreativ zu sein bedeutet für mich, wirklich lebendig zu sein.",
+          "Bevor wir ausgewandert sind, habe ich in Slowenien sogar mein eigenes kleines Unternehmen gegründet. Ich habe es „Ami\" genannt, und das ist ein kleines Wortspiel, denn „Ami\" steckt im Wort Keramik und ist gleichzeitig mein Spitzname. In meinem Atelier habe ich Schalen, Tassen und Vasen hergestellt, und jedes Stück war von Hand gemacht und einzigartig. Ich liebe den Geruch und das Gefühl von feuchtem Ton zwischen meinen Fingern. Es hat mir unglaublich viel bedeutet, von meiner eigenen Arbeit leben zu können.",
+          "Am allerliebsten arbeite ich mit meinen Händen. Wenn ich töpfere, vergesse ich die Zeit um mich herum völlig. Der Ton ist zuerst weich und formlos, und langsam entsteht unter meinen Fingern eine Form. Manchmal geht etwas schief, und dann fange ich einfach noch einmal von vorne an. Gerade dieses Ausprobieren macht mir große Freude, denn aus einem Fehler wird oft die beste Idee.",
+          "Eines meiner liebsten Stücke ist eine kleine blaue Schale, die ich kurz vor unserem Umzug getöpfert habe. Sie ist überhaupt nicht perfekt, denn der Rand ist an einer Stelle etwas schief, aber genau das macht sie für mich so besonders. Heute steht sie in unserer Küche in Zürich, und jeden Morgen lege ich darin meinen Schlüssel ab. Für mich ist diese Schale wie eine kleine Brücke zwischen meinem alten und meinem neuen Leben.",
+          "Neben der Keramik illustriere und gestalte ich sehr gern. Besonders Kinderbücher haben es mir angetan. In meiner Freizeit zeichne ich kleine Figuren und Tiere, und ich lese auch gern Biografien von erfolgreichen Menschen, denn ihre Geschichten geben mir Mut und neue Ideen. Aus allem, was ich um mich herum sehe, sammle ich Inspiration. Diese Bilder und Ideen bringe ich später wieder in meinen Unterricht ein, und so bleibt meine Arbeit immer lebendig und persönlich.",
+        ]},
+        { roman: "VII", heading: "Freundschaft, Sprache und Zugehörigkeit", paragraphs: [
+          "In einem neuen Land Freunde zu finden ist nicht immer leicht. Am Anfang habe ich mich manchmal sehr allein gefühlt, denn echte Freundschaft braucht Zeit und Geduld. Ich suche gar nicht viele Bekannte, sondern lieber ein paar echte Freunde, also Menschen, mit denen ich offen und ehrlich sein kann. Langsam lerne ich nette Menschen in der Nachbarschaft kennen, und jede neue Verbindung macht das Leben hier ein bisschen wärmer.",
+          "Letzte Woche hat mich eine Nachbarin ganz spontan auf einen Kaffee eingeladen. Wir haben fast eine Stunde lang auf Deutsch geredet, über die Kinder, über das Wetter und über das Leben in der Schweiz. Erst danach ist mir aufgefallen, dass ich die ganze Zeit kein einziges Wort Englisch benutzt habe. Solche kleinen Momente bedeuten mir mehr als jede Prüfung, denn sie zeigen mir, dass ich wirklich Fortschritte mache und langsam ankomme.",
+          "Mit der Zeit habe ich gemerkt, dass vor allem die Sprache die Menschen verbindet. Mit jedem deutschen Satz öffne ich eine neue Tür, und wenn ich Deutsch spreche, kommen mir die Leute näher. Früher habe ich oft schnell auf Englisch geantwortet, aber jetzt traue ich mich immer öfter, wirklich Deutsch zu sprechen. Auch wenn ich dabei Fehler mache, mache ich einfach weiter.",
+          "Mittlerweile gehöre ich hier langsam dazu. Ich kenne die Wege, die Läden und die Gesichter, und der Alltag fühlt sich nicht mehr so fremd an wie früher. Manchmal fühle ich mich noch immer zwischen zwei Welten, aber genau das macht mich heute zu der Person, die ich bin. In Slowenien sind meine Wurzeln und meine Kindheit, und in der Schweiz baue ich gerade meine Zukunft auf. Und heute sage ich mit Freude: Die Schweiz ist mein Zuhause geworden.",
+        ]},
+        { roman: "VIII", heading: "Wer ich wirklich bin und wohin ich gehe", paragraphs: [
+          "Langsam kommt meine wahre Persönlichkeit auch auf Deutsch immer mehr zum Vorschein. Ich bin neugierig, kreativ, verspielt und voller Leben, und ich gehe mit viel Begeisterung und einem guten Sinn für Humor durchs Leben. „Tu es einfach, dann ist es getan\" — das ist seit jeher meine Haltung. Ich liebe es, zu kochen, zu backen und draußen in der Natur zu sein. Ich bin ein Mensch, der gern Neues ausprobiert und keine Angst vor Veränderung hat. Lange Zeit konnte ich diese Seite von mir auf Deutsch kaum zeigen, aber jetzt darf endlich mein ganzes Ich mitsprechen.",
+          "Mit jedem Tag werde ich in der deutschen Sprache sicherer. Ich höre jeden Tag zu, ich wiederhole und ich spreche nach. Ich habe gelernt, dass es sehr hilft, einen ganzen Text auswendig zu lernen, wenn man sich in einer Sprache noch unsicher fühlt; danach weiß man nämlich, dass man wirklich alle Wörter kennt. So baue ich mir ein festes Fundament auf, und aus diesen sicheren Sätzen kann ich später ganz frei sprechen.",
+          "Ich habe ein großes Ziel, und ich gehe es mutig an. Mein Ziel ist hoch gesteckt, denn ich will nicht nur irgendeine Lehrerin sein, sondern eine richtig gute und inspirierende Lehrerin. „Wenn schon, denn schon\", sage ich mir immer wieder, denn ich gebe mich nicht mit halben Sachen zufrieden. Ich bin mittendrin in meinem Traum, und das spüre ich jeden einzelnen Tag. Und so stehe ich am Ende wieder in meinem hellen Klassenzimmer — ruhig, klar, ganz im Moment. Volle Kraft voraus.",
+        ]},
+      ],
+    },
+    podcast: {
+      title: "Mein neues Leben",
+      subtitle: "Amis Geschichte auf Deutsch",
+      audioUrl: "https://wcrwnfvwydibhggislne.supabase.co/storage/v1/object/public/lesson-audio/ANAMARIJAC2604-de-podcast/v30.mp3",
+      hostVoiceId: "E13qNLHLLuVPKQvesCoy",
+      learnerVoiceId: "E13qNLHLLuVPKQvesCoy",
+      checks: [
+        { n: 1, timeSec: 70.8,   question: "Was sind Amis drei Gründe, warum sie auf Deutsch spricht?" },
+        { n: 2, timeSec: 254.06, question: "Was macht Ami, wenn ihr ein deutsches Wort fehlt?" },
+        { n: 3, timeSec: 506.02, question: "Was hat Ami beschlossen, als sie nicht mehr warten wollte?" },
+        { n: 4, timeSec: 645.74, question: "Was wünscht sich Ami für Aaron?" },
+        { n: 5, timeSec: 864.18, question: "Was bedeutet die kleine blaue Schale für Ami?" },
+        { n: 6, timeSec: 1131.82, question: "Warum hilft es, einen langen Text auswendig zu lernen?" },
+      ],
+      milestones: [
+        {
+          key: "v02",
+          label: "Meilenstein 1 — 2 Minuten",
+          audioUrl: "https://wcrwnfvwydibhggislne.supabase.co/storage/v1/object/public/lesson-audio/ANAMARIJAC2604-de-podcast/v02.mp3",
+          durationMin: 2,
+          checks: [
+            { n: 1, timeSec: 70.8, question: "Warum spricht Ami auf Deutsch? Was ist ihr Ziel für August?" },
+          ],
+        },
+        {
+          key: "v05",
+          label: "Meilenstein 2 — 5 Minuten",
+          audioUrl: "https://wcrwnfvwydibhggislne.supabase.co/storage/v1/object/public/lesson-audio/ANAMARIJAC2604-de-podcast/v05.mp3",
+          durationMin: 5,
+          checks: [
+            { n: 1, timeSec: 70.8,   question: "Was sind Amis drei Gründe, warum sie auf Deutsch spricht?" },
+            { n: 2, timeSec: 254.06, question: "Was macht Ami, wenn ihr im Unterricht ein deutsches Wort fehlt?" },
+          ],
+        },
+        {
+          key: "v15",
+          label: "Meilenstein 3 — 15 Minuten",
+          audioUrl: "https://wcrwnfvwydibhggislne.supabase.co/storage/v1/object/public/lesson-audio/ANAMARIJAC2604-de-podcast/v15.mp3",
+          durationMin: 15,
+          checks: [
+            { n: 1, timeSec: 70.8,   question: "Was sind Amis drei Gründe, warum sie auf Deutsch spricht?" },
+            { n: 2, timeSec: 254.06, question: "Was macht Ami, wenn ihr ein deutsches Wort fehlt?" },
+            { n: 3, timeSec: 506.02, question: "Warum war der Anfang in der Schweiz schwer? Was hat Ami dann beschlossen?" },
+            { n: 4, timeSec: 645.74, question: "Was wünscht sich Ami für ihren Sohn Aaron?" },
+          ],
+        },
+      ],
+    },
+    writing: {
+      title: "Schreib deine Geschichte",
+      intro: "Nachdem du gelesen und gehört hast, schreib auf Deutsch. Es gibt keine richtigen oder falschen Antworten — deine Begleiterin liest, was du schreibst.",
+      prompts: [
+        { prompt: "Stell dir vor, du stehst vor deiner Klasse und sprichst Deutsch. Wie fühlt sich das an? Beschreibe diesen Moment so genau wie möglich.", helper: "Schreib frei, ohne dich um Perfektion zu kümmern.", minWords: 40 },
+        { prompt: "Erzähl von einem Moment, in dem du etwas wirklich Schwieriges erlebt hast und trotzdem weitergemacht hast. Was hat dir geholfen?", helper: "Ein konkretes Beispiel ist besser als eine allgemeine Idee.", minWords: 40 },
+        { prompt: "Was macht dich aus? Beschreibe deine Persönlichkeit, deine Leidenschaften und deinen größten Traum.", helper: "Schreib, was du wirklich denkst — in deinen eigenen Worten.", minWords: 50 },
+      ],
+    },
+    conversation: {
+      title: "Abschlussgespräch",
+      intro: "Hör dir jede Frage an und nimm deine Antwort auf Deutsch auf. Bewertet werden Aussprache und Fluss — nicht der Inhalt.",
+      prompts: [
+        { text: "Wer bist du? Woher kommst du, und warum lebst du jetzt in der Schweiz?", audioUrl: "" },
+        { text: "Erzähl mir von deiner Arbeit als Lehrerin. Was liebst du daran?", audioUrl: "" },
+        { text: "Was bedeutet Kunst für dich? Wie hat die Keramik dein Leben geprägt?", audioUrl: "" },
+        { text: "Was wünschst du dir für Aaron — und was für dich selbst?", audioUrl: "" },
+        { text: "Wie fühlt sich Deutsch heute für dich an, verglichen mit vor einem Jahr?", audioUrl: "" },
+      ],
+    },
+    session: {
+      title: "Abschlusssession",
+      note: "Deine letzte Live-Session mit deiner Begleiterin. Komm vorbereitet: Lesetext gelesen, Podcast gehört, Schreiben fertig, Gespräch geübt.",
+      sessionId: "ANAMARIJAC2604-de",
       durationMin: 30,
     },
   },
