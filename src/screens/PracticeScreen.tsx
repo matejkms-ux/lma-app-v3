@@ -148,12 +148,9 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
   // exists (reported by the panel). Audio steps done + this = lesson complete.
   const [freestyleComplete, setFreestyleComplete] = useState(false);
 
-  // When the lesson becomes complete we auto-show a congrats screen and offer the
-  // next lesson (which is now unlocked). `lessonComplete` is the single source of
-  // truth: every audio step done AND a qualifying freestyle take.
-  const allAudioDone =
-    api.audioSteps.length > 0 && api.audioSteps.every((s) => api.passes[s] >= requiredReps(s));
-  const lessonComplete = allAudioDone && freestyleComplete;
+  // Congrats + the next-lesson CTA appear only when the learner explicitly taps
+  // FINISH (see below) — not automatically — so they can record multiple freestyle
+  // takes first. `freestyleComplete` only gates whether FINISH is enabled.
   const [showCongrats, setShowCongrats] = useState(false);
   const [nextLesson, setNextLesson] = useState<PracticeLesson | null>(null);
 
