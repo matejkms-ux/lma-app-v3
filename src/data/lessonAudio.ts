@@ -135,11 +135,12 @@ export async function uploadStepAudio(
     {
       lesson_code: lessonCode,
       step,
+      version: 1, // lesson_audio unique is (lesson_code, version, step); all live content is v1
       audio_url: audioUrl,
       file_name: file.name,
       updated_at: new Date().toISOString(),
     },
-    { onConflict: 'lesson_code,step' },
+    { onConflict: 'lesson_code,version,step' },
   );
 
   if (dbErr) return { error: dbErr.message };
@@ -220,8 +221,8 @@ export async function uploadRefAudio(
   const audioUrl = pub.publicUrl;
 
   const { error: dbErr } = await adminClient.from('lesson_audio').upsert(
-    { lesson_code: lessonCode, step: slot, audio_url: audioUrl, file_name: file.name, updated_at: new Date().toISOString() },
-    { onConflict: 'lesson_code,step' },
+    { lesson_code: lessonCode, step: slot, version: 1, audio_url: audioUrl, file_name: file.name, updated_at: new Date().toISOString() },
+    { onConflict: 'lesson_code,version,step' },
   );
 
   if (dbErr) return { error: dbErr.message };
@@ -263,14 +264,16 @@ export async function upsertSentences(
   const { error: lessonErr } = await adminClient
     .from('lessons')
     .upsert(
-      { lesson_code: lessonCode, language, title: `Lesson ${lessonNr}` },
-      { onConflict: 'lesson_code' },
+      // lessons unique is (lesson_code, version); all live content is v1
+      { lesson_code: lessonCode, version: 1, language, title: `Lesson ${lessonNr}` },
+      { onConflict: 'lesson_code,version' },
     );
   if (lessonErr) return { error: lessonErr.message };
 
   const rows = sentences.map((s) => ({
     lesson_code: lessonCode,
     sentence_nr: s.sentence_nr,
+    version: 1, // sentences unique is (lesson_code, version, sentence_nr)
     l1: s.l1,
     l2: s.l2,
     l2_translit: s.l2_translit || null,
@@ -278,7 +281,7 @@ export async function upsertSentences(
 
   const { error } = await adminClient
     .from('sentences')
-    .upsert(rows, { onConflict: 'lesson_code,sentence_nr' });
+    .upsert(rows, { onConflict: 'lesson_code,version,sentence_nr' });
 
   return error ? { error: error.message } : {};
 }
@@ -418,8 +421,9 @@ export async function setLessonTitle(
   if (!trimmed) return { error: 'Title cannot be empty' };
   const parsed = parseLessonCode(lessonCode);
   const { error } = await adminClient.from('lessons').upsert(
-    { lesson_code: lessonCode, language: parsed?.language ?? 'UNKNOWN', title: trimmed },
-    { onConflict: 'lesson_code' },
+    // lessons unique is (lesson_code, version); all live content is v1
+    { lesson_code: lessonCode, version: 1, language: parsed?.language ?? 'UNKNOWN', title: trimmed },
+    { onConflict: 'lesson_code,version' },
   );
   return error ? { error: error.message } : {};
 }
