@@ -1,0 +1,31 @@
+{
+  "slug": "anamarija-freestyle",
+  "voice": "E13qNLHLLuVPKQvesCoy",
+  "eyebrow": "Freestyle · korrigiert",
+  "title_html": "Dein <em>Freestyle</em> 🎤",
+  "lede_html": "Anamarija — das ist dein Freestyle nach der Lektion (frei gesprochen!). Oben siehst du <b>so gesagt</b> (rot = ändern), darunter die <b>natürliche</b> Version — zum Lesen und Anhören.",
+  "recorded_by": "Anamarija",
+  "recorded_date": "27. Juni 2026",
+  "original_opus": "anamarija-freestyle.mp3",
+  "foot_html": "Richtig stark — du hast frei gesprochen und sogar über deine eigenen Fehler nachgedacht. Genau so wächst es. 👏",
+  "cards": [
+    {"said": "Ich habe jetzt <s>diese</s> Lektion zwei <s>das erste Mal</s> gemacht.",
+     "nat": "Ich habe jetzt Lektion zwei <b>zum ersten Mal</b> gemacht.",
+     "tip": "„<b>zum ersten Mal</b>\" (nicht „das erste Mal\"); „Lektion zwei\" ohne „diese\"."},
+    {"said": "<s>ich habe gedacht am Anfang</s>: „Uff, das ist schwer.\"",
+     "nat": "<b>Am Anfang dachte ich</b>: „Uff, das ist schwer.\"",
+     "tip": "Zeit zuerst, Verb an zweiter Stelle: „Am Anfang <b>dachte ich</b> …\"."},
+    {"said": "jetzt <s>am Recall Section</s> habe ich nur ein paar Fehler gemacht.",
+     "nat": "<b>Im Recall-Teil</b> habe ich nur ein paar Fehler gemacht.",
+     "tip": "Ein englisches Wort einbauen: „im Recall-<b>Teil</b>\" (oder „in der Recall-Sektion\")."},
+    {"said": "ich <s>muss es noch einmal gemacht</s>, die ganze Lektion.",
+     "nat": "Ich muss <b>die ganze Lektion noch einmal machen</b>.",
+     "tip": "Nach „müssen\" kommt der Infinitiv: „ich muss … <b>machen</b>\" (nicht „gemacht\")."},
+    {"said": "ich bin sicher, dass <s>nach ich es der zweiten Mal mache</s>, ich <s>will</s> alles <s>immer noch</s> besser sagen.",
+     "nat": "Ich bin sicher: <b>Wenn ich es das zweite Mal mache</b>, <b>sage ich</b> alles <b>noch</b> besser.",
+     "tip": "„<b>wenn</b> ich es <b>das zweite Mal</b> mache, <b>dann sage ich</b> …\"."},
+    {"said": "Und das ist wirklich cool.",
+     "nat": "Und das ist wirklich cool.",
+     "tip": "Perfekt — genau so sagt man das! 👏", "good": true}
+  ]
+}

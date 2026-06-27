@@ -10,7 +10,7 @@ import { useSession } from '../session';
 import { displayName } from '../data/mock';
 import { adventureStatus, adventureEndLabel } from '../data/adventure';
 import { finalProgramFor } from '../data/finalContent';
-import { feedbackFor } from '../data/feedback';
+import { correctionsFor } from '../data/corrections';
 
 /** Tailwind classes for the small adventure status chip, keyed by phase. */
 const PHASE_CHIP: Record<string, string> = {
@@ -68,7 +68,7 @@ export function HomeScreen() {
       : null;
 
   const finalProgram = finalProgramFor(user?.username);
-  const feedback = feedbackFor(user?.username);
+  const corrections = correctionsFor(user?.username);
 
   const openPractice = () => {
     if (lesson) navigate('/practice', { state: { lessonCode: lesson.code } });
@@ -220,24 +220,23 @@ export function HomeScreen() {
           </a>
         )}
 
-        {/* Feedback from Matej — a red/green "say it naturally" correction of the
-            learner's own voice note, with audio. Self-paced; opens the standalone
-            page (also a sendable link). Only shown for learners who have one. */}
-        {feedback && (
-          <a
-            href={feedback.href}
-            target="_blank"
-            rel="noopener"
-            className="mt-3.5 flex w-full items-center gap-3 rounded-[18px] border border-rule bg-white p-4 active:scale-[.99]"
+        {/* Corrections — the learner's personal "say it naturally" feedback section.
+            Opens the Corrections hub; only shown for learners who have some. */}
+        {corrections.length > 0 && (
+          <button
+            onClick={() => navigate('/corrections')}
+            className="mt-3.5 flex w-full items-center gap-3 rounded-[18px] border border-rule bg-white p-4 text-left active:scale-[.99]"
           >
             <span className="text-[26px]">📩</span>
             <span className="min-w-0 flex-1">
-              <span className="block text-[11px] font-bold tracking-[.14em] text-muted">FEEDBACK FROM MATEJ</span>
-              <span className="mt-[3px] block font-serif text-[18px] text-heading">{feedback.title}</span>
-              <span className="block truncate text-[12px] text-muted">{feedback.note}</span>
+              <span className="block text-[11px] font-bold tracking-[.14em] text-muted">CORRECTIONS</span>
+              <span className="mt-[3px] block font-serif text-[18px] text-heading">From Matej</span>
+              <span className="block truncate text-[12px] text-muted">
+                {corrections.length} {corrections.length === 1 ? 'correction' : 'corrections'} · tap to open
+              </span>
             </span>
             <span className="text-muted">›</span>
-          </a>
+          </button>
         )}
 
         {/* Stats — real values from progress store. Hidden entirely until there's

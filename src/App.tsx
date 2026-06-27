@@ -18,6 +18,7 @@ import { FinalConversationScreen } from './screens/FinalConversationScreen';
 import { FinalSessionScreen } from './screens/FinalSessionScreen';
 import { ReaderScreen } from './screens/ReaderScreen';
 import { ReaderLessonScreen } from './screens/ReaderLessonScreen';
+import { CorrectionsScreen } from './screens/CorrectionsScreen';
 // Lazy — keeps the heavy @zoom/videosdk out of the main bundle (loads only on /session/*).
 const VideoSessionScreen = lazy(() => import('./screens/VideoSessionScreen'));
 import VideoRosterScreen from './screens/VideoRosterScreen';
@@ -52,6 +53,7 @@ export default function App() {
         <Route path="/final-writing" element={<FinalWritingScreen />} />
         <Route path="/final-conversation" element={<FinalConversationScreen />} />
         <Route path="/final-session" element={<FinalSessionScreen />} />
+        <Route path="/corrections" element={<CorrectionsScreen />} />
         <Route path="/reader" element={<ReaderScreen />} />
         <Route path="/reader-lesson" element={<ReaderLessonScreen />} />
         <Route
