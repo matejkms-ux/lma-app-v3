@@ -74,16 +74,16 @@ export const FINAL_PROGRAMS: Record<string, FinalProgram> = {
     podcast: {
       title: "Cuatro movimientos",
       subtitle: "Una conversación con Neal",
-      audioUrl: "https://wcrwnfvwydibhggislne.supabase.co/storage/v1/object/public/lesson-audio/NEALG2603-es-podcast/cuatro-movimientos.mp3?v=3",
+      audioUrl: "https://wcrwnfvwydibhggislne.supabase.co/storage/v1/object/public/lesson-audio/NEALG2603-es-podcast/cuatro-movimientos.mp3?v=4",
       hostVoiceId: "ewn5JTa3lNPY8QVuZJi6",
-      learnerVoiceId: "cIBxLwfshLYhRB9lCXEg",
+      learnerVoiceId: "P951amuWPNCJ0L15rFyC",
       checks: [
-      { n: 1, timeSec: 315.3, question: "¿Cómo describe Neal su manera de mirar el mundo cuando era niño?" },
-      { n: 2, timeSec: 536.46, question: "¿Por qué dice Neal que le atraía aquello que todavía no dominaba?" },
-      { n: 3, timeSec: 930.73, question: "Según Neal, ¿de dónde vienen realmente las mejores ideas?" },
-      { n: 4, timeSec: 984.41, question: "¿Por qué dice Neal que la creatividad es espiritual?" },
-      { n: 5, timeSec: 1304.05, question: "¿Qué descubrió Neal sobre el logro y la felicidad?" },
-      { n: 6, timeSec: 1515.31, question: "Según Neal, ¿cuáles son las cuatro cosas para las que estamos aquí?" }
+      { n: 1, timeSec: 336.42, question: "¿Cómo describe Neal su manera de mirar el mundo cuando era niño?" },
+      { n: 2, timeSec: 571.82, question: "¿Por qué dice Neal que le atraía aquello que todavía no dominaba?" },
+      { n: 3, timeSec: 990.49, question: "Según Neal, ¿de dónde vienen realmente las mejores ideas?" },
+      { n: 4, timeSec: 1047.29, question: "¿Por qué dice Neal que la creatividad es espiritual?" },
+      { n: 5, timeSec: 1399.33, question: "¿Qué descubrió Neal sobre el logro y la felicidad?" },
+      { n: 6, timeSec: 1622.43, question: "Según Neal, ¿cuáles son las cuatro cosas para las que estamos aquí?" }
       ],
     },
     writing: {

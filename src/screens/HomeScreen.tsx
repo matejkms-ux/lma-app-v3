@@ -40,7 +40,10 @@ export function HomeScreen() {
   const sessionId = (user?.username ?? '').replace(/-[a-z]{2}$/i, '').toLowerCase();
   const videoUrl = sessionId ? `https://lma-video-app.netlify.app/session/${sessionId}` : null;
 
-  const available = lesson ? STEPS.filter((s) => lesson.audio[s]) : [];
+  // The practice flow walks all canonical STEPS (the in-lesson counter is X/6); the
+  // catalog lesson carries no per-step audio map, so count progress over STEPS here
+  // (using lesson.audio would always be 0/0).
+  const available = lesson ? STEPS : [];
   const progress = user && lesson ? lessonProgress(user.id, lesson.code) : null;
   const doneCount = progress ? available.filter((s) => progress.completedSteps.includes(s)).length : 0;
   const currentIdx = Math.min(doneCount, Math.max(0, available.length - 1));
@@ -177,23 +180,8 @@ export function HomeScreen() {
           </button>
         )}
 
-        {/* Live session — opens the adventurer's own room (participant) in the video app */}
-        {videoUrl && (
-          <a
-            href={videoUrl}
-            target="_blank"
-            rel="noopener"
-            className="mt-3.5 flex w-full items-center justify-between rounded-[18px] border border-rule bg-white p-4"
-          >
-            <div>
-              <div className="text-[11px] font-bold tracking-[.14em] text-muted">LIVE SESSION</div>
-              <div className="mt-[5px] font-serif text-[18px] text-heading">Join your video session</div>
-            </div>
-            <span className="text-sm font-bold text-coral">Join →</span>
-          </a>
-        )}
-
-        {/* Final App — the capstone; only for learners with a final program loaded */}
+        {/* Final App — the capstone; sits right under practice so it's easy to reach.
+            Only for learners with a final program loaded. */}
         {finalProgram && (
           <button
             onClick={() => navigate('/final')}
@@ -211,7 +199,25 @@ export function HomeScreen() {
           </button>
         )}
 
-        {/* Stats — real values from progress store */}
+        {/* Live session — opens the adventurer's own room (participant) in the video app */}
+        {videoUrl && (
+          <a
+            href={videoUrl}
+            target="_blank"
+            rel="noopener"
+            className="mt-3.5 flex w-full items-center justify-between rounded-[18px] border border-rule bg-white p-4"
+          >
+            <div>
+              <div className="text-[11px] font-bold tracking-[.14em] text-muted">LIVE SESSION</div>
+              <div className="mt-[5px] font-serif text-[18px] text-heading">Join your video session</div>
+            </div>
+            <span className="text-sm font-bold text-coral">Join →</span>
+          </a>
+        )}
+
+        {/* Stats — real values from progress store. Hidden entirely until there's
+            something to show (no empty "0 of N" / "—" placeholders). */}
+        {(lessonsPassed > 0 || avgGrade !== null) && (
         <div className="mt-3.5 flex gap-3">
           <div className="flex-1 rounded-[18px] border border-rule bg-white p-3.5">
             <div className="text-[10px] font-bold tracking-[.1em] text-muted">LESSONS PASSED</div>
@@ -226,6 +232,7 @@ export function HomeScreen() {
             </div>
           </div>
         </div>
+        )}
 
         {/* Study plan — only shown for learners with a structured program */}
         {user?.plan && (

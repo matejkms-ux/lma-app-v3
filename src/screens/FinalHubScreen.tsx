@@ -76,10 +76,13 @@ export function FinalHubScreen() {
       </div>
 
       <div className="scroll-region flex-1 px-5 pb-6 pt-3">
-        <div className="mb-3 flex items-center justify-between rounded-2xl border border-rule bg-cream-panel px-4 py-3">
-          <span className="text-[11px] font-bold tracking-[.12em] text-muted">PROGRESS</span>
-          <span className="text-[13px] font-extrabold text-emerald">{doneCount} / {cards.length}</span>
-        </div>
+        {/* Progress only appears once there's something to show — no empty 0/N. */}
+        {doneCount > 0 && (
+          <div className="mb-3 flex items-center justify-between rounded-2xl border border-rule bg-cream-panel px-4 py-3">
+            <span className="text-[11px] font-bold tracking-[.12em] text-muted">PROGRESS</span>
+            <span className="text-[13px] font-extrabold text-emerald">{doneCount} / {cards.length}</span>
+          </div>
+        )}
 
         <div className="flex flex-col gap-2.5">
           {cards.map((c, i) => {

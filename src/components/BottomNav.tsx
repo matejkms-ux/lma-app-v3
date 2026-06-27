@@ -5,7 +5,7 @@ type Tab = 'home' | 'practice' | 'read';
 
 const ROUTE: Record<Tab, string> = {
   home: '/home',
-  practice: '/lessons',
+  practice: '/sentences',
   read: '/reader',
 };
 
@@ -27,7 +27,7 @@ function ReadIcon() {
 }
 const ITEMS: { tab: Tab; label: string; Icon: () => JSX.Element }[] = [
   { tab: 'home', label: 'Home', Icon: HomeIcon },
-  { tab: 'practice', label: 'Practice', Icon: PracticeIcon },
+  { tab: 'practice', label: 'Sentences', Icon: PracticeIcon },
   { tab: 'read', label: 'Read', Icon: ReadIcon },
 ];
 
@@ -43,7 +43,7 @@ export function BottomNav({ active }: { active: Tab }) {
   const isActive = (tab: Tab) => {
     if (tab === active) return true;
     if (tab === 'practice') {
-      return ['/lessons', '/practice', '/overview'].includes(location.pathname);
+      return ['/sentences', '/lessons', '/practice', '/overview'].includes(location.pathname);
     }
     if (tab === 'read') {
       return ['/reader', '/reader-lesson'].includes(location.pathname);
