@@ -21,6 +21,8 @@ export interface PracticeLesson {
   pointsPerStep: number;
   /** How many of this lesson's steps have audio (denominator for the counter). */
   audioStepCount: number;
+  /** Bonus lessons (`…-bonus001`) group at the top, always open, off the main path. */
+  bonus: boolean;
 }
 
 const DEFAULT_POINTS_PER_STEP = 10;
@@ -40,15 +42,15 @@ const DEFAULT_POINTS_PER_STEP = 10;
  */
 const _catalog: Record<string, PracticeLesson[]> = {};
 
-/** A lesson's owning scope — the code minus its trailing `-<number>`. */
+/** A lesson's owning scope — the code minus its trailing `-<number>` / `-bonus<number>`. */
 export function lessonScope(code: string): string {
-  return code.replace(/-\d{1,4}$/, '');
+  return code.replace(/-(?:bonus)?\d{1,4}$/, '');
 }
 
 function buildLesson(code: string, audioSteps: Step[], title?: string): PracticeLesson | null {
   const parsed = parseLessonCode(code);
   if (!parsed) return null; // legacy / malformed code → not a real catalog lesson
-  const defaultTitle = `Lesson ${parsed.lessonNr}`;
+  const defaultTitle = parsed.bonus ? `Bonus ${parsed.lessonNr}` : `Lesson ${parsed.lessonNr}`;
   return {
     code,
     title: title && title !== defaultTitle ? title : defaultTitle,
@@ -57,6 +59,7 @@ function buildLesson(code: string, audioSteps: Step[], title?: string): Practice
     audio: {},
     pointsPerStep: DEFAULT_POINTS_PER_STEP,
     audioStepCount: audioSteps.length,
+    bonus: parsed.bonus,
   };
 }
 
@@ -81,7 +84,12 @@ export async function getLessonCatalog(scope: string): Promise<PracticeLesson[]>
     if (!lesson) continue;
     mine.push(lesson);
   }
-  mine.sort((a, b) => parseLessonCode(a.code)!.lessonNr - parseLessonCode(b.code)!.lessonNr);
+  // Bonus lessons first (their own group at the top), then the main path by number.
+  mine.sort((a, b) =>
+    a.bonus !== b.bonus
+      ? (a.bonus ? -1 : 1)
+      : parseLessonCode(a.code)!.lessonNr - parseLessonCode(b.code)!.lessonNr,
+  );
   _catalog[scope] = mine;
   return mine;
 }
@@ -116,7 +124,7 @@ export async function getPracticeLessonWithAudio(code: string): Promise<Practice
     }
   }
 
-  const defaultTitle = `Lesson ${parsed.lessonNr}`;
+  const defaultTitle = parsed.bonus ? `Bonus ${parsed.lessonNr}` : `Lesson ${parsed.lessonNr}`;
   return {
     code,
     title: customTitle && customTitle !== defaultTitle ? customTitle : defaultTitle,
@@ -125,5 +133,6 @@ export async function getPracticeLessonWithAudio(code: string): Promise<Practice
     audio,
     pointsPerStep: DEFAULT_POINTS_PER_STEP,
     audioStepCount,
+    bonus: parsed.bonus,
   };
 }

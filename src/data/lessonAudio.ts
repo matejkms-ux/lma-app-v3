@@ -360,19 +360,22 @@ const CODE_LANG: Record<string, string> = {
 export interface ParsedLessonCode {
   language: string;
   lessonNr: number;
+  /** Bonus lessons (`…-de-bonus001`) sit in their own group, always open. */
+  bonus: boolean;
 }
 
 /**
- * A lesson_code is well-formed when it is `<prefix>-<2-letter-lang>-<number>`
- * and the language segment is a known code (e.g. JERODC2604-th-001). Returns the
- * derived language + lesson number, or null when malformed.
+ * A lesson_code is well-formed when it is `<prefix>-<2-letter-lang>-<number>` OR
+ * `<prefix>-<2-letter-lang>-bonus<number>` (a bonus lesson), and the language
+ * segment is a known code (e.g. JERODC2604-th-001, ANAMARIJAC2604-de-bonus001).
+ * Returns the derived language, lesson number, and bonus flag, or null when malformed.
  */
 export function parseLessonCode(code: string): ParsedLessonCode | null {
-  const m = /^([A-Za-z0-9]+)-([a-z]{2})-(\d{1,4})$/.exec(code.trim());
+  const m = /^([A-Za-z0-9]+)-([a-z]{2})-(bonus)?(\d{1,4})$/.exec(code.trim());
   if (!m) return null;
   const language = CODE_LANG[m[2]];
   if (!language) return null;
-  return { language, lessonNr: parseInt(m[3], 10) };
+  return { language, lessonNr: parseInt(m[4], 10), bonus: Boolean(m[3]) };
 }
 
 /** The custom title stored in the DB for a lesson, or null if none. */

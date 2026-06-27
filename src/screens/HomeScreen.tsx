@@ -33,7 +33,10 @@ export function HomeScreen() {
   useEffect(() => {
     if (scope) void getLessonCatalog(scope).then(setLessons);
   }, [scope]);
-  const lesson = lessons[0];
+  // Bonus lessons live in their own group and never drive the main "Continue" CTA
+  // or the lessons-passed count — those track the real adventure path only.
+  const mainLessons = lessons.filter((l) => !l.bonus);
+  const lesson = mainLessons[0];
   const reps = user ? lifetimeReps(user.id) : 0;
   const today = user ? repsToday(user.id) : 0;
 
@@ -50,7 +53,7 @@ export function HomeScreen() {
   const currentIdx = Math.min(doneCount, Math.max(0, available.length - 1));
 
   // Real progress stats — only lessons with audio count toward "passed"
-  const practicableLessons = lessons.filter((l) => l.audioStepCount > 0);
+  const practicableLessons = mainLessons.filter((l) => l.audioStepCount > 0);
   const lessonsPassed = user
     ? practicableLessons.filter((l) => isLessonUnlockComplete(user.id, l.code, l.audioStepCount)).length
     : 0;

@@ -124,6 +124,16 @@ function LockedLessonRow({ lesson, comingSoon = false }: { lesson: PracticeLesso
   );
 }
 
+/** A labeled divider separating lesson groups (Bonus vs the main path). */
+function GroupLabel({ children }: { children: string }) {
+  return (
+    <div className="mb-2 mt-1 flex items-center gap-3 px-1">
+      <span className="shrink-0 text-[10.5px] font-bold uppercase tracking-[.16em] text-muted">{children}</span>
+      <span className="h-px flex-1 bg-rule" />
+    </div>
+  );
+}
+
 /** Lesson select — the lessons loaded for the signed-in learner's language. */
 export function LessonsScreen() {
   const navigate = useNavigate();
@@ -156,17 +166,11 @@ export function LessonsScreen() {
           </div>
         ) : (
           <>
-            {lessons.map((l, i) => {
-              // A lesson must have VOICE to be entered — never let a learner walk
-              // into a voiceless lesson (it would show empty "AUDIO COMING SOON").
-              const hasVoice = l.audioStepCount > 0;
-              // …and it unlocks sequentially, once the previous one is complete.
-              const prev = lessons[i - 1];
-              const sequentialOk =
-                !prev || isLessonUnlockComplete(user.id, prev.code, prev.audioStepCount);
-
-              if (hasVoice && sequentialOk) {
-                return (
+            {(() => {
+              // A lesson must have VOICE to be entered — never walk a learner into a
+              // voiceless lesson (empty "AUDIO COMING SOON").
+              const renderRow = (l: PracticeLesson, unlocked: boolean) =>
+                l.audioStepCount > 0 && unlocked ? (
                   <LessonRow
                     key={l.code}
                     userId={user.id}
@@ -174,11 +178,32 @@ export function LessonsScreen() {
                     freestyleDone={freestyleDone.has(l.code)}
                     onOpen={() => navigate('/practice', { state: { lessonCode: l.code, startAt: 'GRASP' } })}
                   />
+                ) : (
+                  <LockedLessonRow key={l.code} lesson={l} comingSoon={l.audioStepCount === 0} />
                 );
-              }
-              // No voice yet → "COMING SOON"; otherwise a normal sequential lock.
-              return <LockedLessonRow key={l.code} lesson={l} comingSoon={!hasVoice} />;
-            })}
+
+              const bonus = lessons.filter((l) => l.bonus);
+              const main = lessons.filter((l) => !l.bonus);
+              return (
+                <>
+                  {/* Bonus lessons — their own group, always open (off the main path). */}
+                  {bonus.length > 0 && (
+                    <>
+                      <GroupLabel>Bonus · jederzeit offen</GroupLabel>
+                      {bonus.map((l) => renderRow(l, true))}
+                      <GroupLabel>Deine Lektionen</GroupLabel>
+                    </>
+                  )}
+                  {/* Main path — unlocks sequentially, once the previous lesson is complete. */}
+                  {main.map((l, i) => {
+                    const prev = main[i - 1];
+                    const unlocked =
+                      !prev || isLessonUnlockComplete(user.id, prev.code, prev.audioStepCount);
+                    return renderRow(l, unlocked);
+                  })}
+                </>
+              );
+            })()}
 
             {/* Final reading test — German only */}
             {user.language === 'GERMAN' && (
