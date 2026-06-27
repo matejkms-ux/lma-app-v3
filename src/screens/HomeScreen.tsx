@@ -10,6 +10,7 @@ import { useSession } from '../session';
 import { displayName } from '../data/mock';
 import { adventureStatus, adventureEndLabel } from '../data/adventure';
 import { finalProgramFor } from '../data/finalContent';
+import { feedbackFor } from '../data/feedback';
 
 /** Tailwind classes for the small adventure status chip, keyed by phase. */
 const PHASE_CHIP: Record<string, string> = {
@@ -64,6 +65,7 @@ export function HomeScreen() {
       : null;
 
   const finalProgram = finalProgramFor(user?.username);
+  const feedback = feedbackFor(user?.username);
 
   const openPractice = () => {
     if (lesson) navigate('/practice', { state: { lessonCode: lesson.code } });
@@ -212,6 +214,26 @@ export function HomeScreen() {
               <div className="mt-[5px] font-serif text-[18px] text-heading">Join your video session</div>
             </div>
             <span className="text-sm font-bold text-coral">Join →</span>
+          </a>
+        )}
+
+        {/* Feedback from Matej — a red/green "say it naturally" correction of the
+            learner's own voice note, with audio. Self-paced; opens the standalone
+            page (also a sendable link). Only shown for learners who have one. */}
+        {feedback && (
+          <a
+            href={feedback.href}
+            target="_blank"
+            rel="noopener"
+            className="mt-3.5 flex w-full items-center gap-3 rounded-[18px] border border-rule bg-white p-4 active:scale-[.99]"
+          >
+            <span className="text-[26px]">📩</span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[11px] font-bold tracking-[.14em] text-muted">FEEDBACK FROM MATEJ</span>
+              <span className="mt-[3px] block font-serif text-[18px] text-heading">{feedback.title}</span>
+              <span className="block truncate text-[12px] text-muted">{feedback.note}</span>
+            </span>
+            <span className="text-muted">›</span>
           </a>
         )}
 
