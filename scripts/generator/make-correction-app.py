@@ -30,7 +30,7 @@ Spec JSON shape:
 Usage:  python3 make-correction-app.py feedback/<slug>.json
 Env:    ELEVENLABS_API_KEY (in .env next to this script).
 """
-import os, sys, io, re, json, base64, html as _html
+import os, sys, io, re, json, base64, subprocess, tempfile, html as _html
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PUBLIC_FEEDBACK = os.path.normpath(os.path.join(HERE, "..", "..", "public", "feedback"))
@@ -66,7 +66,18 @@ def tts_b64(text, voice, key):
 def plain(s):
     return _html.unescape(re.sub(r"<[^>]+>", "", s)).strip()
 
-def render(spec, audio_b64):
+def opus_to_mp3_file(path, out_mp3):
+    """Convert the learner's original voice note to mp3 (browser-safe) written to
+    out_mp3 — kept as a SEPARATE streaming file (not inlined) so the page stays
+    light and the long original only loads when tapped. Returns 'M:SS' duration."""
+    dur = float(subprocess.run(
+        ["ffprobe", "-v", "error", "-show_entries", "format=duration",
+         "-of", "csv=p=0", path], capture_output=True, text=True).stdout.strip() or 0)
+    subprocess.run(["ffmpeg", "-y", "-i", path, "-ac", "1", "-b:a", "64k", out_mp3],
+                   capture_output=True)
+    return f"{int(dur // 60)}:{int(dur % 60):02d}"
+
+def render(spec, audio_b64, original=None):
     cards = spec["cards"]
     card_html = []
     for i, c in enumerate(cards, 1):
@@ -91,6 +102,18 @@ def render(spec, audio_b64):
     rise = ''.join(f'.cards .card:nth-child({i+1}){{animation-delay:{0.05+i*0.05:.2f}s}}'
                    for i in range(len(cards)))
     order = ','.join(str(i) for i in range(1, len(cards) + 1))
+    rb, rd = spec.get("recorded_by"), spec.get("recorded_date")
+    if rb:
+        dur = f' · {original["mmss"]} Min' if original else ''
+        date = f' · {rd}' if rd else ''
+        meta_html = f'<div class="meta"><span class="mic" aria-hidden="true">🎙️</span> <b>{rb}</b>{dur}{date}</div>'
+    else:
+        meta_html = ''
+    orig_btn = ('<button class="playorig" id="playorig"><span class="play__i" aria-hidden="true"></span>'
+                '<span id="po-x">Deine Aufnahme</span></button>') if original else ''
+    orig_audio_tag = (f'<audio id="orig" preload="none" src="{original["url"]}"></audio>'
+                      if original else '')
+    sig_html = f'<p class="sig">{spec["sig"]}</p>' if spec.get("sig") else ''
     body = f'''<style>
   :root {{
     --ground:#0E1A17; --ground2:#102019; --cream:#F2ECE0; --teal:#8FC0B8;
@@ -111,11 +134,22 @@ def render(spec, audio_b64):
   h1 em {{ font-style:italic; color:var(--green); }}
   .lede {{ color:var(--teal); font-size:15px; max-width:46ch; }}
   .lede b {{ color:var(--cream); font-weight:600; }}
-  .allbar {{ display:flex; align-items:center; gap:12px; margin:22px 0 6px; padding:14px 16px;
+  .meta {{ margin-top:14px; display:inline-flex; align-items:center; gap:8px; font-size:12.5px;
+    color:var(--teal-dim); font-weight:600; letter-spacing:.01em; }}
+  .meta .mic {{ font-size:14px; }}
+  .meta b {{ color:var(--teal); font-weight:700; }}
+  .allbar {{ display:flex; align-items:center; gap:12px 14px; flex-wrap:wrap; margin:18px 0 6px; padding:14px 16px;
     border:1px solid var(--line); border-radius:16px;
     background:linear-gradient(180deg,rgba(143,192,184,.07),rgba(143,192,184,.02)); }}
-  .allbar .t {{ font-size:13.5px; color:var(--teal); flex:1; }}
+  .allbar .t {{ font-size:13.5px; color:var(--teal); flex:1; min-width:140px; }}
   .allbar .t b {{ color:var(--cream); }}
+  .abtns {{ display:flex; gap:8px; flex-wrap:wrap; }}
+  .playorig {{ display:inline-flex; align-items:center; gap:9px; cursor:pointer;
+    border:1px solid rgba(143,192,184,.5); background:transparent; color:var(--teal);
+    border-radius:999px; padding:10px 16px; font-size:13px; font-weight:700; letter-spacing:.02em; }}
+  .playorig:hover {{ background:rgba(143,192,184,.1); }}
+  .playorig.is-playing {{ background:var(--teal); color:#0E1A17; }}
+  .playorig:focus-visible {{ outline:2px solid var(--cream); outline-offset:2px; }}
   .playall {{ display:inline-flex; align-items:center; gap:9px; cursor:pointer; border:none;
     border-radius:999px; padding:11px 17px; font-size:13px; font-weight:700; letter-spacing:.02em;
     color:#0E1A17; background:var(--green); white-space:nowrap; }}
@@ -167,9 +201,13 @@ def render(spec, audio_b64):
   <p class="eyebrow">{spec['eyebrow']}</p>
   <h1 class="serif">{spec['title_html']}</h1>
   <p class="lede">{spec['lede_html']}</p>
+  {meta_html}
   <div class="allbar">
-    <span class="t"><b>Die ganze Geschichte</b> — richtig gesprochen, Satz für Satz.</span>
-    <button class="playall" id="playall"><span class="play__i" aria-hidden="true"></span><span id="pa-x">Alles anhören</span></button>
+    <span class="t"><b>Hör den Unterschied</b> — erst deine Aufnahme, dann richtig.</span>
+    <div class="abtns">
+      {orig_btn}
+      <button class="playall" id="playall"><span class="play__i" aria-hidden="true"></span><span id="pa-x">Alles anhören</span></button>
+    </div>
   </div>
   <div class="cards">{''.join(card_html)}
   </div>
@@ -179,10 +217,11 @@ def render(spec, audio_b64):
       <span><span class="dot dot--r"></span> weglassen / ändern</span>
       <span><span class="dot dot--g"></span> so ist es natürlich</span>
     </div>
-    <p class="sig">{spec['sig']}</p>
+    {sig_html}
   </div>
 </div></div>
 
+{orig_audio_tag}
 {audio_tags}
 
 <script>
@@ -195,6 +234,8 @@ def render(spec, audio_b64):
     cur=curBtn=curCard=null;
     var pa=document.getElementById('pa-x'); if(pa)pa.textContent='Alles anhören';
     document.getElementById('playall').classList.remove('is-playing');
+    var pox=document.getElementById('po-x'); if(pox)pox.textContent='Deine Aufnahme';
+    var pob=document.getElementById('playorig'); if(pob)pob.classList.remove('is-playing');
   }}
   function playOne(n, onend){{
     var a=document.getElementById('a'+n);
@@ -215,6 +256,15 @@ def render(spec, audio_b64):
       var n=this.getAttribute('data-n'); var same = curBtn===this;
       stop(); if(!same) playOne(n);
     }});
+  }});
+  var pobtn=document.getElementById('playorig');
+  if(pobtn) pobtn.addEventListener('click',function(){{
+    var same=curBtn===this; stop(); if(same) return;
+    var a=document.getElementById('orig'); if(!a) return;
+    cur=a; curBtn=this; curCard=null;
+    this.classList.add('is-playing'); var x=document.getElementById('po-x'); if(x)x.textContent='Läuft…';
+    a.onended=function(){{ stop(); }};
+    a.play();
   }});
   var order=[{order}];
   document.getElementById('playall').addEventListener('click',function(){{
@@ -252,7 +302,15 @@ def main():
     for i, c in enumerate(spec["cards"], 1):
         audio_b64[i] = tts_b64(plain(c["nat"]), voice, key)
         print(f"  {i:02d} audio ok")
-    out_html = render(spec, audio_b64)
+    original = None
+    if spec.get("original_opus"):
+        opath = os.path.join(os.path.dirname(os.path.abspath(sys.argv[1])), spec["original_opus"])
+        os.makedirs(PUBLIC_FEEDBACK, exist_ok=True)
+        orig_name = f"{spec['slug']}-original.mp3"
+        mmss = opus_to_mp3_file(opath, os.path.join(PUBLIC_FEEDBACK, orig_name))
+        original = {"url": orig_name, "mmss": mmss}  # relative to /feedback/<slug>.html
+        print(f"  original voice -> public/feedback/{orig_name} ({mmss})")
+    out_html = render(spec, audio_b64, original)
     os.makedirs(PUBLIC_FEEDBACK, exist_ok=True)
     out = os.path.join(PUBLIC_FEEDBACK, f"{spec['slug']}.html")
     open(out, "w", encoding="utf-8").write(out_html)

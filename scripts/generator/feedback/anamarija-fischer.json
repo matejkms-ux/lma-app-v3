@@ -4,8 +4,10 @@
   "eyebrow": "Deine Sprachnachricht · korrigiert",
   "title_html": "Dein <em>Angel&#8209;Morgen</em>, auf Deutsch 🐟",
   "lede_html": "Anamarija — ich habe deine Sprachnachricht genommen und sie dir „natürlich\" zurückgeschrieben. Oben siehst du <b>so gesagt</b> (rot = weglassen), darunter die <b>natürliche</b> Version — zum Lesen und Anhören.",
+  "recorded_by": "Anamarija",
+  "recorded_date": "27. Juni 2026",
+  "original_opus": "anamarija-fischer.opus",
   "foot_html": "Ehrlich, Anamarija: du hast eine ganze Geschichte erzählt — mit Gefühl und Details. Genau das ist das Ziel. Der Rest ist Feinschliff. 👏",
-  "sig": "— Matej · LMA",
   "cards": [
     {"said": "ich spaziere schon wieder und heute Morgen <s>haben wir</s> mit Aaron ein bisschen <s>ins</s> Wasser <s>gegangen</s>",
      "nat": "Ich spaziere schon wieder. Heute Morgen <b>waren</b> Aaron und ich ein bisschen <b>im</b> Wasser.",
