@@ -1,12 +1,11 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSession } from '../session';
-import { correctionsFor } from '../data/corrections';
 
 type Tab = 'home' | 'practice' | 'read' | 'corrections';
 
 const ROUTE: Record<Tab, string> = {
   home: '/home',
-  practice: '/sentences',
+  practice: '/lessons',
   read: '/reader',
   corrections: '/corrections',
 };
@@ -45,10 +44,10 @@ function CorrectionsIcon() {
 }
 const ITEMS: { tab: Tab; label: string; Icon: () => JSX.Element }[] = [
   { tab: 'home', label: 'Home', Icon: HomeIcon },
-  { tab: 'practice', label: 'Sentences', Icon: PracticeIcon },
+  { tab: 'practice', label: 'Lessons', Icon: PracticeIcon },
   { tab: 'read', label: 'Read', Icon: ReadIcon },
+  { tab: 'corrections', label: 'Corrections', Icon: CorrectionsIcon },
 ];
-const CORRECTIONS_ITEM = { tab: 'corrections' as Tab, label: 'Corrections', Icon: CorrectionsIcon };
 
 /**
  * The bottom tab bar — Home / Practice / Read / Switch learner.
@@ -59,8 +58,7 @@ export function BottomNav({ active }: { active: Tab }) {
   const location = useLocation();
   const { user, signOut } = useSession();
 
-  // Corrections sits in the menu only for learners who have some.
-  const items = correctionsFor(user?.username).length > 0 ? [...ITEMS, CORRECTIONS_ITEM] : ITEMS;
+  const items = ITEMS;
 
   const isActive = (tab: Tab) => {
     if (tab === active) return true;

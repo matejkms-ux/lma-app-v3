@@ -30,14 +30,14 @@ export function CorrectionsScreen() {
         <div className="text-[11px] font-bold tracking-[.16em] text-muted">FROM MATEJ</div>
         <div className="mt-1 font-serif text-[30px] italic text-heading">Corrections</div>
         <div className="mt-1 text-[12px] text-muted">
-          Deine eigenen Worte — rot zum Ändern, grün natürlich, zum Anhören.
+          Your own words — red to change, green is natural, tap to listen.
         </div>
       </div>
 
       <div className="scroll-region flex-1 px-5 pb-5 pt-1.5">
         {corrections.length === 0 ? (
           <div className="mt-10 px-2 text-center font-serif text-[15px] italic text-muted">
-            Noch keine Korrekturen — sie erscheinen hier, sobald Matej welche schickt.
+            No corrections yet — they'll appear here once Matej sends some.
           </div>
         ) : (
           corrections.map((c) => (

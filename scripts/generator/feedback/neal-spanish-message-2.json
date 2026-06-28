@@ -1,6 +1,6 @@
 {
   "slug": "neal-spanish-message-2",
-  "voice": "ewn5JTa3lNPY8QVuZJi6",
+  "voice": "cIBxLwfshLYhRB9lCXEg",
   "eyebrow": "Tu mensaje de voz · corregido",
   "title_html": "Tu <em>español natural</em> · II 🇲🇽",
   "lede_html": "Neal — tomé tu mensaje del 23 de junio y te lo reescribí de forma <b>natural</b>. Arriba ves <b>lo que dijiste</b> (rojo = cambiar), abajo la versión <b>natural</b> — para leer y escuchar.",
@@ -10,12 +10,21 @@
   "foot_html": "Neal, de verdad — hablar de tu infancia en español, eso es exactamente el nivel al que queremos llegar. Solo pequeños ajustes. 👏",
   "sig": "— Matej · LMA",
   "ui": {
-    "said": "Lo que dijiste", "nat": "Natural", "listen": "Escuchar",
-    "playing": "Reproduciendo…", "orig": "Tu grabación", "full": "Todo seguido",
-    "all": "Escuchar todo", "stop": "Parar",
-    "hear_diff": "Escucha la diferencia", "hear_sub": "primero tu grabación, luego la versión natural.",
-    "legend_drop": "cambiar / quitar", "legend_nat": "así suena natural",
-    "good_badge": "✓ bien", "dur_unit": "min", "lang": "es"
+    "said": "Lo que dijiste",
+    "nat": "Natural",
+    "listen": "Escuchar",
+    "playing": "Reproduciendo…",
+    "orig": "Tu grabación",
+    "full": "Todo seguido",
+    "all": "Escuchar todo",
+    "stop": "Parar",
+    "hear_diff": "Escucha la diferencia",
+    "hear_sub": "primero tu grabación, luego la versión natural.",
+    "legend_drop": "cambiar / quitar",
+    "legend_nat": "así suena natural",
+    "good_badge": "✓ bien",
+    "dur_unit": "min",
+    "lang": "es"
   },
   "cards": [
     {
