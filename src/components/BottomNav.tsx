@@ -1,13 +1,16 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSession } from '../session';
+import { readerLessonsForScope } from '../data/readerLessons';
+import { finalProgramFor } from '../data/finalContent';
 
-type Tab = 'home' | 'practice' | 'read' | 'corrections';
+type Tab = 'home' | 'practice' | 'read' | 'corrections' | 'final';
 
 const ROUTE: Record<Tab, string> = {
   home: '/home',
   practice: '/lessons',
   read: '/reader',
   corrections: '/corrections',
+  final: '/final',
 };
 
 function HomeIcon() {
@@ -42,11 +45,28 @@ function CorrectionsIcon() {
     </svg>
   );
 }
-const ITEMS: { tab: Tab; label: string; Icon: () => JSX.Element }[] = [
+function FinalIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      className="h-5 w-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <polygon points="10,2.5 12.5,8 18.5,8.5 14,12.5 15.5,18.5 10,15 4.5,18.5 6,12.5 1.5,8.5 7.5,8" />
+    </svg>
+  );
+}
+
+const ALL_ITEMS: { tab: Tab; label: string; Icon: () => JSX.Element }[] = [
   { tab: 'home', label: 'Home', Icon: HomeIcon },
   { tab: 'practice', label: 'Lessons', Icon: PracticeIcon },
   { tab: 'read', label: 'Read', Icon: ReadIcon },
   { tab: 'corrections', label: 'Corrections', Icon: CorrectionsIcon },
+  { tab: 'final', label: 'Final', Icon: FinalIcon },
 ];
 
 /**
@@ -58,7 +78,15 @@ export function BottomNav({ active }: { active: Tab }) {
   const location = useLocation();
   const { user, signOut } = useSession();
 
-  const items = ITEMS;
+  const scope = user?.username ?? '';
+  const hasReader = readerLessonsForScope(scope).length > 0;
+  const hasFinal = !!finalProgramFor(user?.username);
+
+  const items = ALL_ITEMS.filter((item) => {
+    if (item.tab === 'read') return hasReader;
+    if (item.tab === 'final') return hasFinal;
+    return true;
+  });
 
   const isActive = (tab: Tab) => {
     if (tab === active) return true;
@@ -69,6 +97,7 @@ export function BottomNav({ active }: { active: Tab }) {
       return ['/reader', '/reader-lesson'].includes(location.pathname);
     }
     if (tab === 'corrections') return location.pathname === '/corrections';
+    if (tab === 'final') return location.pathname.startsWith('/final');
     return false;
   };
 
