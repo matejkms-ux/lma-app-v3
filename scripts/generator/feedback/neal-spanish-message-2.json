@@ -1,0 +1,49 @@
+{
+  "slug": "neal-spanish-message-2",
+  "voice": "ewn5JTa3lNPY8QVuZJi6",
+  "eyebrow": "Tu mensaje de voz · corregido",
+  "title_html": "Tu <em>español natural</em> · II 🇲🇽",
+  "lede_html": "Neal — tomé tu mensaje del 23 de junio y te lo reescribí de forma <b>natural</b>. Arriba ves <b>lo que dijiste</b> (rojo = cambiar), abajo la versión <b>natural</b> — para leer y escuchar.",
+  "recorded_by": "Neal",
+  "recorded_date": "23 de junio de 2026",
+  "original_opus": "neal-spanish-message-2.ogg",
+  "foot_html": "Neal, de verdad — hablar de tu infancia en español, eso es exactamente el nivel al que queremos llegar. Solo pequeños ajustes. 👏",
+  "sig": "— Matej · LMA",
+  "ui": {
+    "said": "Lo que dijiste", "nat": "Natural", "listen": "Escuchar",
+    "playing": "Reproduciendo…", "orig": "Tu grabación", "full": "Todo seguido",
+    "all": "Escuchar todo", "stop": "Parar",
+    "hear_diff": "Escucha la diferencia", "hear_sub": "primero tu grabación, luego la versión natural.",
+    "legend_drop": "cambiar / quitar", "legend_nat": "así suena natural",
+    "good_badge": "✓ bien", "dur_unit": "min", "lang": "es"
+  },
+  "cards": [
+    {
+      "said": "Gracias Alejandra por el mensaje.",
+      "nat": "Gracias, Alejandra, por el mensaje.",
+      "tip": "Almost perfect! Just add commas around a name you're addressing directly: «Gracias, <b>Alejandra</b>, por el mensaje.»",
+      "good": true
+    },
+    {
+      "said": "Me gusta también la conversación <s>ayer</s>.",
+      "nat": "La conversación de ayer también <b>me gustó</b>.",
+      "tip": "It happened yesterday → past tense: <b>me gustó</b>. And the conversation is <i>of</i> yesterday: «la conversación <b>de</b> ayer»."
+    },
+    {
+      "said": "<s>Me disfruto</s> aprender <s>tu vida de niña</s> y <s>hablando mi vida de niño</s>.",
+      "nat": "<b>Disfruté</b> aprender sobre <b>tu infancia</b> y <b>hablar de la mía</b>.",
+      "tip": "«Disfrutar» doesn't take <i>me</i> — just <b>disfruté</b> (past). «Vida de niña/niño» → <b>infancia</b> (childhood). And «hablando mi vida» → <b>hablar de la mía</b> (infinitive, plus <i>de</i>)."
+    },
+    {
+      "said": "Y hablando <s>cerca de</s> Alinda y <s>los bicicletes</s> y más.",
+      "nat": "Y hablando <b>de</b> Alinda, <b>las bicicletas</b> y más.",
+      "tip": "«Cerca de» = <i>near</i> (physical location). To talk <i>about</i> something: hablar <b>de</b>. And it's <b>las</b> bicicleta<b>s</b> — feminine noun."
+    },
+    {
+      "said": "Gracias.",
+      "nat": "Gracias.",
+      "tip": "Perfect closer. Simple and warm. 👏",
+      "good": true
+    }
+  ]
+}
