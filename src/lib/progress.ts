@@ -127,6 +127,11 @@ export function correctionReps(userId: string): number {
   return correctionOpened(userId).size * REPS_PER_CORRECTION;
 }
 
+/** Whether a specific correction slug has been opened by this user. */
+export function correctionSeen(userId: string, slug: string): boolean {
+  return correctionOpened(userId).has(slug);
+}
+
 export function lifetimeReps(userId: string): number {
   const events = repEvents(userId);
 

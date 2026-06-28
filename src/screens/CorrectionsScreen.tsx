@@ -5,7 +5,7 @@ import { StatusBar } from '../components/StatusBar';
 import { BottomNav } from '../components/BottomNav';
 import { useSession } from '../session';
 import { correctionsFor, correctionHref, type Correction } from '../data/corrections';
-import { awardCorrectionPoints, REPS_PER_CORRECTION } from '../lib/progress';
+import { awardCorrectionPoints, correctionSeen, REPS_PER_CORRECTION } from '../lib/progress';
 
 function CorrectionCard({
   c,
@@ -17,10 +17,11 @@ function CorrectionCard({
   onPoints: () => void;
 }) {
   const icon = c.type === 'written' ? '📝' : '🎙️';
+  const [seen, setSeen] = useState(() => correctionSeen(userId, c.slug));
 
   const handleClick = useCallback(() => {
     const awarded = awardCorrectionPoints(userId, c.slug);
-    if (awarded) onPoints();
+    if (awarded) { setSeen(true); onPoints(); }
   }, [userId, c.slug, onPoints]);
 
   return (
@@ -41,7 +42,11 @@ function CorrectionCard({
         <span className="block font-serif text-[19px] leading-[1.15] text-heading">{c.title}</span>
         <span className="block truncate text-[11.5px] text-muted">{c.note}</span>
       </span>
-      <span className="text-muted">›</span>
+      {seen ? (
+        <span className="ml-1 flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white text-[13px] font-bold">✓</span>
+      ) : (
+        <span className="text-muted">›</span>
+      )}
     </a>
   );
 }
