@@ -122,6 +122,12 @@ def render(spec, audio_b64, original=None, full=None):
                 f'<span id="po-x">{ui["orig"]}</span></button>') if original else ''
     orig_audio_tag = (f'<audio id="orig" preload="none" src="{original["url"]}"></audio>'
                       if original else '')
+    # Written correction: show the learner's original text in a message-bubble block
+    orig_text = spec.get("original_text")
+    orig_text_html = (
+        f'<div class="orig-text"><div class="orig-text__lbl">{ui.get("orig_text_lbl", "Lo que escribiste")}</div>'
+        f'<p class="orig-text__body">{_html.escape(orig_text)}</p></div>'
+    ) if orig_text else ''
     full_btn = (f'<button class="playfull" id="playfull"><span class="play__i" aria-hidden="true"></span>'
                 f'<span id="pf-x">{ui["full"]}</span></button>') if full else ''
     full_audio_tag = (f'<audio id="full" preload="none" src="{full["url"]}"></audio>'
@@ -209,6 +215,12 @@ def render(spec, audio_b64, original=None, full=None):
   .dot {{ width:11px; height:11px; border-radius:3px; }}
   .dot--r {{ background:var(--red-bg); border:1px solid var(--red); }}
   .dot--g {{ background:var(--green-bg); border:1px solid var(--green); }}
+  .orig-text {{ margin:16px 0 4px; padding:14px 16px; border-radius:16px;
+    background:rgba(143,192,184,.06); border:1px solid var(--line); }}
+  .orig-text__lbl {{ font-size:10px; font-weight:700; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--teal-dim); margin-bottom:8px; }}
+  .orig-text__body {{ font-family:Georgia,"Iowan Old Style",Palatino,serif; font-size:15px;
+    line-height:1.6; color:rgba(242,236,224,.7); white-space:pre-wrap; margin:0; }}
   @media (prefers-reduced-motion:no-preference) {{
     .card {{ opacity:0; transform:translateY(10px); animation:rise .5s ease forwards; }}
     {rise}
@@ -221,6 +233,7 @@ def render(spec, audio_b64, original=None, full=None):
   <h1 class="serif">{spec['title_html']}</h1>
   <p class="lede">{spec['lede_html']}</p>
   {meta_html}
+  {orig_text_html}
   <div class="allbar">
     <span class="t"><b>{ui["hear_diff"]}</b> — {ui["hear_sub"]}</span>
     <div class="abtns">

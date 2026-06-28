@@ -3,12 +3,36 @@ import { DeviceFrame } from '../components/DeviceFrame';
 import { StatusBar } from '../components/StatusBar';
 import { BottomNav } from '../components/BottomNav';
 import { useSession } from '../session';
-import { correctionsFor, correctionHref } from '../data/corrections';
+import { correctionsFor, correctionHref, type Correction } from '../data/corrections';
+
+function CorrectionCard({ c }: { c: Correction }) {
+  const icon = c.type === 'written' ? '📝' : '🎙️';
+  return (
+    <a
+      key={c.slug}
+      href={correctionHref(c.slug)}
+      target="_blank"
+      rel="noopener"
+      className="mb-[11px] flex w-full items-center gap-3.5 rounded-2xl border border-rule bg-white px-4 py-[15px] text-left active:scale-[.99]"
+    >
+      <span className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full bg-coral/12 text-[17px]">
+        {icon}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-[10.5px] font-bold tracking-[.08em] text-coral">
+          {c.date}
+        </span>
+        <span className="block font-serif text-[19px] leading-[1.15] text-heading">{c.title}</span>
+        <span className="block truncate text-[11.5px] text-muted">{c.note}</span>
+      </span>
+      <span className="text-muted">›</span>
+    </a>
+  );
+}
 
 /**
- * Corrections — the learner's personal "say it naturally" feedback. Each card opens
- * a standalone red/green correction page (her own words, the natural version, audio).
- * Self-paced; the page is also a link Matej can send.
+ * Corrections — grouped into WRITTEN CORRECTIONS and AUDIO CORRECTIONS.
+ * Each card opens a standalone red/green correction page.
  */
 export function CorrectionsScreen() {
   const navigate = useNavigate();
@@ -16,6 +40,8 @@ export function CorrectionsScreen() {
   if (!user) return <Navigate to="/" replace />;
 
   const corrections = correctionsFor(user.username);
+  const written = corrections.filter((c) => c.type === 'written');
+  const audio = corrections.filter((c) => c.type === 'audio' || !c.type);
 
   return (
     <DeviceFrame tone="light">
@@ -30,7 +56,7 @@ export function CorrectionsScreen() {
         <div className="text-[11px] font-bold tracking-[.16em] text-muted">FROM MATEJ</div>
         <div className="mt-1 font-serif text-[30px] italic text-heading">Corrections</div>
         <div className="mt-1 text-[12px] text-muted">
-          Your own words — red to change, green is natural, tap to listen.
+          Your own words — red to change, green is natural.
         </div>
       </div>
 
@@ -40,27 +66,24 @@ export function CorrectionsScreen() {
             No corrections yet — they'll appear here once Matej sends some.
           </div>
         ) : (
-          corrections.map((c) => (
-            <a
-              key={c.slug}
-              href={correctionHref(c.slug)}
-              target="_blank"
-              rel="noopener"
-              className="mb-[11px] flex w-full items-center gap-3.5 rounded-2xl border border-rule bg-white px-4 py-[15px] text-left active:scale-[.99]"
-            >
-              <span className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full bg-coral/12 text-[17px]">
-                📩
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-[10.5px] font-bold tracking-[.08em] text-coral">
-                  {c.date}
-                </span>
-                <span className="block font-serif text-[19px] leading-[1.15] text-heading">{c.title}</span>
-                <span className="block truncate text-[11.5px] text-muted">{c.note}</span>
-              </span>
-              <span className="text-muted">›</span>
-            </a>
-          ))
+          <>
+            {written.length > 0 && (
+              <div className="mb-3 mt-3">
+                <div className="mb-2 text-[10px] font-bold tracking-[.18em] text-muted">
+                  WRITTEN CORRECTIONS
+                </div>
+                {written.map((c) => <CorrectionCard key={c.slug} c={c} />)}
+              </div>
+            )}
+            {audio.length > 0 && (
+              <div className="mb-3 mt-3">
+                <div className="mb-2 text-[10px] font-bold tracking-[.18em] text-muted">
+                  AUDIO CORRECTIONS
+                </div>
+                {audio.map((c) => <CorrectionCard key={c.slug} c={c} />)}
+              </div>
+            )}
+          </>
         )}
       </div>
 

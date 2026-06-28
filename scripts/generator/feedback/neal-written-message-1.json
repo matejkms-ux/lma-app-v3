@@ -1,0 +1,52 @@
+{
+  "slug": "neal-written-message-1",
+  "voice": "cIBxLwfshLYhRB9lCXEg",
+  "eyebrow": "Tu mensaje de WhatsApp · corregido",
+  "title_html": "Tu <em>español escrito</em> · I",
+  "lede_html": "Neal — esto es lo que escribiste, y cómo sonaría de forma <b>completamente natural</b>.",
+  "foot_html": "Buen intento, Neal — ya ves que un par de palabras te cambian todo el mensaje. Sigue así. 💪",
+  "original_text": "Hola @~Alejandra — nessicito cancelar nuestra llama manana. Tengo ocupada con trabajo. Lo siento. Podemos sessicion double a las martes? Gracias",
+  "ui": {
+    "said": "Lo dijiste",
+    "nat": "Lo natural",
+    "listen": "Escuchar",
+    "playing": "Sonando…",
+    "full": "De corrido",
+    "all": "Escuchar todo",
+    "stop": "Parar",
+    "hear_diff": "Mira la diferencia",
+    "hear_sub": "tu versión arriba · la natural abajo.",
+    "legend_drop": "cambiar / quitar",
+    "legend_nat": "así es natural",
+    "good_badge": "✓ bien",
+    "dur_unit": "min",
+    "orig_text_lbl": "Lo que escribiste",
+    "lang": "es"
+  },
+  "cards": [
+    {
+      "said": "Hola Alejandra — <s>nessicito</s> cancelar nuestra <s>llama</s> <s>manana</s>.",
+      "nat": "Hola Alejandra — <b>necesito</b> cancelar nuestra <b>llamada</b> de <b>mañana</b>.",
+      "tip": "<i>necesito</i> (una <i>c</i>, no dos <i>ss</i>). <i>llamada</i> = la llamada telefónica; <i>llama</i> = el animal o el fuego 🦙🔥. <i>mañana</i> lleva tilde.",
+      "good": false
+    },
+    {
+      "said": "Tengo <s>ocupada</s> con trabajo.",
+      "nat": "Estoy muy <b>ocupado</b> con el trabajo.",
+      "tip": "<i>Tengo ocupada</i> no funciona en español. Di <i>estoy muy ocupado</i> — <i>ocupado</i> va con el masculino porque eres tú el que habla.",
+      "good": false
+    },
+    {
+      "said": "Lo siento.",
+      "nat": "Lo siento.",
+      "tip": "Perfecto — <i>lo siento</i> es exactamente lo que se dice.",
+      "good": true
+    },
+    {
+      "said": "¿Podemos <s>sessicion double</s> a <s>las</s> martes?",
+      "nat": "¿Podemos hacer <b>sesión doble</b> el <b>martes</b>?",
+      "tip": "<i>sesión</i> lleva tilde y una sola <i>s</i>. <i>el martes</i> (no <i>a las martes</i>) — los días de la semana van con artículo masculino singular.",
+      "good": false
+    }
+  ]
+}
