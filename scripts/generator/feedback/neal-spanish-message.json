@@ -1,0 +1,53 @@
+{
+  "slug": "neal-spanish-message",
+  "voice": "ewn5JTa3lNPY8QVuZJi6",
+  "eyebrow": "Tu mensaje de voz · corregido",
+  "title_html": "Tu <em>español natural</em> 🇲🇽",
+  "lede_html": "Neal — tomé tu mensaje de voz y te lo reescribí de forma <b>natural</b>. Arriba ves <b>lo que dijiste</b> (rojo = cambiar), abajo la versión <b>natural</b> — para leer y escuchar.",
+  "recorded_by": "Neal",
+  "recorded_date": "17 de junio de 2026",
+  "original_opus": "neal-spanish-message.opus",
+  "foot_html": "Neal, lo que más importa: te lanzaste y lo dijiste. Eso es exactamente el objetivo. El resto es solo pulir. 👏",
+  "sig": "— Matej · LMA",
+  "ui": {
+    "said": "Lo que dijiste", "nat": "Natural", "listen": "Escuchar",
+    "playing": "Reproduciendo…", "orig": "Tu grabación", "full": "Todo seguido",
+    "all": "Escuchar todo", "stop": "Parar",
+    "hear_diff": "Escucha la diferencia", "hear_sub": "primero tu grabación, luego la versión natural.",
+    "legend_drop": "cambiar / quitar", "legend_nat": "así suena natural",
+    "good_badge": "✓ bien", "dur_unit": "min", "lang": "es"
+  },
+  "cards": [
+    {
+      "said": "Hola Alejandra, gracias por la conversación hoy.",
+      "nat": "Hola Alejandra, gracias por la conversación de hoy.",
+      "tip": "Perfect — just add <i>de</i> before <i>hoy</i>: «la conversación <b>de</b> hoy».",
+      "good": true
+    },
+    {
+      "said": "<s>Para siempre</s>, disfruto hablando con <s>ti</s>.",
+      "nat": "<b>Siempre</b> disfruto hablar contigo.",
+      "tip": "«Para siempre» = <i>forever</i>. For <i>always</i> just say <b>siempre</b>. And «con ti» doesn't exist — it merges into one word: <b>contigo</b>."
+    },
+    {
+      "said": "Lo siento <s>para</s> <s>being late</s>.",
+      "nat": "Lo siento por <b>llegar tarde</b>.",
+      "tip": "Two fixes: <i>para</i> vs <b>por</b> — apologies use <b>por</b>. And «being late» — use the Spanish infinitive: <b>llegar tarde</b>."
+    },
+    {
+      "said": "<s>Pero si</s> preocupado <s>a mi</s> castellano.",
+      "nat": "Pero sí, me <b>preocupa</b> mi español.",
+      "tip": "«Preocupado a mi» → «<b>me preocupa</b>» (the thing worries me). Also: <i>sí</i> (yes) needs an accent to separate it from <i>si</i> (if)."
+    },
+    {
+      "said": "Pero gracias <s>para</s> ayudar.",
+      "nat": "Pero gracias <b>por</b> ayudarme.",
+      "tip": "Again <b>por</b> (not <i>para</i>) for thanks. And add <b>-me</b>: <i>ayudar</i><b>me</b> — thanks for helping <i>me</i>."
+    },
+    {
+      "said": "Ok, <s>buenos</s> tardes.",
+      "nat": "Ok, <b>buenas</b> tardes.",
+      "tip": "«Tardes» is feminine → <b>buenas</b> (not <i>buenos</i>). Same rule: <i>buenos días</i> (días = masculine), <i><b>buenas</b> tardes/noches</i>."
+    }
+  ]
+}

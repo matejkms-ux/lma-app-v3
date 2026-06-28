@@ -12,6 +12,9 @@ export interface Correction {
 }
 
 export const CORRECTIONS_BY_USER: Record<string, Correction[]> = {
+  'NEALG2603-es': [
+    { slug: 'neal-spanish-message', title: 'Tu español natural', note: 'Tu mensaje de voz 🇲🇽', date: '17 de junio de 2026' },
+  ],
   'ANAMARIJAC2604-de': [
     { slug: 'anamarija-freestyle', title: 'Dein Freestyle', note: 'Frei gesprochen nach der Lektion 🎤', date: '27. Juni 2026' },
     { slug: 'anamarija-fischer', title: 'Dein Angel-Morgen', note: 'Deine Sprachnachricht 🐟', date: '27. Juni 2026' },

@@ -78,20 +78,29 @@ def opus_to_mp3_file(path, out_mp3):
     return f"{int(dur // 60)}:{int(dur % 60):02d}"
 
 def render(spec, audio_b64, original=None, full=None):
+    ui = {
+        "said": "So gesagt", "nat": "Natürlich", "listen": "Anhören",
+        "playing": "Läuft…", "orig": "Deine Aufnahme", "full": "Am Stück",
+        "all": "Alles anhören", "stop": "Stopp",
+        "hear_diff": "Hör den Unterschied", "hear_sub": "erst deine Aufnahme, dann richtig.",
+        "legend_drop": "weglassen / ändern", "legend_nat": "so ist es natürlich",
+        "good_badge": "✓ stark", "dur_unit": "Min", "lang": "de",
+    }
+    ui.update(spec.get("ui", {}))
     cards = spec["cards"]
     card_html = []
     for i, c in enumerate(cards, 1):
         good = c.get("good")
-        badge = "✓ stark" if good else f"{i:02d}"
+        badge = ui["good_badge"] if good else f"{i:02d}"
         card_html.append(f'''
     <article class="card{' card--good' if good else ''}" id="card-{i}">
       <header class="card__h"><span class="num">{badge}</span></header>
-      <p class="said"><span class="lbl lbl--said">So gesagt</span>{c['said']}</p>
+      <p class="said"><span class="lbl lbl--said">{ui["said"]}</span>{c['said']}</p>
       <div class="nat">
-        <span class="lbl lbl--nat">Natürlich</span>
+        <span class="lbl lbl--nat">{ui["nat"]}</span>
         <p class="nat__t">{c['nat']}</p>
-        <button class="play" data-n="{i}" aria-label="Diesen Satz anhören">
-          <span class="play__i" aria-hidden="true"></span><span class="play__x">Anhören</span>
+        <button class="play" data-n="{i}" aria-label="{ui['listen']}">
+          <span class="play__i" aria-hidden="true"></span><span class="play__x">{ui["listen"]}</span>
         </button>
       </div>
       <p class="tip"><span aria-hidden="true">💡</span> {c['tip']}</p>
@@ -104,20 +113,21 @@ def render(spec, audio_b64, original=None, full=None):
     order = ','.join(str(i) for i in range(1, len(cards) + 1))
     rb, rd = spec.get("recorded_by"), spec.get("recorded_date")
     if rb:
-        dur = f' · {original["mmss"]} Min' if original else ''
+        dur = f' · {original["mmss"]} {ui["dur_unit"]}' if original else ''
         date = f' · {rd}' if rd else ''
         meta_html = f'<div class="meta"><span class="mic" aria-hidden="true">🎙️</span> <b>{rb}</b>{dur}{date}</div>'
     else:
         meta_html = ''
-    orig_btn = ('<button class="playorig" id="playorig"><span class="play__i" aria-hidden="true"></span>'
-                '<span id="po-x">Deine Aufnahme</span></button>') if original else ''
+    orig_btn = (f'<button class="playorig" id="playorig"><span class="play__i" aria-hidden="true"></span>'
+                f'<span id="po-x">{ui["orig"]}</span></button>') if original else ''
     orig_audio_tag = (f'<audio id="orig" preload="none" src="{original["url"]}"></audio>'
                       if original else '')
-    full_btn = ('<button class="playfull" id="playfull"><span class="play__i" aria-hidden="true"></span>'
-                '<span id="pf-x">Am Stück</span></button>') if full else ''
+    full_btn = (f'<button class="playfull" id="playfull"><span class="play__i" aria-hidden="true"></span>'
+                f'<span id="pf-x">{ui["full"]}</span></button>') if full else ''
     full_audio_tag = (f'<audio id="full" preload="none" src="{full["url"]}"></audio>'
                       if full else '')
     sig_html = f'<p class="sig">{spec["sig"]}</p>' if spec.get("sig") else ''
+    lang = ui["lang"]
     body = f'''<style>
   :root {{
     --ground:#0E1A17; --ground2:#102019; --cream:#F2ECE0; --teal:#8FC0B8;
@@ -212,11 +222,11 @@ def render(spec, audio_b64, original=None, full=None):
   <p class="lede">{spec['lede_html']}</p>
   {meta_html}
   <div class="allbar">
-    <span class="t"><b>Hör den Unterschied</b> — erst deine Aufnahme, dann richtig.</span>
+    <span class="t"><b>{ui["hear_diff"]}</b> — {ui["hear_sub"]}</span>
     <div class="abtns">
       {orig_btn}
       {full_btn}
-      <button class="playall" id="playall"><span class="play__i" aria-hidden="true"></span><span id="pa-x">Alles anhören</span></button>
+      <button class="playall" id="playall"><span class="play__i" aria-hidden="true"></span><span id="pa-x">{ui["all"]}</span></button>
     </div>
   </div>
   <div class="cards">{''.join(card_html)}
@@ -224,8 +234,8 @@ def render(spec, audio_b64, original=None, full=None):
   <div class="foot">
     <p class="big">{spec['foot_html']}</p>
     <div class="legend">
-      <span><span class="dot dot--r"></span> weglassen / ändern</span>
-      <span><span class="dot dot--g"></span> so ist es natürlich</span>
+      <span><span class="dot dot--r"></span> {ui["legend_drop"]}</span>
+      <span><span class="dot dot--g"></span> {ui["legend_nat"]}</span>
     </div>
     {sig_html}
   </div>
@@ -240,14 +250,14 @@ def render(spec, audio_b64, original=None, full=None):
   var cur=null, curBtn=null, curCard=null;
   function stop(){{
     if(cur){{ cur.pause(); cur.currentTime=0; }}
-    if(curBtn){{ curBtn.classList.remove('is-playing'); var x=curBtn.querySelector('.play__x'); if(x)x.textContent='Anhören'; }}
+    if(curBtn){{ curBtn.classList.remove('is-playing'); var x=curBtn.querySelector('.play__x'); if(x)x.textContent='{ui["listen"]}'; }}
     if(curCard) curCard.classList.remove('is-playing');
     cur=curBtn=curCard=null;
-    var pa=document.getElementById('pa-x'); if(pa)pa.textContent='Alles anhören';
+    var pa=document.getElementById('pa-x'); if(pa)pa.textContent='{ui["all"]}';
     document.getElementById('playall').classList.remove('is-playing');
-    var pox=document.getElementById('po-x'); if(pox)pox.textContent='Deine Aufnahme';
+    var pox=document.getElementById('po-x'); if(pox)pox.textContent='{ui["orig"]}';
     var pob=document.getElementById('playorig'); if(pob)pob.classList.remove('is-playing');
-    var pfx=document.getElementById('pf-x'); if(pfx)pfx.textContent='Am Stück';
+    var pfx=document.getElementById('pf-x'); if(pfx)pfx.textContent='{ui["full"]}';
     var pfb=document.getElementById('playfull'); if(pfb)pfb.classList.remove('is-playing');
   }}
   function playOne(n, onend){{
@@ -255,10 +265,10 @@ def render(spec, audio_b64, original=None, full=None):
     var btn=document.querySelector('.play[data-n="'+n+'"]');
     var card=document.getElementById('card-'+n);
     cur=a; curBtn=btn; curCard=card;
-    if(btn){{ btn.classList.add('is-playing'); var x=btn.querySelector('.play__x'); if(x)x.textContent='Läuft…'; }}
+    if(btn){{ btn.classList.add('is-playing'); var x=btn.querySelector('.play__x'); if(x)x.textContent='{ui["playing"]}'; }}
     if(card) card.classList.add('is-playing');
     a.onended=function(){{
-      if(btn){{ btn.classList.remove('is-playing'); var x=btn.querySelector('.play__x'); if(x)x.textContent='Anhören'; }}
+      if(btn){{ btn.classList.remove('is-playing'); var x=btn.querySelector('.play__x'); if(x)x.textContent='{ui["listen"]}'; }}
       if(card) card.classList.remove('is-playing');
       if(onend) onend();
     }};
@@ -274,7 +284,7 @@ def render(spec, audio_b64, original=None, full=None):
     var same=curBtn===btn; stop(); if(same) return;
     var a=document.getElementById(audioId); if(!a) return;
     cur=a; curBtn=btn; curCard=null;
-    btn.classList.add('is-playing'); var x=document.getElementById(xId); if(x)x.textContent='Läuft…';
+    btn.classList.add('is-playing'); var x=document.getElementById(xId); if(x)x.textContent='{ui["playing"]}';
     a.onended=function(){{ stop(); }};
     a.play();
   }}
@@ -285,7 +295,7 @@ def render(spec, audio_b64, original=None, full=None):
   var order=[{order}];
   document.getElementById('playall').addEventListener('click',function(){{
     if(cur){{ stop(); return; }}
-    document.getElementById('pa-x').textContent='Stopp';
+    document.getElementById('pa-x').textContent='{ui["stop"]}';
     this.classList.add('is-playing');
     var i=0;
     (function next(){{
@@ -298,7 +308,7 @@ def render(spec, audio_b64, original=None, full=None):
 }})();
 </script>'''
     return (
-        '<!doctype html>\n<html lang="de">\n<head>\n'
+        f'<!doctype html>\n<html lang="{lang}">\n<head>\n'
         '<meta charset="utf-8">\n'
         '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
         '<meta name="theme-color" content="#0E1A17">\n'
