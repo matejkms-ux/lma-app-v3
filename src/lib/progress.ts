@@ -101,6 +101,31 @@ export function getStepStars(userId: string, code: string, step: Step): number |
  * (Each rep event still records `points` for the log, but it does not drive totals.)
  */
 export const REPS_PER_PLAY = 10;
+export const REPS_PER_CORRECTION = 50;
+
+const correctionPtsKey = (id: string) => `lma:correction-pts:${id}`;
+
+/** Correction slugs already opened (to avoid double-counting). */
+function correctionOpened(userId: string): Set<string> {
+  return new Set(lsRead<string[]>(correctionPtsKey(userId), []));
+}
+
+/**
+ * Award REPS_PER_CORRECTION for opening a correction page — idempotent per slug.
+ * Returns true if points were actually awarded (first open), false if already seen.
+ */
+export function awardCorrectionPoints(userId: string, slug: string): boolean {
+  const seen = correctionOpened(userId);
+  if (seen.has(slug)) return false;
+  seen.add(slug);
+  lsWrite(correctionPtsKey(userId), [...seen]);
+  return true;
+}
+
+/** Total reps earned from corrections alone. */
+export function correctionReps(userId: string): number {
+  return correctionOpened(userId).size * REPS_PER_CORRECTION;
+}
 
 export function lifetimeReps(userId: string): number {
   const events = repEvents(userId);
@@ -119,7 +144,7 @@ export function lifetimeReps(userId: string): number {
   for (const k of allKeys) {
     plays += Math.max(localPlays[k] ?? 0, cache[k]?.pass_count ?? 0);
   }
-  return plays * REPS_PER_PLAY;
+  return plays * REPS_PER_PLAY + correctionReps(userId);
 }
 
 export function repsToday(userId: string): number {

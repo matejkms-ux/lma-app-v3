@@ -1,18 +1,34 @@
+import { useState, useCallback } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { DeviceFrame } from '../components/DeviceFrame';
 import { StatusBar } from '../components/StatusBar';
 import { BottomNav } from '../components/BottomNav';
 import { useSession } from '../session';
 import { correctionsFor, correctionHref, type Correction } from '../data/corrections';
+import { awardCorrectionPoints, REPS_PER_CORRECTION } from '../lib/progress';
 
-function CorrectionCard({ c }: { c: Correction }) {
+function CorrectionCard({
+  c,
+  userId,
+  onPoints,
+}: {
+  c: Correction;
+  userId: string;
+  onPoints: () => void;
+}) {
   const icon = c.type === 'written' ? '📝' : '🎙️';
+
+  const handleClick = useCallback(() => {
+    const awarded = awardCorrectionPoints(userId, c.slug);
+    if (awarded) onPoints();
+  }, [userId, c.slug, onPoints]);
+
   return (
     <a
-      key={c.slug}
       href={correctionHref(c.slug)}
       target="_blank"
       rel="noopener"
+      onClick={handleClick}
       className="mb-[11px] flex w-full items-center gap-3.5 rounded-2xl border border-rule bg-white px-4 py-[15px] text-left active:scale-[.99]"
     >
       <span className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full bg-coral/12 text-[17px]">
@@ -37,6 +53,13 @@ function CorrectionCard({ c }: { c: Correction }) {
 export function CorrectionsScreen() {
   const navigate = useNavigate();
   const { user } = useSession();
+  const [toast, setToast] = useState(false);
+
+  const handlePoints = useCallback(() => {
+    setToast(true);
+    setTimeout(() => setToast(false), 2000);
+  }, []);
+
   if (!user) return <Navigate to="/" replace />;
 
   const corrections = correctionsFor(user.username);
@@ -72,7 +95,9 @@ export function CorrectionsScreen() {
                 <div className="mb-2 text-[10px] font-bold tracking-[.18em] text-muted">
                   WRITTEN CORRECTIONS
                 </div>
-                {written.map((c) => <CorrectionCard key={c.slug} c={c} />)}
+                {written.map((c) => (
+                  <CorrectionCard key={c.slug} c={c} userId={user.id} onPoints={handlePoints} />
+                ))}
               </div>
             )}
             {audio.length > 0 && (
@@ -80,12 +105,23 @@ export function CorrectionsScreen() {
                 <div className="mb-2 text-[10px] font-bold tracking-[.18em] text-muted">
                   AUDIO CORRECTIONS
                 </div>
-                {audio.map((c) => <CorrectionCard key={c.slug} c={c} />)}
+                {audio.map((c) => (
+                  <CorrectionCard key={c.slug} c={c} userId={user.id} onPoints={handlePoints} />
+                ))}
               </div>
             )}
           </>
         )}
       </div>
+
+      {/* +50 reps toast */}
+      {toast && (
+        <div className="pointer-events-none absolute inset-x-0 top-[30%] flex justify-center">
+          <span className="animate-pop rounded-full bg-coral px-5 py-2 font-bold text-white text-[15px] shadow-lg">
+            +{REPS_PER_CORRECTION} reps
+          </span>
+        </div>
+      )}
 
       <BottomNav active="corrections" />
     </DeviceFrame>
