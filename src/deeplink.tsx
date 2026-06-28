@@ -38,7 +38,7 @@ export function DeepLink() {
     window.history.replaceState({}, '', window.location.pathname);
 
     if (lesson) navigate('/practice', { state: { lessonCode: lesson } });
-    else if (u) navigate('/lessons');
+    else if (u) navigate('/home');
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return null;
