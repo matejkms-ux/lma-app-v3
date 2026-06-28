@@ -37,12 +37,6 @@
       "good": false
     },
     {
-      "said": "Lo siento.",
-      "nat": "Lo siento.",
-      "tip": "Perfecto — <i>lo siento</i> es exactamente lo que se dice.",
-      "good": true
-    },
-    {
       "said": "¿Podemos <s>sessicion double</s> a <s>las</s> martes?",
       "nat": "¿Podemos hacer <b>sesión doble</b> el <b>martes</b>?",
       "tip": "<i>sesión</i> lleva tilde y una sola <i>s</i>. <i>el martes</i> (no <i>a las martes</i>) — los días de la semana van con artículo masculino singular.",
