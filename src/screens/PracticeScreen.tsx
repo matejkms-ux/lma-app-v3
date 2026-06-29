@@ -104,7 +104,9 @@ export function PracticeScreen() {
     );
   }
 
-  return <Player key={lesson.code} lesson={lesson} userId={user.id} startAt={startAt} unlockAll={!!user.unlock_all} />;
+  // Bonus lessons sit off the main path and are "always open" (see LessonsScreen) —
+  // so their steps are never gated either, for every learner, not just unlock_all ones.
+  return <Player key={lesson.code} lesson={lesson} userId={user.id} startAt={startAt} unlockAll={!!user.unlock_all || !!lesson.bonus} />;
 }
 
 function Player({ lesson, userId, startAt, unlockAll }: { lesson: PracticeLesson; userId: string; startAt?: Step; unlockAll?: boolean }) {
@@ -302,7 +304,7 @@ function Player({ lesson, userId, startAt, unlockAll }: { lesson: PracticeLesson
     switch (cfg.body) {
       case 'dualWave': return <ShadowBody />;
       case 'melody':   return <HumBody />;
-      case 'text':     return <ReadBody sentences={sentences} language={lesson.language} playing={playing} progress={readProgress} />;
+      case 'text':     return <ReadBody sentences={sentences} language={lesson.language} />;
       case 'recall':   return <RecallBody sentences={sentences} playing={playing} progress={readProgress} />;
       default:         return <GraspBody active={playing} />;
     }

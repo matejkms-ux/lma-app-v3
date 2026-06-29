@@ -196,15 +196,9 @@ type ReadSentence = {
 export function ReadBody({
   sentences,
   language,
-  playing = false,
-  progress = 0,
 }: {
   sentences: ReadSentence[];
   language?: string;
-  /** READ clip is playing — drives the hands-free auto-scroll. */
-  playing?: boolean;
-  /** Playback position 0–1; the list glides to match so reading flows. */
-  progress?: number;
 }) {
   const isJa = (language ?? '').toUpperCase() === 'JAPANESE';
   const lang = (language ?? 'xx').toUpperCase();
@@ -257,22 +251,10 @@ export function ReadBody({
 
   const activeExtras = extras.filter((e) => enabled.has(e.key));
 
-  // Hands-free flow: while the READ clip plays, the list scrolls so its position
-  // tracks the audio. We map the playback fraction straight onto scrollTop on
-  // each progress tick (~4Hz from the <audio> timeupdate) — over a clip the
-  // steps are a couple of pixels each, so it glides without any CSS smooth-scroll
-  // (which stalls when re-triggered every tick) or rAF (which the OS pauses when
-  // the tab is backgrounded). When there's no READ audio the step is a
-  // pass-through (playing stays false) and the learner just scrolls by hand.
-  const listRef = useRef<HTMLOListElement>(null);
-  useEffect(() => {
-    const el = listRef.current;
-    if (!el || !playing) return;
-    const max = el.scrollHeight - el.clientHeight;
-    if (max <= 0) return;
-    el.scrollTop = Math.max(0, Math.min(max, progress * max));
-  }, [playing, progress]);
-
+  // The learner scrolls READ by hand. We deliberately do NOT auto-scroll to the
+  // audio position: tying scrollTop to playback fraction ran the text too fast at
+  // the start and too slow at the end (the audio's pacing ≠ a reader's), and it
+  // fought any manual scroll. Reading at your own pace is the point of this step.
   return (
     <div className="flex flex-1 flex-col overflow-hidden px-[22px]">
       {/* Add/remove the reading aids that show below each line */}
@@ -296,10 +278,7 @@ export function ReadBody({
           })}
         </div>
       )}
-      <ol
-        ref={listRef}
-        className="flex-1 space-y-1.5 overflow-y-auto py-1"
-      >
+      <ol className="flex-1 space-y-1.5 overflow-y-auto py-1">
         {sentences.length === 0 ? (
           <li className="py-6 text-center font-serif text-[14px] italic text-teal/50">
             Sentences loading…

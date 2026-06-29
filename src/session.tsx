@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import { USERS, type User } from './data/mock';
 import { initProgressSync } from './lib/progress';
 import { getLessonCatalog } from './data/content';
+import { refreshUser } from './data/api';
 
 /**
  * Session — who's "in". Name-select sets the current user (no auth; v3 brief §4)
@@ -39,11 +40,32 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
   // Sync Supabase progress + warm the lesson catalog whenever the active user
   // changes (login + page reload), so synchronous catalog reads are populated.
+  // Also re-pull server-managed fields (e.g. `unlock_all`) and merge them into the
+  // stored user, so an admin unlocking a learner takes effect on their next load
+  // without a sign-out/in — the persisted object can otherwise go stale (lockers).
   useEffect(() => {
-    if (user) {
-      void initProgressSync(user.id);
-      if (user.username) void getLessonCatalog(user.username);
-    }
+    if (!user) return;
+    const id = user.id;
+    void initProgressSync(id);
+    if (user.username) void getLessonCatalog(user.username);
+    void refreshUser(id).then((fresh) => {
+      if (!fresh) return;
+      setUser((prev) => {
+        if (!prev || prev.id !== id) return prev;
+        // Apply only the fields the server actually returned — never clobber a
+        // present local value with an undefined one.
+        const merged: User = { ...prev };
+        for (const [k, v] of Object.entries(fresh)) {
+          if (v !== undefined) (merged as unknown as Record<string, unknown>)[k] = v;
+        }
+        try {
+          localStorage.setItem(USER_OBJ_KEY, JSON.stringify(merged));
+        } catch {
+          /* ignore */
+        }
+        return merged;
+      });
+    });
   }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const value = useMemo<SessionValue>(

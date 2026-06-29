@@ -30,6 +30,36 @@ export async function getRoster(): Promise<User[]> {
 }
 
 /**
+ * Re-fetch a single learner's server-managed fields by id (notably `unlock_all`).
+ * The session persists the user object in localStorage and restores from it, so a
+ * server-side change (e.g. an admin flipping `unlock_all`) would otherwise never
+ * reach an already-signed-in learner until they sign out and back in. Returns the
+ * mapped fields, or null when Supabase is unavailable / the row is missing.
+ */
+export async function refreshUser(id: string): Promise<Partial<User> | null> {
+  if (!useSupabase || !supabase) return null;
+  const { data, error } = await supabase
+    .from('users')
+    .select('id, name, first_name, last_names, called_name, language, username, plan, adventure, unlock_all')
+    .eq('id', id)
+    .maybeSingle();
+  if (error || !data) return null;
+  const r = data as Record<string, unknown>;
+  return {
+    id: r.id as string,
+    name: r.name as string,
+    firstName: (r.first_name as string | null) ?? undefined,
+    lastNames: (r.last_names as string | null) ?? undefined,
+    calledName: (r.called_name as string | null) ?? undefined,
+    language: r.language as string,
+    username: (r.username as string | null) ?? undefined,
+    plan: (r.plan as LearnerPlan | null) ?? undefined,
+    adventure: (r.adventure as Adventure | null) ?? undefined,
+    unlock_all: (r.unlock_all as boolean | null) ?? undefined,
+  };
+}
+
+/**
  * Upsert a learner to the users table, keyed by username.
  * Returns the Supabase-assigned UUID on success, null otherwise.
  */
