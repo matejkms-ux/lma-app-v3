@@ -44,6 +44,15 @@ export function useRecorder() {
   const recRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  // Once the mic is denied/unsupported, STOP re-requesting it on every play. The
+  // listen steps call start() on each ▶ (onPlay); on Safari a fresh getUserMedia
+  // against a blocked/contended mic can interrupt the just-started <audio> (it fires
+  // an involuntary `pause`), and the player's self-heal only re-kicks a few times
+  // before landing on PAUSED — so a learner with the mic blocked couldn't play the
+  // clip at all, even though playback is supposed to "still count". After the first
+  // failure we latch this and start() becomes a no-op until prime() (the Retry-mic
+  // button) re-grants access — leaving playback completely undisturbed.
+  const blockedRef = useRef(false);
 
   const releaseStream = () => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
@@ -64,11 +73,14 @@ export function useRecorder() {
       }
       return;
     }
+    // Mic already known-unavailable this session: never re-request (see blockedRef).
+    if (blockedRef.current) return;
     if (
       typeof navigator === 'undefined' ||
       !navigator.mediaDevices?.getUserMedia ||
       typeof MediaRecorder === 'undefined'
     ) {
+      blockedRef.current = true;
       setStatus('unsupported');
       return;
     }
@@ -108,6 +120,7 @@ export function useRecorder() {
       setErrorName(null);
       setStatus('recording');
     } catch (e) {
+      blockedRef.current = true; // don't re-request on the next play — leave playback alone
       setErrorName((e as DOMException)?.name ?? 'Error');
       setStatus('denied');
       releaseStream();
@@ -149,16 +162,19 @@ export function useRecorder() {
    */
   const prime = useCallback(async (): Promise<boolean> => {
     if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
+      blockedRef.current = true;
       setStatus('unsupported');
       return false;
     }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       stream.getTracks().forEach((t) => t.stop());
+      blockedRef.current = false; // re-granted — start() may acquire the mic again
       setErrorName(null);
       setStatus('idle');
       return true;
     } catch (e) {
+      blockedRef.current = true;
       setErrorName((e as DOMException)?.name ?? 'Error');
       setStatus('denied');
       return false;
