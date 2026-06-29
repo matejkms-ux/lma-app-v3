@@ -3016,6 +3016,178 @@ export const READER_LESSONS: ReaderLesson[] = [
         "en": "Japanese people only know about Japan."
       }
     ]
+  },
+  {
+    "code": "ANAMARIJAC2604-de-hannah-17",
+    "scope": "ANAMARIJAC2604-de",
+    "language": "GERMAN",
+    "sessionNr": 17,
+    "title": "Conversation #17 with Hannah",
+    "audio": "/audio/reader/de/hannah-17.mp3",
+    "durationSec": 121,
+    "sentences": [
+      {
+        "i": 1,
+        "start": 0.0,
+        "end": 2.08,
+        "l2": "Hallo Anamarija,",
+        "en": "Hello Anamarija,"
+      },
+      {
+        "i": 2,
+        "start": 2.08,
+        "end": 7.8,
+        "l2": "Shona ist eine der sechzehn Sprachen von Simbabwe.",
+        "en": "Shona is one of the sixteen languages of Zimbabwe."
+      },
+      {
+        "i": 3,
+        "start": 7.8,
+        "end": 14.48,
+        "l2": "Es ist so herzig, wenn Aaron blabbert und mehrere Silben spricht.",
+        "en": "It's so adorable when Aaron babbles and says several syllables."
+      },
+      {
+        "i": 4,
+        "start": 14.48,
+        "end": 20.04,
+        "l2": "Ich habe den Eindruck, dass es eine aufregende Zeit wird.",
+        "en": "I have the impression that it's going to be an exciting time."
+      },
+      {
+        "i": 5,
+        "start": 20.04,
+        "end": 26.62,
+        "l2": "Es ist eindrücklich zu sehen, wie schnell sich die Kinder entwickeln.",
+        "en": "It's striking to see how quickly children develop."
+      },
+      {
+        "i": 6,
+        "start": 26.62,
+        "end": 33.06,
+        "l2": "Aaron ist heute das erste Mal auf den Beinen gestanden.",
+        "en": "Today Aaron stood on his feet for the first time."
+      },
+      {
+        "i": 7,
+        "start": 33.06,
+        "end": 37.78,
+        "l2": "Erwachsene müssen ein Vorbild für die Kinder sein.",
+        "en": "Adults have to be a role model for the children."
+      },
+      {
+        "i": 8,
+        "start": 37.78,
+        "end": 41.46,
+        "l2": "Es ist schmerzhaft, wenn sie beim Stillen zubeißen.",
+        "en": "It's painful when they bite down while breastfeeding."
+      },
+      {
+        "i": 9,
+        "start": 41.46,
+        "end": 49.3,
+        "l2": "Du hattest so viele Gedanken im Kopf, dass du vergessen hast, was du sagen wolltest.",
+        "en": "You had so many thoughts in your head that you forgot what you wanted to say."
+      },
+      {
+        "i": 10,
+        "start": 49.3,
+        "end": 57.94,
+        "l2": "Wegen der Kita ist es gut, wenn Aaron bereits weniger trinkt und sich deine Brüste umstellen können.",
+        "en": "Because of the daycare, it's good if Aaron is already drinking less so your breasts can adjust."
+      },
+      {
+        "i": 11,
+        "start": 57.94,
+        "end": 61.9,
+        "l2": "Deine Eltern haben den Krieg erlebt.",
+        "en": "Your parents lived through the war."
+      },
+      {
+        "i": 12,
+        "start": 61.9,
+        "end": 67.36,
+        "l2": "Wir haben uns geeinigt, einen Umzugswagen zu mieten.",
+        "en": "We agreed to rent a moving van."
+      },
+      {
+        "i": 13,
+        "start": 67.36,
+        "end": 71.86,
+        "l2": "So übernehmen sie auch die Verantwortung für die Möbel.",
+        "en": "That way they also take responsibility for the furniture."
+      },
+      {
+        "i": 14,
+        "start": 71.86,
+        "end": 75.22,
+        "l2": "Ihr habt alles in Boxen gepackt.",
+        "en": "You packed everything into boxes."
+      },
+      {
+        "i": 15,
+        "start": 75.22,
+        "end": 79.8,
+        "l2": "Er freut sich darauf, in der neuen Wohnung zu schlafen.",
+        "en": "He's looking forward to sleeping in the new apartment."
+      },
+      {
+        "i": 16,
+        "start": 79.8,
+        "end": 84.34,
+        "l2": "Bisher hattest du keine Sorgen um deine Eltern.",
+        "en": "Until now you hadn't worried about your parents."
+      },
+      {
+        "i": 17,
+        "start": 84.34,
+        "end": 90.08,
+        "l2": "Es ist ein normales Kapitel im Leben, das auf uns zukommen wird.",
+        "en": "It's a normal chapter in life that's coming our way."
+      },
+      {
+        "i": 18,
+        "start": 90.08,
+        "end": 96.08,
+        "l2": "Ich habe gerade wieder daran gedacht, dass ich Shona lernen sollte.",
+        "en": "I was just thinking again that I should learn Shona."
+      },
+      {
+        "i": 19,
+        "start": 96.08,
+        "end": 105.42,
+        "l2": "Ich bin schon vier Jahre hier und kann immer noch nur die Begrüßungen und Verabschiedungen und ein paar andere Wörter.",
+        "en": "I've already been here four years and still only know the greetings and goodbyes and a few other words."
+      },
+      {
+        "i": 20,
+        "start": 105.42,
+        "end": 107.78,
+        "l2": "Aber die Sprache ist so schwierig für mich.",
+        "en": "But the language is so difficult for me."
+      },
+      {
+        "i": 21,
+        "start": 107.78,
+        "end": 111.24,
+        "l2": "Ich kann mir die Wörter einfach nicht merken.",
+        "en": "I just can't remember the words."
+      },
+      {
+        "i": 22,
+        "start": 111.24,
+        "end": 116.44,
+        "l2": "Vielleicht kann ich es zusammen mit Leandro lernen, wenn er beginnt zu reden.",
+        "en": "Maybe I can learn it together with Leandro when he starts to talk."
+      },
+      {
+        "i": 23,
+        "start": 116.44,
+        "end": 121.12,
+        "l2": "Tschüss und bis morgen!",
+        "en": "Bye and see you tomorrow!"
+      }
+    ]
   }
 ];
 
