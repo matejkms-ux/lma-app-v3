@@ -5,6 +5,7 @@ import { StatusBar } from '../components/StatusBar';
 import { useSession } from '../session';
 import { finalProgramFor } from '../data/finalContent';
 import { getEssayRatings, setEssayRating, averageStars, markModuleDone } from '../lib/finalProgress';
+import { needsLargeScript } from '../lib/script';
 
 /** A 1–5 star self-rating row. Tapping a star sets the value. */
 function StarRow({ value, onRate }: { value: number | null; onRate: (n: number) => void }) {
@@ -61,6 +62,8 @@ export function FinalReadingScreen() {
 
   const total = essay.pages.length;
   const cur = essay.pages[page];
+  // Larger type for dense scripts (Thai/CJK/etc.); compact for Latin essays.
+  const large = needsLargeScript(cur.heading, ...cur.paragraphs);
   const rated = ratings[page] ?? null;
   const isLast = page === total - 1;
   const allRated = essay.pages.every((_, i) => ratings[i] != null);
@@ -145,14 +148,20 @@ export function FinalReadingScreen() {
           <div className="text-[11px] font-bold tracking-[.18em] text-emerald">
             {cur.roman}
           </div>
-          <h1 className="mb-4 mt-1 font-serif text-[39px] font-bold leading-snug text-heading">
+          <h1
+            className={`mb-4 mt-1 font-serif font-bold leading-snug text-heading ${
+              large ? 'text-[32px]' : 'text-[22px]'
+            }`}
+          >
             {cur.heading}
           </h1>
           {cur.paragraphs.map((para, i) => (
             <div key={i} className="mb-3 last:mb-0">
-              <p className="text-[39px] leading-[1.7] text-heading">{para}</p>
+              <p className={`leading-[1.7] text-heading ${large ? 'text-[30px]' : 'text-[15px]'}`}>{para}</p>
               {cur.translit?.[i] && (
-                <p className="mt-1 text-[22px] leading-[1.6] text-muted">{cur.translit[i]}</p>
+                <p className={`mt-1 leading-[1.6] text-muted ${large ? 'text-[18px]' : 'text-[12px]'}`}>
+                  {cur.translit[i]}
+                </p>
               )}
             </div>
           ))}

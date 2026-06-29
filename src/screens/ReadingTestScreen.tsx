@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { DeviceFrame } from '../components/DeviceFrame';
 import { StatusBar } from '../components/StatusBar';
 import { useSession } from '../session';
+import { needsLargeScript } from '../lib/script';
 
 const READING_TIME_SECONDS = 20 * 60; // 20 minutes
 
@@ -80,6 +81,9 @@ Volle Kraft voraus. Es gibt noch so viel, das ich tun will. Ich will mehr illust
 Und ich will strahlen. Nicht laut, nicht für andere – sondern leise, auf meine Art. Die Art der Menschen, die viel gefühlt und viel gelernt haben. Die Art der Menschen, die an sich geglaubt haben, auch wenn es schwer war. Die Art der Menschen, die zwischen zwei Welten einen dritten Weg gefunden haben: ihren eigenen.
 
 Ich bin Anamarija. Ich lebe meinen Sinn. Ich strahle.`;
+
+// Bigger reading type only when the text is in a dense script (e.g. Thai); German stays compact.
+const READING_LARGE = needsLargeScript(READING_TEXT);
 
 function fmt(secs: number) {
   const m = Math.floor(secs / 60);
@@ -170,13 +174,23 @@ export function ReadingTestScreen() {
             {READING_TEXT.split('\n\n').map((para, i) => {
               if (i === 0) {
                 return (
-                  <h1 key={i} className="mb-4 font-serif text-[39px] font-bold leading-snug text-heading">
+                  <h1
+                    key={i}
+                    className={`mb-4 font-serif font-bold leading-snug text-heading ${
+                      READING_LARGE ? 'text-[32px]' : 'text-[20px]'
+                    }`}
+                  >
                     {para}
                   </h1>
                 );
               }
               return (
-                <p key={i} className="mb-3 text-[39px] leading-[1.65] text-heading last:mb-0">
+                <p
+                  key={i}
+                  className={`mb-3 leading-[1.65] text-heading last:mb-0 ${
+                    READING_LARGE ? 'text-[30px]' : 'text-[15px]'
+                  }`}
+                >
                   {para}
                 </p>
               );
@@ -204,10 +218,10 @@ export function ReadingTestScreen() {
 
         <div className="scroll-region flex-1 px-5 pb-6 pt-[18px]">
           <div className="text-[10px] font-bold tracking-[.16em] text-muted">GERMAN · FINAL TEST</div>
-          <div className="mt-1 font-serif text-[39px] italic leading-tight text-heading">
+          <div className="mt-1 font-serif text-[26px] italic leading-tight text-heading">
             Now tell me what you read.
           </div>
-          <p className="mt-2 text-[22px] leading-[1.6] text-muted">
+          <p className="mt-2 text-[13px] leading-[1.6] text-muted">
             Write in English. Summarise what the text was about — the people, the places, the story, the feelings. Write as much as you remember.
           </p>
 
@@ -216,7 +230,7 @@ export function ReadingTestScreen() {
             value={response}
             onChange={(e) => setResponse(e.target.value)}
             placeholder="The text was about…"
-            className="mt-5 min-h-[260px] w-full resize-none rounded-2xl border border-rule bg-cream-panel p-4 text-[22px] leading-[1.65] text-heading placeholder:text-locked focus:border-emerald focus:outline-none"
+            className="mt-5 min-h-[260px] w-full resize-none rounded-2xl border border-rule bg-cream-panel p-4 text-[15px] leading-[1.65] text-heading placeholder:text-locked focus:border-emerald focus:outline-none"
           />
 
           <p className="mt-2 text-right text-[11px] text-muted">

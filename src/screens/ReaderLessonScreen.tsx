@@ -4,6 +4,7 @@ import { DeviceFrame } from '../components/DeviceFrame';
 import { StatusBar } from '../components/StatusBar';
 import { AudioPlayer } from '../components/AudioPlayer';
 import { readerLessonByCode, type ReaderSentence } from '../data/readerLessons';
+import { needsLargeScript } from '../lib/script';
 
 type Phase = 'listen' | 'rate' | 'read';
 
@@ -134,6 +135,9 @@ function ReadPhase({ audio, sentences }: { audio: string; sentences: ReaderSente
   const [playing, setPlaying] = useState(false);
   const [revealed, setRevealed] = useState<Set<number>>(new Set());
 
+  // Larger reading type for dense scripts (e.g. Thai ล vs ส); compact for Latin.
+  const large = useMemo(() => needsLargeScript(...sentences.map((s) => s.l2)), [sentences]);
+
   // Active line = the last sentence whose start has passed.
   const activeIndex = useMemo(() => {
     let idx = -1;
@@ -218,14 +222,20 @@ function ReadPhase({ audio, sentences }: { audio: string; sentences: ReaderSente
               className="block w-full border-b border-teal/10 py-3 text-left"
             >
               <span
-                className={`block font-serif text-[39px] leading-snug transition-colors ${
-                  active ? 'text-coral' : 'text-cream'
-                }`}
+                className={`block font-serif leading-snug transition-colors ${
+                  large ? 'text-[30px]' : 'text-[19px]'
+                } ${active ? 'text-coral' : 'text-cream'}`}
               >
                 {s.l2}
               </span>
               {show && (
-                <span className="mt-1 block text-[22px] italic leading-snug text-teal">{s.en}</span>
+                <span
+                  className={`mt-1 block italic leading-snug text-teal ${
+                    large ? 'text-[18px]' : 'text-[14px]'
+                  }`}
+                >
+                  {s.en}
+                </span>
               )}
             </button>
           );
