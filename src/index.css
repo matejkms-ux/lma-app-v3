@@ -23,7 +23,7 @@ body {
   position: relative;
   overflow: hidden;
   box-shadow: 0 0 80px rgba(0, 0, 0, 0.6);
-  zoom: 2.4;
+  zoom: 2.2;
 }
 
 /* On laptops and bigger - go full width */
