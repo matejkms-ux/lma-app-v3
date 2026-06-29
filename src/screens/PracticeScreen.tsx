@@ -104,10 +104,10 @@ export function PracticeScreen() {
     );
   }
 
-  return <Player key={lesson.code} lesson={lesson} userId={user.id} startAt={startAt} />;
+  return <Player key={lesson.code} lesson={lesson} userId={user.id} startAt={startAt} unlockAll={!!user.unlock_all} />;
 }
 
-function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: string; startAt?: Step }) {
+function Player({ lesson, userId, startAt, unlockAll }: { lesson: PracticeLesson; userId: string; startAt?: Step; unlockAll?: boolean }) {
   const navigate = useNavigate();
   const api = usePractice(lesson, userId, startAt);
   const recorder = useRecorder();
@@ -205,16 +205,18 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
   // disagree with what the screen says. Star rating is an optional self-assessment
   // and never blocks progress.
   const isUnlockComplete = useCallback((s: Step): boolean => {
+    if (unlockAll) return true;
     if (!lesson.audio[s]) return true;
     return api.passes[s] >= requiredReps(s);
-  }, [lesson.audio, api.passes]);
+  }, [unlockAll, lesson.audio, api.passes]);
 
   // GRASP is always unlocked; every other step requires the previous to be unlock-complete.
   const isUnlocked = useCallback((s: Step): boolean => {
+    if (unlockAll) return true;
     const idx = STEPS.indexOf(s);
     if (idx <= 0) return true;
     return isUnlockComplete(STEPS[idx - 1]);
-  }, [isUnlockComplete]);
+  }, [unlockAll, isUnlockComplete]);
 
   const url = api.currentUrl;
   const hasAudio = Boolean(url);
@@ -229,6 +231,14 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
   }, [hasAudio]);
 
   const onPlay = useCallback(() => { void recorder.start(); }, [recorder]);
+
+  // Playback underran on a slow connection: pause the take so it doesn't capture the
+  // buffering gap as dead air, and resume it cleanly when the clip recovers. The
+  // player handles the user-facing BUFFERING/retry affordance.
+  const onBufferingChange = useCallback((buffering: boolean) => {
+    if (buffering) recorder.pause();
+    else recorder.resume();
+  }, [recorder]);
 
   const onEnded = useCallback(async () => {
     const take = await recorder.stop();
@@ -425,6 +435,7 @@ function Player({ lesson, userId, startAt }: { lesson: PracticeLesson; userId: s
                 onEnded={onEnded}
                 onPlayingChange={setPlaying}
                 onProgress={setReadProgress}
+                onBufferingChange={onBufferingChange}
               />
             </div>
           </>
