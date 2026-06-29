@@ -34,6 +34,8 @@ export interface User {
   plan?: LearnerPlan;
   /** Adventure schedule (number, dates, status, language pair, history) — sourced from Airtable. */
   adventure?: Adventure;
+  /** When true, all lessons with audio are open regardless of sequential completion. */
+  unlock_all?: boolean;
 }
 
 export interface Sentence {
@@ -77,7 +79,7 @@ export const USERS: User[] = [
     },
     adventure: { number: 1, startDate: '2026-06-26', totalDays: 28, status: 'active', languageFrom: 'English', languageTo: 'German' },
   },
-  { id: 'u4', name: 'Jerod Cox',         firstName: 'Jerod',     lastNames: 'Cox',                           language: 'THAI',     username: 'JERODC2604-th',   adventure: { number: 1, startDate: '2026-06-25', totalDays: 42, status: 'active', languageFrom: 'English', languageTo: 'Thai' } },
+  { id: 'u4', name: 'Jerod Cox',         firstName: 'Jerod',     lastNames: 'Cox',                           language: 'THAI',     username: 'JERODC2604-th',   adventure: { number: 1, totalDays: 42, status: 'upcoming', languageFrom: 'English', languageTo: 'Thai' } },
   { id: 'u2', name: 'Tom Roberge',       firstName: 'Tom',       lastNames: 'Roberge',                       language: 'KHMER',    username: 'TOMR2504-km',     adventure: { number: 1, languageFrom: 'English', languageTo: 'Khmer' } },
   { id: 'u1', name: 'Won-Chak Leung',    firstName: 'Won-Chak',  lastNames: 'Leung',    calledName: 'Charles', language: 'JAPANESE', username: 'WONCHAKL2401-ja', adventure: { number: 1, languageFrom: 'English', languageTo: 'Japanese' } },
   { id: 'u5', name: 'Jason Oberbillig',  firstName: 'Jason',     lastNames: 'Oberbillig',                       language: 'JAPANESE', username: 'JASONO2308-ja',   adventure: { number: 1, languageFrom: 'English', languageTo: 'Japanese' } },

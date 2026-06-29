@@ -8,7 +8,7 @@ export async function getRoster(): Promise<User[]> {
   if (useSupabase && supabase) {
     const { data, error } = await supabase
       .from('users')
-      .select('id, name, first_name, last_names, called_name, language, username, plan, adventure')
+      .select('id, name, first_name, last_names, called_name, language, username, plan, adventure, unlock_all')
       .eq('role', 'adventurer')
       .order('name');
     if (!error && data && data.length) {
@@ -22,6 +22,7 @@ export async function getRoster(): Promise<User[]> {
         username: (r.username as string | null) ?? undefined,
         plan: (r.plan as LearnerPlan | null) ?? undefined,
         adventure: (r.adventure as Adventure | null) ?? undefined,
+        unlock_all: (r.unlock_all as boolean | null) ?? undefined,
       })) as User[];
     }
   }

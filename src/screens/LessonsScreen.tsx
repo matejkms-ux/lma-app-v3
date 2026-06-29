@@ -194,11 +194,13 @@ export function LessonsScreen() {
                       <GroupLabel>Deine Lektionen</GroupLabel>
                     </>
                   )}
-                  {/* Main path — unlocks sequentially, once the previous lesson is complete. */}
+                  {/* Main path — sequential by default; unlock_all bypasses the gate. */}
                   {main.map((l, i) => {
                     const prev = main[i - 1];
                     const unlocked =
-                      !prev || isLessonUnlockComplete(user.id, prev.code, prev.audioStepCount);
+                      !!user.unlock_all ||
+                      !prev ||
+                      isLessonUnlockComplete(user.id, prev.code, prev.audioStepCount);
                     return renderRow(l, unlocked);
                   })}
                 </>
