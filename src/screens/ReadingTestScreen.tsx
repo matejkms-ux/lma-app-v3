@@ -170,13 +170,13 @@ export function ReadingTestScreen() {
             {READING_TEXT.split('\n\n').map((para, i) => {
               if (i === 0) {
                 return (
-                  <h1 key={i} className="mb-4 font-serif text-[33px] font-bold leading-snug text-heading">
+                  <h1 key={i} className="mb-4 font-serif text-[39px] font-bold leading-snug text-heading">
                     {para}
                   </h1>
                 );
               }
               return (
-                <p key={i} className="mb-3 text-[33px] leading-[1.65] text-heading last:mb-0">
+                <p key={i} className="mb-3 text-[39px] leading-[1.65] text-heading last:mb-0">
                   {para}
                 </p>
               );
@@ -204,7 +204,7 @@ export function ReadingTestScreen() {
 
         <div className="scroll-region flex-1 px-5 pb-6 pt-[18px]">
           <div className="text-[10px] font-bold tracking-[.16em] text-muted">GERMAN · FINAL TEST</div>
-          <div className="mt-1 font-serif text-[33px] italic leading-tight text-heading">
+          <div className="mt-1 font-serif text-[39px] italic leading-tight text-heading">
             Now tell me what you read.
           </div>
           <p className="mt-2 text-[22px] leading-[1.6] text-muted">

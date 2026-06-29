@@ -218,7 +218,7 @@ function ReadPhase({ audio, sentences }: { audio: string; sentences: ReaderSente
               className="block w-full border-b border-teal/10 py-3 text-left"
             >
               <span
-                className={`block font-serif text-[33px] leading-snug transition-colors ${
+                className={`block font-serif text-[39px] leading-snug transition-colors ${
                   active ? 'text-coral' : 'text-cream'
                 }`}
               >
