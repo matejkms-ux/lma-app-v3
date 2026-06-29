@@ -218,14 +218,14 @@ function ReadPhase({ audio, sentences }: { audio: string; sentences: ReaderSente
               className="block w-full border-b border-teal/10 py-3 text-left"
             >
               <span
-                className={`block font-serif text-[19px] leading-snug transition-colors ${
+                className={`block font-serif text-[33px] leading-snug transition-colors ${
                   active ? 'text-coral' : 'text-cream'
                 }`}
               >
                 {s.l2}
               </span>
               {show && (
-                <span className="mt-1 block text-[14px] italic leading-snug text-teal">{s.en}</span>
+                <span className="mt-1 block text-[22px] italic leading-snug text-teal">{s.en}</span>
               )}
             </button>
           );

@@ -145,14 +145,14 @@ export function FinalReadingScreen() {
           <div className="text-[11px] font-bold tracking-[.18em] text-emerald">
             {cur.roman}
           </div>
-          <h1 className="mb-4 mt-1 font-serif text-[22px] font-bold leading-snug text-heading">
+          <h1 className="mb-4 mt-1 font-serif text-[33px] font-bold leading-snug text-heading">
             {cur.heading}
           </h1>
           {cur.paragraphs.map((para, i) => (
             <div key={i} className="mb-3 last:mb-0">
-              <p className="text-[15px] leading-[1.7] text-heading">{para}</p>
+              <p className="text-[33px] leading-[1.7] text-heading">{para}</p>
               {cur.translit?.[i] && (
-                <p className="mt-1 text-[12px] leading-[1.6] text-muted">{cur.translit[i]}</p>
+                <p className="mt-1 text-[22px] leading-[1.6] text-muted">{cur.translit[i]}</p>
               )}
             </div>
           ))}
