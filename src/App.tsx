@@ -23,6 +23,11 @@ import { CorrectionsScreen } from './screens/CorrectionsScreen';
 const VideoSessionScreen = lazy(() => import('./screens/VideoSessionScreen'));
 import VideoRosterScreen from './screens/VideoRosterScreen';
 
+// Zoom video is confined to the explicit team "video" deploy. In the learner app
+// (any other mode) the live-session feature is COMING SOON: the roster/room routes
+// redirect to /final so a learner can never reach a Zoom room, even by URL.
+const VIDEO_MODE = (import.meta.env.VITE_APP_MODE as string | undefined) === 'video';
+
 export default function App() {
   return (
     <ErrorBoundary>
@@ -30,13 +35,7 @@ export default function App() {
       <Routes>
         <Route
           path="/"
-          element={
-            (import.meta.env.VITE_APP_MODE as string | undefined) === 'video' ? (
-              <VideoRosterScreen />
-            ) : (
-              <EntryScreen />
-            )
-          }
+          element={VIDEO_MODE ? <VideoRosterScreen /> : <EntryScreen />}
         />
         {/* Practice flow (wired to Supabase) + legacy screens, unchanged. */}
         <Route path="/home" element={<HomeScreen />} />
@@ -59,12 +58,16 @@ export default function App() {
         <Route
           path="/session/:sessionId"
           element={
-            <Suspense fallback={<div style={{ padding: 32 }}>Loading session…</div>}>
-              <VideoSessionScreen />
-            </Suspense>
+            VIDEO_MODE ? (
+              <Suspense fallback={<div style={{ padding: 32 }}>Loading session…</div>}>
+                <VideoSessionScreen />
+              </Suspense>
+            ) : (
+              <Navigate to="/final" replace />
+            )
           }
         />
-        <Route path="/rooms" element={<VideoRosterScreen />} />
+        <Route path="/rooms" element={VIDEO_MODE ? <VideoRosterScreen /> : <Navigate to="/final" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </ErrorBoundary>

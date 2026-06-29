@@ -49,18 +49,13 @@ export function FinalHubScreen() {
   }
 
   const done = getModuleDone(user.id, user.username ?? '');
-  // Gate: the four prep modules must be done before Final Session unlocks.
-  const PREP: FinalModule[] = ['read', 'podcast', 'writing', 'conversation'];
-  const prepLeft = PREP.filter((k) => !done[k]).length;
   const cards: ModuleCard[] = [
     { key: 'read', route: '/final-reading', emoji: '📖', title: 'Final Read', desc: `“${program.essay.title}” · ${program.essay.pages.length} pages` },
     { key: 'podcast', route: '/podcast', emoji: '🎧', title: 'Final Podcast', desc: `${program.podcast.title} · ${program.podcast.checks.length} checks` },
     { key: 'writing', route: '/final-writing', emoji: '✍️', title: 'Final Writing', desc: `${program.writing.prompts.length} prompts to write` },
     { key: 'conversation', route: '/final-conversation', emoji: '💬', title: 'Final Conversation', desc: `${program.conversation.prompts.length} prompts · auto-scored` },
-    {
-      key: 'session', route: '/final-session', emoji: '🏁', title: 'Final Session',
-      desc: prepLeft > 0 ? `Locked · finish ${prepLeft} prep step${prepLeft > 1 ? 's' : ''} first` : program.session.title,
-    },
+    // Final Session is the live Zoom call — COMING SOON until the video layer ships.
+    { key: 'session', route: '/final-session', emoji: '🏁', title: 'Final Session', desc: 'Live session · coming soon' },
   ];
   const doneCount = cards.filter((c) => done[c.key]).length;
 
@@ -86,23 +81,22 @@ export function FinalHubScreen() {
 
         <div className="flex flex-col gap-2.5">
           {cards.map((c, i) => {
-            const locked = c.key === 'session' && prepLeft > 0;
+            const comingSoon = c.key === 'session';
             return (
               <button
                 key={c.key}
                 onClick={() => navigate(c.route)}
-                aria-disabled={locked}
-                className={`flex items-center gap-3 rounded-[18px] border border-rule bg-white p-4 text-left active:scale-[.99] ${locked ? 'opacity-60' : ''}`}
+                className={`flex items-center gap-3 rounded-[18px] border border-rule bg-white p-4 text-left active:scale-[.99] ${comingSoon ? 'opacity-70' : ''}`}
               >
-                <span className="text-[26px]">{locked ? '🔒' : c.emoji}</span>
+                <span className="text-[26px]">{c.emoji}</span>
                 <span className="min-w-0 flex-1">
                   <span className="flex items-center gap-2">
                     <span className="text-[10px] font-bold tracking-[.1em] text-muted">STEP {i + 1}</span>
-                    {done[c.key] && (
+                    {done[c.key] && !comingSoon && (
                       <span className="rounded-full bg-emerald/15 px-1.5 py-[1px] text-[9px] font-bold tracking-[.06em] text-emerald">✓ DONE</span>
                     )}
-                    {locked && (
-                      <span className="rounded-full bg-coral/15 px-1.5 py-[1px] text-[9px] font-bold tracking-[.06em] text-coral">LOCKED</span>
+                    {comingSoon && (
+                      <span className="rounded-full bg-muted/15 px-1.5 py-[1px] text-[9px] font-bold tracking-[.06em] text-muted">COMING SOON</span>
                     )}
                   </span>
                   <span className="block text-[15px] font-bold text-heading">{c.title}</span>

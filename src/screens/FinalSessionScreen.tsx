@@ -4,7 +4,7 @@ import { DeviceFrame } from '../components/DeviceFrame';
 import { StatusBar } from '../components/StatusBar';
 import { useSession } from '../session';
 import { finalProgramFor } from '../data/finalContent';
-import { getModuleDone, markModuleDone, type FinalModule } from '../lib/finalProgress';
+import { getModuleDone, type FinalModule } from '../lib/finalProgress';
 
 /**
  * Final Session — the live graduation conversation with the Language Companion /
@@ -104,25 +104,26 @@ export function FinalSessionScreen() {
           ))}
         </div>
 
-        {!unlocked && (
-          <div className="mt-4 rounded-2xl border border-coral/30 bg-coral/[.06] p-4">
-            <div className="flex items-center gap-2 text-[13px] font-bold text-coral">
-              <span>🔒</span> Locked until prep is complete
-            </div>
-            <p className="mt-1 text-[12.5px] leading-[1.5] text-muted">
-              Finish {remaining.map((r) => r.label).join(', ')} to unlock your live session.
-            </p>
+        {/* The live room is COMING SOON — keep prep visible, but no Zoom join yet. */}
+        <div className="mt-4 rounded-2xl border border-rule bg-cream-panel p-4">
+          <div className="flex items-center gap-2 text-[13px] font-bold text-heading">
+            <span>🗓️</span> Live session — coming soon
           </div>
-        )}
+          <p className="mt-1 text-[12.5px] leading-[1.5] text-muted">
+            {unlocked
+              ? 'Your prep is done. Your guide will be in touch to arrange the live session.'
+              : `Keep going on your prep${remaining.length ? ` — ${remaining.map((r) => r.label).join(', ')}` : ''}. Your guide will arrange the live session.`}
+          </p>
+        </div>
       </div>
 
       <div className="px-5 pb-5">
         <button
-          onClick={() => { markModuleDone(user.id, user.username ?? '', 'session'); navigate(`/session/${encodeURIComponent(session.sessionId)}`); }}
-          disabled={!unlocked}
-          className="w-full rounded-[15px] bg-emerald py-4 text-[15px] font-bold tracking-[.01em] text-cream disabled:opacity-40"
+          disabled
+          aria-disabled="true"
+          className="w-full rounded-[15px] bg-emerald py-4 text-[15px] font-bold tracking-[.01em] text-cream opacity-40"
         >
-          {unlocked ? 'Join the live room →' : `🔒 Complete ${remaining.length} more to unlock`}
+          Live session · coming soon
         </button>
         <button
           onClick={() => navigate('/final')}
