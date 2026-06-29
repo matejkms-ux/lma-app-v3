@@ -50,12 +50,9 @@ export function FinalHubScreen() {
 
   const done = getModuleDone(user.id, user.username ?? '');
   const cards: ModuleCard[] = [
-    { key: 'read', route: '/final-reading', emoji: '📖', title: 'Final Read', desc: `“${program.essay.title}” · ${program.essay.pages.length} pages` },
+    { key: 'read', route: '/final-reading', emoji: '📖', title: 'Final Read', desc: `”${program.essay.title}” · ${program.essay.pages.length} pages` },
     { key: 'podcast', route: '/podcast', emoji: '🎧', title: 'Final Podcast', desc: `${program.podcast.title} · ${program.podcast.checks.length} checks` },
     { key: 'writing', route: '/final-writing', emoji: '✍️', title: 'Final Writing', desc: `${program.writing.prompts.length} prompts to write` },
-    { key: 'conversation', route: '/final-conversation', emoji: '💬', title: 'Final Conversation', desc: `${program.conversation.prompts.length} prompts · auto-scored` },
-    // Final Session is the live Zoom call — COMING SOON until the video layer ships.
-    { key: 'session', route: '/final-session', emoji: '🏁', title: 'Final Session', desc: 'Live session · coming soon' },
   ];
   const doneCount = cards.filter((c) => done[c.key]).length;
 
@@ -66,7 +63,7 @@ export function FinalHubScreen() {
         <div className="text-[11px] font-bold tracking-[.14em] text-muted">{program.language} · FINAL APP</div>
         <div className="mt-1 font-serif text-[28px] italic leading-tight text-heading">The final week</div>
         <p className="mt-1.5 text-[13px] leading-[1.5] text-muted">
-          Five steps to close your adventure — read, listen, write, talk, and meet.
+          Three steps to close your adventure — read, listen, and write.
         </p>
       </div>
 
