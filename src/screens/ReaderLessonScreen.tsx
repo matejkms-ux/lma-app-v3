@@ -5,6 +5,7 @@ import { StatusBar } from '../components/StatusBar';
 import { AudioPlayer } from '../components/AudioPlayer';
 import { readerLessonByCode, type ReaderSentence } from '../data/readerLessons';
 import { needsLargeScript } from '../lib/script';
+import { useSession } from '../session';
 
 type Phase = 'listen' | 'rate' | 'read';
 
@@ -271,6 +272,9 @@ function ReadPhase({ audio, sentences }: { audio: string; sentences: ReaderSente
 export function ReaderLessonScreen() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useSession();
+  // Unlocked learners can jump freely between listen / rate / read.
+  const freeNav = !!user?.unlock_all;
   const code = (location.state as { code?: string } | null)?.code;
   const lesson = code ? readerLessonByCode(code) : undefined;
   const ratingKey = `lma:reader:understood:${code}`;
@@ -298,8 +302,9 @@ export function ReaderLessonScreen() {
   if (!code || !lesson) return <Navigate to="/reader" replace />;
 
   // A pill is reachable once its prerequisite is met (listen → rate → read).
+  // Unlocked learners (unlock_all) bypass the gate and can tap any phase.
   const lockedFor = (p: Phase) =>
-    (p === 'rate' && !listened) || (p === 'read' && understood === 0);
+    !freeNav && ((p === 'rate' && !listened) || (p === 'read' && understood === 0));
 
   return (
     <DeviceFrame tone="dark">
