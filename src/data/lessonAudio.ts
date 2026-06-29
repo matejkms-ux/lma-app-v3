@@ -355,6 +355,10 @@ const CODE_LANG: Record<string, string> = {
   fr: 'FRENCH',
   zh: 'MANDARIN',
   ar: 'ARABIC',
+  en: 'ENGLISH',
+  he: 'HEBREW',
+  it: 'ITALIAN',
+  ru: 'RUSSIAN',
 };
 
 export interface ParsedLessonCode {
