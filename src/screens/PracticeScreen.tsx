@@ -234,14 +234,6 @@ function Player({ lesson, userId, startAt, unlockAll }: { lesson: PracticeLesson
 
   const onPlay = useCallback(() => { void recorder.start(); }, [recorder]);
 
-  // Playback underran on a slow connection: pause the take so it doesn't capture the
-  // buffering gap as dead air, and resume it cleanly when the clip recovers. The
-  // player handles the user-facing BUFFERING/retry affordance.
-  const onBufferingChange = useCallback((buffering: boolean) => {
-    if (buffering) recorder.pause();
-    else recorder.resume();
-  }, [recorder]);
-
   const onEnded = useCallback(async () => {
     const take = await recorder.stop();
     if (take) {
@@ -437,7 +429,6 @@ function Player({ lesson, userId, startAt, unlockAll }: { lesson: PracticeLesson
                 onEnded={onEnded}
                 onPlayingChange={setPlaying}
                 onProgress={setReadProgress}
-                onBufferingChange={onBufferingChange}
               />
             </div>
           </>
