@@ -23,6 +23,17 @@ const COMPLETE_TAIL_SECONDS = 1.0;
 // of leaving the learner stuck having to stop and replay by hand.
 const STALL_RENUDGE_MS = 6000; // re-issue play() if still buffering after this
 const STALL_HARD_MS = 14000; // give up auto-recovery and show a retry hint
+// Safari (macOS + iOS) switches the audio session to "record" the instant the mic
+// opens via getUserMedia — and the listen steps start the recorder the moment
+// playback begins (onPlay → recorder.start()). That session switch INTERRUPTS the
+// just-started <audio> element: it fires `pause` a beat after `play`, so the learner
+// taps ▶, hears nothing, and the bar sits at PAUSED while the mic records. Chrome
+// doesn't do this. The element has already begun (so it's "user-activated"), and the
+// session is in record mode after the first interruption — so simply re-issuing
+// play() makes it stick. We re-arm on any pause we didn't initiate, capped so a
+// genuinely failed clip doesn't loop forever.
+const RESUME_AFTER_INTERRUPT_MS = 200;
+const MAX_RESUME_REISSUES = 3;
 
 function fmt(secs: number): string {
   if (!Number.isFinite(secs) || secs < 0) secs = 0;
@@ -65,10 +76,19 @@ export function AudioPlayer({
   // Mirrors `buffering` for synchronous reads outside render — lets us fire
   // onBufferingChange exactly on each transition (not inside a setState updater).
   const bufferingRef = useRef(false);
+  // Safari mic-interruption recovery: `playIntentRef` = the learner wants it playing
+  // (set on the ▶ gesture, cleared on a deliberate pause / end / new clip).
+  // `selfPauseRef` flags a pause WE issued (deliberate toggle, hard-stall) so the
+  // resume watchdog doesn't fight it. `resumeReissues` caps the re-kicks.
+  const playIntentRef = useRef(false);
+  const selfPauseRef = useRef(false);
+  const resumeReissues = useRef(0);
+  const resumeTimer = useRef<number | null>(null);
 
   const clearStallTimers = useCallback(() => {
     if (renudgeTimer.current) { window.clearTimeout(renudgeTimer.current); renudgeTimer.current = null; }
     if (hardTimer.current) { window.clearTimeout(hardTimer.current); hardTimer.current = null; }
+    if (resumeTimer.current) { window.clearTimeout(resumeTimer.current); resumeTimer.current = null; }
   }, []);
 
   // Buffering recovered (or playback stopped): clear the stall UI + watchdog and let
@@ -102,6 +122,7 @@ export function AudioPlayer({
     hardTimer.current = window.setTimeout(() => {
       const el = audioRef.current;
       if (el && !el.paused && !el.ended) {
+        selfPauseRef.current = true; // our pause — don't let the resume watchdog fight it
         el.pause(); // stop the spinner; the learner taps ▶ to retry from here
         setHardStall(true);
       }
@@ -114,6 +135,9 @@ export function AudioPlayer({
     setPlaying(false);
     setCur(0);
     firedRef.current = false;
+    playIntentRef.current = false;
+    selfPauseRef.current = false;
+    resumeReissues.current = 0;
     clearBuffering();
     if (a) {
       a.pause();
@@ -133,10 +157,15 @@ export function AudioPlayer({
     const a = audioRef.current;
     if (!a) return;
     if (a.paused) {
+      playIntentRef.current = true; // we want it playing — arm interruption recovery
+      resumeReissues.current = 0;
+      setHardStall(false);
       void a.play().catch(() => {
         /* autoplay/permission edge — leave UI as-is */
       });
     } else {
+      selfPauseRef.current = true; // deliberate pause — suppress the resume watchdog
+      playIntentRef.current = false;
       a.pause(); // pause keeps position — no reset
     }
   };
@@ -165,6 +194,8 @@ export function AudioPlayer({
         playsInline
         onPlay={(e) => {
           setPlaying(true);
+          playIntentRef.current = true; // playback is live — arm interruption recovery
+          selfPauseRef.current = false;
           // Re-arm the gate for a fresh pass (replay seeks back to the start).
           const a = e.currentTarget;
           if (!a.duration || a.duration - a.currentTime > COMPLETE_TAIL_SECONDS) {
@@ -172,9 +203,34 @@ export function AudioPlayer({
           }
           onPlay?.();
         }}
-        onPause={() => {
+        onPause={(e) => {
           setPlaying(false);
           clearBuffering();
+          const a = e.currentTarget;
+          // Distinguish OUR pauses (deliberate toggle, hard-stall) from an external
+          // interruption. On Safari, the recorder opening the mic right after play
+          // pauses the element involuntarily — we still intend to play and we're not
+          // at the end, so re-issue play(). The element has already started, so this
+          // is allowed without a fresh gesture, and the audio session is now in
+          // record mode so the second play() sticks.
+          if (selfPauseRef.current) {
+            selfPauseRef.current = false; // consume; nothing to recover
+            return;
+          }
+          if (
+            playIntentRef.current &&
+            !a.ended &&
+            resumeReissues.current < MAX_RESUME_REISSUES
+          ) {
+            resumeReissues.current += 1;
+            if (resumeTimer.current) window.clearTimeout(resumeTimer.current);
+            resumeTimer.current = window.setTimeout(() => {
+              const el = audioRef.current;
+              if (el && el.paused && !el.ended && playIntentRef.current) {
+                void el.play().catch(() => {});
+              }
+            }, RESUME_AFTER_INTERRUPT_MS);
+          }
         }}
         onWaiting={enterBuffering}
         onStalled={enterBuffering}
@@ -201,10 +257,12 @@ export function AudioPlayer({
           // out of the player — log it and reset the transport. The step can still
           // be cleared by playback gating once a working clip arrives.
           console.warn('Audio failed to load/play:', src);
+          playIntentRef.current = false; // a real error — don't fight it with resumes
           setPlaying(false);
           clearBuffering();
         }}
         onEnded={() => {
+          playIntentRef.current = false; // reached the end — no resume
           setPlaying(false);
           setCur(0);
           clearBuffering();
