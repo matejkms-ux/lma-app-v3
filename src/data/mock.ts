@@ -67,7 +67,7 @@ export interface Lesson {
 export const USERS: User[] = [
   {
     id: 'u3', name: 'Anamarija Cvelbar', firstName: 'Anamarija', lastNames: 'Cvelbar',
-    language: 'GERMAN', username: 'ANAMARIJAC2604-de',
+    language: 'GERMAN', username: 'ANAMARIJAC2604-de', unlock_all: true,
     plan: {
       programName: 'German 4-Week Program',
       totalWeeks: 4,

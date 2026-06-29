@@ -16,9 +16,17 @@ interface SessionValue {
 
 const SessionContext = createContext<SessionValue | null>(null);
 const USER_KEY = 'lma:userId';
+const USER_OBJ_KEY = 'lma:user';
 
 function restore(): User | null {
   try {
+    // Prefer the full stored object (has Supabase fields like unlock_all).
+    const raw = localStorage.getItem(USER_OBJ_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as User;
+      if (parsed?.id) return parsed;
+    }
+    // Fallback: legacy id-only storage → look up in mock list.
     const id = localStorage.getItem(USER_KEY);
     return (id && USERS.find((u) => u.id === id)) || null;
   } catch {
@@ -45,6 +53,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         setUser(u);
         try {
           localStorage.setItem(USER_KEY, u.id);
+          localStorage.setItem(USER_OBJ_KEY, JSON.stringify(u));
         } catch {
           /* ignore */
         }
@@ -53,6 +62,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         setUser(null);
         try {
           localStorage.removeItem(USER_KEY);
+          localStorage.removeItem(USER_OBJ_KEY);
         } catch {
           /* ignore */
         }
