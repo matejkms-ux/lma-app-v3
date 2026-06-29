@@ -51,7 +51,19 @@ export function useRecorder() {
   };
 
   const start = useCallback(async () => {
-    if (recRef.current) return; // already recording
+    // Already have a recorder: if it was paused (playback stalled or the learner
+    // paused), resume it rather than spinning up a second capture. Active → no-op.
+    const existing = recRef.current;
+    if (existing) {
+      if (existing.state === 'paused') {
+        try {
+          existing.resume();
+        } catch {
+          /* ignore — finalized elsewhere */
+        }
+      }
+      return;
+    }
     if (
       typeof navigator === 'undefined' ||
       !navigator.mediaDevices?.getUserMedia ||
@@ -69,14 +81,63 @@ export function useRecorder() {
       rec.ondataavailable = (e) => {
         if (e.data.size > 0) chunksRef.current.push(e.data);
       };
+      // A recorder that errors mid-clip (iOS audio-session interruption — Siri, an
+      // incoming call, the control centre — or the mic track being revoked) would
+      // otherwise die silently and lose the take. Surface it and release so the next
+      // play() can cleanly re-acquire the mic.
+      rec.onerror = () => {
+        setErrorName('RecorderError');
+        recRef.current = null;
+        releaseStream();
+        setStatus('idle');
+      };
+      // The OS yanking the mic (call/Siri/another app) ends or mutes the track
+      // without a recorder error on some browsers — treat it the same way.
+      stream.getAudioTracks().forEach((t) => {
+        t.onended = () => {
+          recRef.current = null;
+          releaseStream();
+          setStatus('idle');
+        };
+      });
       recRef.current = rec;
-      rec.start();
+      // Flush a chunk every second: without a timeslice, data is only delivered at
+      // stop(), so any mid-clip failure loses everything. Periodic chunks salvage
+      // whatever was captured before the failure.
+      rec.start(1000);
       setErrorName(null);
       setStatus('recording');
     } catch (e) {
       setErrorName((e as DOMException)?.name ?? 'Error');
       setStatus('denied');
       releaseStream();
+    }
+  }, []);
+
+  /** Pause capture without finalizing — used while playback is buffering/stalled so
+   * the take doesn't accumulate dead air. Resumed by resume(). */
+  const pause = useCallback(() => {
+    const rec = recRef.current;
+    if (rec && rec.state === 'recording') {
+      try {
+        rec.pause();
+      } catch {
+        /* ignore */
+      }
+    }
+  }, []);
+
+  /** Resume a paused take when playback recovers from a stall. Resume-ONLY: it never
+   * acquires the mic, so a stall after the take is already finalized is a safe no-op
+   * (unlike start(), which is the begin-a-take path). */
+  const resume = useCallback(() => {
+    const rec = recRef.current;
+    if (rec && rec.state === 'paused') {
+      try {
+        rec.resume();
+      } catch {
+        /* ignore */
+      }
     }
   }, []);
 
@@ -152,5 +213,5 @@ export function useRecorder() {
     setStatus((s) => (s === 'denied' || s === 'unsupported' ? s : 'idle'));
   }, []);
 
-  return { status, errorName, start, stop, cancel, prime };
+  return { status, errorName, start, pause, resume, stop, cancel, prime };
 }

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 /**
  * Audio player (spec §5): two controls — reverse and a play/pause toggle. There
@@ -15,6 +15,14 @@ import { useEffect, useRef, useState } from 'react';
  */
 const REVERSE_SECONDS = 5;
 const COMPLETE_TAIL_SECONDS = 1.0;
+// Clips stream from remote Storage, so a slow phone connection can underrun a long
+// (2 min+) clip mid-playback: the element fires `waiting`/`stalled`, playback halts
+// (often with an audible glitch at the buffer boundary) and `timeupdate` stops — so
+// the completion gate never reaches the tail and the step can't clear. We surface a
+// BUFFERING state and a watchdog that re-kicks playback, then offers a retry, instead
+// of leaving the learner stuck having to stop and replay by hand.
+const STALL_RENUDGE_MS = 6000; // re-issue play() if still buffering after this
+const STALL_HARD_MS = 14000; // give up auto-recovery and show a retry hint
 
 function fmt(secs: number): string {
   if (!Number.isFinite(secs) || secs < 0) secs = 0;
@@ -29,6 +37,7 @@ export function AudioPlayer({
   onPlay,
   onPlayingChange,
   onProgress,
+  onBufferingChange,
 }: {
   src: string;
   onEnded?: () => void;
@@ -36,14 +45,68 @@ export function AudioPlayer({
   onPlayingChange?: (playing: boolean) => void;
   /** Playback position as a 0–1 fraction (drives READ auto-scroll). */
   onProgress?: (fraction: number) => void;
+  /** True while playback has stalled on buffering — lets the parent pause the mic
+   * recorder so the take doesn't accumulate dead air during the gap. */
+  onBufferingChange?: (buffering: boolean) => void;
 }) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
   const [cur, setCur] = useState(0);
   const [dur, setDur] = useState(0);
+  // Buffering = mid-playback underrun (waiting/stalled). `hardStall` = it didn't
+  // recover on its own and we've stopped auto-nudging, so we prompt a manual retry.
+  const [buffering, setBuffering] = useState(false);
+  const [hardStall, setHardStall] = useState(false);
   // Whether the completion gate has already fired for the current pass. Re-armed
   // whenever a fresh pass starts from before the threshold (incl. a replay).
   const firedRef = useRef(false);
+  const renudgeTimer = useRef<number | null>(null);
+  const hardTimer = useRef<number | null>(null);
+  // Mirrors `buffering` for synchronous reads outside render — lets us fire
+  // onBufferingChange exactly on each transition (not inside a setState updater).
+  const bufferingRef = useRef(false);
+
+  const clearStallTimers = useCallback(() => {
+    if (renudgeTimer.current) { window.clearTimeout(renudgeTimer.current); renudgeTimer.current = null; }
+    if (hardTimer.current) { window.clearTimeout(hardTimer.current); hardTimer.current = null; }
+  }, []);
+
+  // Buffering recovered (or playback stopped): clear the stall UI + watchdog and let
+  // the parent resume the recorder.
+  const clearBuffering = useCallback(() => {
+    clearStallTimers();
+    setHardStall(false);
+    if (bufferingRef.current) {
+      bufferingRef.current = false;
+      setBuffering(false);
+      onBufferingChange?.(false);
+    }
+  }, [clearStallTimers, onBufferingChange]);
+
+  // Entered a buffering underrun: surface it, pause the recorder, and arm the
+  // watchdog — first re-issue play() (often re-kicks a hung media element), then if
+  // it's still stuck, fall back to a manual retry prompt.
+  const enterBuffering = useCallback(() => {
+    const a = audioRef.current;
+    if (!a || a.paused || a.ended) return; // a real pause/end isn't a stall
+    if (!bufferingRef.current) {
+      bufferingRef.current = true;
+      setBuffering(true);
+      onBufferingChange?.(true);
+    }
+    if (renudgeTimer.current || hardTimer.current) return; // watchdog already armed
+    renudgeTimer.current = window.setTimeout(() => {
+      const el = audioRef.current;
+      if (el && !el.paused && !el.ended) void el.play().catch(() => {});
+    }, STALL_RENUDGE_MS);
+    hardTimer.current = window.setTimeout(() => {
+      const el = audioRef.current;
+      if (el && !el.paused && !el.ended) {
+        el.pause(); // stop the spinner; the learner taps ▶ to retry from here
+        setHardStall(true);
+      }
+    }, STALL_HARD_MS);
+  }, [onBufferingChange]);
 
   // A new clip resets the transport.
   useEffect(() => {
@@ -51,11 +114,15 @@ export function AudioPlayer({
     setPlaying(false);
     setCur(0);
     firedRef.current = false;
+    clearBuffering();
     if (a) {
       a.pause();
       a.currentTime = 0;
     }
-  }, [src]);
+  }, [src, clearBuffering]);
+
+  // Tidy the watchdog on unmount.
+  useEffect(() => clearStallTimers, [clearStallTimers]);
 
   // Surface play/pause to the parent (drives the orb animation).
   useEffect(() => {
@@ -105,10 +172,19 @@ export function AudioPlayer({
           }
           onPlay?.();
         }}
-        onPause={() => setPlaying(false)}
+        onPause={() => {
+          setPlaying(false);
+          clearBuffering();
+        }}
+        onWaiting={enterBuffering}
+        onStalled={enterBuffering}
+        // Real progress is the only reliable "recovered" signal: `playing`/`canplay`
+        // can fire while the element is still catching up.
+        onPlaying={clearBuffering}
         onTimeUpdate={(e) => {
           const a = e.currentTarget;
           setCur(a.currentTime);
+          if (bufferingRef.current) clearBuffering(); // real progress = recovered
           if (a.duration > 0) {
             onProgress?.(a.currentTime / a.duration);
             // Count the pass complete once within ~1s of the end — clears the
@@ -126,10 +202,12 @@ export function AudioPlayer({
           // be cleared by playback gating once a working clip arrives.
           console.warn('Audio failed to load/play:', src);
           setPlaying(false);
+          clearBuffering();
         }}
         onEnded={() => {
           setPlaying(false);
           setCur(0);
+          clearBuffering();
           onProgress?.(1);
           // Natural end — fire the gate only if 95% didn't already trip it.
           if (!firedRef.current) {
@@ -158,7 +236,9 @@ export function AudioPlayer({
         </div>
         <div className="mt-1.5 flex justify-between text-[10px] font-bold tracking-[.1em] text-teal-dim">
           <span>{fmt(cur)}</span>
-          <span>{playing ? 'PLAYING' : 'PAUSED'}</span>
+          <span className={hardStall ? 'text-coral' : buffering ? 'text-cream' : undefined}>
+            {hardStall ? 'CONNECTION SLOW · TAP ▶' : buffering ? 'BUFFERING…' : playing ? 'PLAYING' : 'PAUSED'}
+          </span>
           <span>{fmt(dur)}</span>
         </div>
       </div>
