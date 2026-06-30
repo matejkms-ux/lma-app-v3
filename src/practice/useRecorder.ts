@@ -1,7 +1,17 @@
 /**
- * Mic recorder — captures the learner while a step's audio plays. Started on
- * playback, finalized when the clip ends (its blob handed back for storage),
- * or cancelled if they stop early.
+ * Mic recorder. Captures the learner while THEY hold a record button
+ * (FREESTYLE, Final Conversation) — never while reference audio is playing.
+ *
+ * HARD INVARIANT — do not remove this check: start() refuses to call
+ * getUserMedia while `audioGuard` reports reference audio is playing.
+ * getUserMedia briefly suspends an active <audio> element on Safari AND
+ * Chrome (each in its own way), which froze the practice player at PAUSED
+ * 0:00 for real learners three times (2026-06-29/30) before mic capture was
+ * removed from the listen steps entirely. This guard makes that class of bug
+ * structurally impossible to reintroduce: even if a future change wires
+ * start() back into an AudioPlayer onPlay handler, it will silently no-op
+ * (loud console.error) instead of freezing someone's lesson. See
+ * lib/audioGuard.ts for the other half of the contract.
  *
  * Browser reality: Safari (incl. iOS) writes audio/mp4, Chrome writes audio/webm,
  * so we feature-detect the container with isTypeSupported. getUserMedia needs a
@@ -9,6 +19,7 @@
  * missing we degrade gracefully — playback + points still work, just no take.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { isPlaybackActive } from '../lib/audioGuard';
 
 export type RecorderStatus = 'idle' | 'recording' | 'denied' | 'unsupported';
 
@@ -107,6 +118,18 @@ export function useRecorder() {
   }, []);
 
   const start = useCallback(async () => {
+    // HARD INVARIANT (see file header): never acquire the mic while reference
+    // audio is playing — getUserMedia interrupts it on Safari and Chrome alike.
+    // This is the structural guard that makes the PAUSED-0:00 freeze impossible
+    // to reintroduce, regardless of which screen calls start() or when.
+    if (isPlaybackActive()) {
+      console.error(
+        '[useRecorder] start() blocked: reference audio is currently playing. ' +
+        'Calling getUserMedia now would risk freezing playback (see lib/audioGuard.ts). ' +
+        'If this fires, a caller is wiring mic capture into an audio onPlay handler again — fix the caller, not this guard.',
+      );
+      return;
+    }
     // Already have a recorder: if it was paused (playback stalled or the learner
     // paused), resume it rather than spinning up a second capture. Active → no-op.
     const existing = recRef.current;

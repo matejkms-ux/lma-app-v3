@@ -5,6 +5,7 @@ import { StatusBar } from '../components/StatusBar';
 import { AudioPlayer } from '../components/AudioPlayer';
 import { readerLessonByCode, type ReaderSentence } from '../data/readerLessons';
 import { needsLargeScript } from '../lib/script';
+import { enterPlayback } from '../lib/audioGuard';
 import { useSession } from '../session';
 
 type Phase = 'listen' | 'rate' | 'read';
@@ -135,6 +136,11 @@ function ReadPhase({ audio, sentences }: { audio: string; sentences: ReaderSente
   const [dur, setDur] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [revealed, setRevealed] = useState<Set<number>>(new Set());
+  // Reference audio is live — block any getUserMedia call app-wide for as long
+  // as this raw <audio> is playing. Reader has no recorder today, but every
+  // reference-audio surface participates so a future feature can't reintroduce
+  // the PAUSED-0:00 freeze. See lib/audioGuard.ts.
+  const releasePlaybackRef = useRef<(() => void) | null>(null);
 
   // Larger reading type for dense scripts (e.g. Thai ล vs ส); compact for Latin.
   const large = useMemo(() => needsLargeScript(...sentences.map((s) => s.l2)), [sentences]);
@@ -161,6 +167,8 @@ function ReadPhase({ audio, sentences }: { audio: string; sentences: ReaderSente
   useEffect(() => {
     const a = audioRef.current;
     return () => {
+      releasePlaybackRef.current?.();
+      releasePlaybackRef.current = null;
       if (a) {
         a.pause();
         a.src = '';
@@ -202,11 +210,22 @@ function ReadPhase({ audio, sentences }: { audio: string; sentences: ReaderSente
         src={audio}
         preload="auto"
         playsInline
-        onPlay={() => setPlaying(true)}
-        onPause={() => setPlaying(false)}
+        onPlay={() => {
+          setPlaying(true);
+          if (!releasePlaybackRef.current) releasePlaybackRef.current = enterPlayback();
+        }}
+        onPause={() => {
+          setPlaying(false);
+          releasePlaybackRef.current?.();
+          releasePlaybackRef.current = null;
+        }}
         onTimeUpdate={(e) => setCur(e.currentTarget.currentTime)}
         onLoadedMetadata={(e) => setDur(e.currentTarget.duration)}
-        onEnded={() => setPlaying(false)}
+        onEnded={() => {
+          setPlaying(false);
+          releasePlaybackRef.current?.();
+          releasePlaybackRef.current = null;
+        }}
       />
       <div className="scroll-region flex-1 px-6 pb-4 pt-1">
         <div className="mb-3 text-[11px] font-bold tracking-[.18em] text-teal-dim">

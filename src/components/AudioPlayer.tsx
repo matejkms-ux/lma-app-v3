@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { enterPlayback } from '../lib/audioGuard';
 
 /**
  * Audio player (spec §5): two controls — reverse and a play/pause toggle. There
@@ -84,6 +85,14 @@ export function AudioPlayer({
   const selfPauseRef = useRef(false);
   const resumeReissues = useRef(0);
   const resumeTimer = useRef<number | null>(null);
+  // Holds the release fn from audioGuard.enterPlayback() while this clip is
+  // playing — lets useRecorder.start() refuse to touch the mic app-wide. Must
+  // be released exactly once per play (pause/end/error/new-clip/unmount).
+  const releasePlaybackRef = useRef<(() => void) | null>(null);
+  const releasePlayback = useCallback(() => {
+    releasePlaybackRef.current?.();
+    releasePlaybackRef.current = null;
+  }, []);
 
   const clearStallTimers = useCallback(() => {
     if (renudgeTimer.current) { window.clearTimeout(renudgeTimer.current); renudgeTimer.current = null; }
@@ -139,14 +148,15 @@ export function AudioPlayer({
     selfPauseRef.current = false;
     resumeReissues.current = 0;
     clearBuffering();
+    releasePlayback();
     if (a) {
       a.pause();
       a.currentTime = 0;
     }
-  }, [src, clearBuffering]);
+  }, [src, clearBuffering, releasePlayback]);
 
-  // Tidy the watchdog on unmount.
-  useEffect(() => clearStallTimers, [clearStallTimers]);
+  // Tidy the watchdog and the playback guard on unmount.
+  useEffect(() => () => { clearStallTimers(); releasePlayback(); }, [clearStallTimers, releasePlayback]);
 
   // Surface play/pause to the parent (drives the orb animation).
   useEffect(() => {
@@ -211,6 +221,9 @@ export function AudioPlayer({
           setPlaying(true);
           playIntentRef.current = true; // playback is live — arm interruption recovery
           selfPauseRef.current = false;
+          // Reference audio is live — block any getUserMedia call app-wide until
+          // this clip pauses/ends/errors. See lib/audioGuard.ts.
+          if (!releasePlaybackRef.current) releasePlaybackRef.current = enterPlayback();
           // Re-arm the gate for a fresh pass (replay seeks back to the start).
           const a = e.currentTarget;
           if (!a.duration || a.duration - a.currentTime > COMPLETE_TAIL_SECONDS) {
@@ -221,6 +234,7 @@ export function AudioPlayer({
         onPause={(e) => {
           setPlaying(false);
           clearBuffering();
+          releasePlayback();
           const a = e.currentTarget;
           // Distinguish OUR pauses (deliberate toggle, hard-stall) from an external
           // interruption. On Safari, the recorder opening the mic right after play
@@ -275,12 +289,14 @@ export function AudioPlayer({
           playIntentRef.current = false; // a real error — don't fight it with resumes
           setPlaying(false);
           clearBuffering();
+          releasePlayback();
         }}
         onEnded={() => {
           playIntentRef.current = false; // reached the end — no resume
           setPlaying(false);
           setCur(0);
           clearBuffering();
+          releasePlayback();
           onProgress?.(1);
           // Natural end — fire the gate only if 95% didn't already trip it.
           if (!firedRef.current) {
