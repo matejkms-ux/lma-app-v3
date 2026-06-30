@@ -132,13 +132,7 @@ export function useRecorder() {
       return;
     }
     try {
-      // Reuse a pre-warmed stream (opened by warmMic() before playback started)
-      // rather than calling getUserMedia during the onPlay event. On Chrome, a
-      // getUserMedia call while an <audio> element is playing briefly suspends
-      // the element (involuntary pause event), causing the "MIC OPEN but audio
-      // stuck at 0:00 PAUSED" symptom. Falls back to a fresh getUserMedia if
-      // warmMic was never called, so recording still works without pre-warming.
-      const stream = streamRef.current ?? await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
       const mime = pickMime();
       const rec = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
@@ -234,40 +228,6 @@ export function useRecorder() {
     }
   }, []);
 
-  /**
-   * Pre-warm the mic stream BEFORE playback starts. On Chrome, calling getUserMedia
-   * during the onPlay event briefly suspends the <audio> element (audio session
-   * conflict), causing the "MIC OPEN but audio stuck at 0:00 PAUSED" symptom.
-   * Call once when the lesson loads; start() reuses the open stream. Safe no-op if
-   * the mic is already blocked, unsupported, or already warmed.
-   */
-  const warmMic = useCallback(async (): Promise<void> => {
-    if (blockedRef.current || streamRef.current) return;
-    if (
-      typeof navigator === 'undefined' ||
-      !navigator.mediaDevices?.getUserMedia ||
-      typeof MediaRecorder === 'undefined'
-    ) {
-      blockedRef.current = true;
-      setStatus('unsupported');
-      return;
-    }
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      streamRef.current = stream;
-      stream.getAudioTracks().forEach((t) => {
-        t.onended = () => {
-          if (recRef.current === null) streamRef.current = null;
-        };
-      });
-    } catch {
-      // Silently latch so start() skips future getUserMedia calls (which would
-      // only interrupt playback again). The Permissions API useEffect sets the
-      // user-visible 'denied' status; don't double-set here.
-      blockedRef.current = true;
-    }
-  }, []);
-
   /** Stop and return the finished take (or null if nothing was captured). */
   const stop = useCallback((): Promise<RecorderResult | null> => {
     return new Promise((resolve) => {
@@ -316,5 +276,5 @@ export function useRecorder() {
     setStatus((s) => (s === 'denied' || s === 'unsupported' ? s : 'idle'));
   }, []);
 
-  return { status, errorName, start, pause, resume, stop, cancel, prime, warmMic };
+  return { status, errorName, start, pause, resume, stop, cancel, prime };
 }
