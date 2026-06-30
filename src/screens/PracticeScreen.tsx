@@ -122,6 +122,13 @@ function Player({ lesson, userId, startAt, unlockAll }: { lesson: PracticeLesson
   const [sentences, setSentences] = useState<
     Array<{ l1: string; l2: string; l2_translit: string | null; l2_translit_1: string | null; l2_translit_2: string | null }>
   >([]);
+
+  // Pre-warm the mic before any audio plays. On Chrome, getUserMedia called during
+  // onPlay briefly pauses the <audio> element — recorder shows "MIC OPEN" but
+  // audio is stuck at 0:00 PAUSED. Acquiring the stream here means start() reuses
+  // it and skips getUserMedia entirely during playback.
+  useEffect(() => { void recorder.warmMic(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     void getSentences(lesson.code).then((rows) =>
       setSentences(
