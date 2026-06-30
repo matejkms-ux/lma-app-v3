@@ -8,7 +8,7 @@
  * secure context (https or localhost). If permission is denied or the API is
  * missing we degrade gracefully — playback + points still work, just no take.
  */
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export type RecorderStatus = 'idle' | 'recording' | 'denied' | 'unsupported';
 
@@ -58,6 +58,53 @@ export function useRecorder() {
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
   };
+
+  // Learn the mic permission state WITHOUT calling getUserMedia. This is the crux of
+  // the Safari blocked-mic stall: the listen step starts the recorder on the ▶ tap,
+  // and on Safari a getUserMedia against a blocked mic aborts the just-started
+  // <audio> — play() rejects with NO `pause` event, so the player's self-heal (which
+  // hooks onPause) never fires and it sits at PAUSED 0:00. The Permissions API tells
+  // us "denied" up front (no gesture, no mic acquisition, no playback interruption),
+  // so we can latch blockedRef BEFORE the first play and never touch the mic during
+  // playback. 'granted'/'prompt' leave the normal play→start() path intact, so a
+  // learner who would allow the mic still records. Unsupported (older Safari) → no-op,
+  // falls back to the runtime catch latch in start().
+  useEffect(() => {
+    let cancelled = false;
+    let permRef: PermissionStatus | null = null;
+    const onChange = () => {
+      if (!permRef) return;
+      if (permRef.state === 'denied') {
+        blockedRef.current = true;
+        setStatus('denied');
+      } else {
+        // Re-granted (or now promptable) out of band — let start() acquire again.
+        blockedRef.current = false;
+        setStatus((s) => (s === 'denied' ? 'idle' : s));
+      }
+    };
+    try {
+      const perms = (navigator as Navigator & { permissions?: Permissions }).permissions;
+      // `microphone` isn't in the TS PermissionName union but Safari/Chrome accept it.
+      void perms
+        ?.query({ name: 'microphone' as PermissionName })
+        .then((status) => {
+          if (cancelled) return;
+          permRef = status;
+          onChange();
+          status.addEventListener?.('change', onChange);
+        })
+        .catch(() => {
+          /* unsupported / not allowed to query — fall back to runtime detection */
+        });
+    } catch {
+      /* no Permissions API — fall back */
+    }
+    return () => {
+      cancelled = true;
+      permRef?.removeEventListener?.('change', onChange);
+    };
+  }, []);
 
   const start = useCallback(async () => {
     // Already have a recorder: if it was paused (playback stalled or the learner

@@ -161,7 +161,22 @@ export function AudioPlayer({
       resumeReissues.current = 0;
       setHardStall(false);
       void a.play().catch(() => {
-        /* autoplay/permission edge — leave UI as-is */
+        // Safari can ABORT this play() when something touches the audio session
+        // (e.g. a getUserMedia against a blocked mic) — it rejects WITHOUT ever
+        // firing a `pause` event, so the onPause self-heal never runs and the bar
+        // sticks at PAUSED 0:00. Retry once shortly after: by then the session
+        // settled and (for a blocked mic) the recorder no longer re-requests, so
+        // the second play() sticks. Guarded by playIntentRef so a deliberate pause
+        // in the gap cancels it.
+        if (resumeReissues.current >= MAX_RESUME_REISSUES) return;
+        resumeReissues.current += 1;
+        if (resumeTimer.current) window.clearTimeout(resumeTimer.current);
+        resumeTimer.current = window.setTimeout(() => {
+          const el = audioRef.current;
+          if (el && el.paused && !el.ended && playIntentRef.current) {
+            void el.play().catch(() => {});
+          }
+        }, RESUME_AFTER_INTERRUPT_MS);
       });
     } else {
       selfPauseRef.current = true; // deliberate pause — suppress the resume watchdog
