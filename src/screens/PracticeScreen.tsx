@@ -17,7 +17,6 @@ import {
   type PracticeLesson,
 } from '../data/content';
 import { getSentences } from '../data/api';
-import { getRecording } from '../lib/recordings';
 import { lifetimeReps, addRepEvent, getStepStars, setStepStars, REPS_PER_PLAY } from '../lib/progress';
 import { STEPS, type Step } from '../tokens';
 
@@ -136,19 +135,16 @@ function Player({ lesson, userId, startAt, unlockAll }: { lesson: PracticeLesson
   // After a rating we auto-advance to the next step; this holds that pending hop.
   const advanceTimer = useRef<number | null>(null);
 
-  // FREESTYLE gate: the lesson is finished once a long-enough freestyle take
-  // exists (reported by the panel). Audio steps done + this = lesson complete.
+  // FREESTYLE gate: the lesson is finished once the learner has self-rated
+  // their freestyle take (reported by the panel). Audio steps done + this =
+  // lesson complete.
   const [freestyleComplete, setFreestyleComplete] = useState(false);
 
   // Congrats + the next-lesson CTA appear only when the learner explicitly taps
-  // FINISH (see below) — not automatically — so they can record multiple freestyle
-  // takes first. `freestyleComplete` only gates whether FINISH is enabled.
+  // FINISH (see below) — not automatically the moment the rating is given.
+  // `freestyleComplete` only gates whether FINISH is enabled.
   const [showCongrats, setShowCongrats] = useState(false);
   const [nextLesson, setNextLesson] = useState<PracticeLesson | null>(null);
-
-  // Congrats is shown only when the learner explicitly taps FINISH — not
-  // automatically on the first qualifying freestyle take, so they can record
-  // multiple takes before deciding they're done.
 
   // Resolve the next lesson (same learner) for the congrats CTA.
   useEffect(() => {
@@ -161,31 +157,11 @@ function Player({ lesson, userId, startAt, unlockAll }: { lesson: PracticeLesson
     });
   }, [lesson.code]);
 
-  const [takeUrl, setTakeUrl] = useState<string | null>(null);
-  const [takePlaying, setTakePlaying] = useState(false);
-  const takeAudioRef = useRef<HTMLAudioElement>(null);
-  const takeUrlRef = useRef<string | null>(null);
-  const setTake = useCallback((blob: Blob | null) => {
-    if (takeUrlRef.current) URL.revokeObjectURL(takeUrlRef.current);
-    const url = blob ? URL.createObjectURL(blob) : null;
-    takeUrlRef.current = url;
-    setTakeUrl(url);
-  }, []);
-
-  useEffect(() => {
-    let alive = true;
-    void getRecording(userId, lesson.code, api.step).then((rec) => {
-      if (alive) setTake(rec ? rec.blob : null);
-    });
-    return () => { alive = false; };
-  }, [userId, lesson.code, api.step, setTake]);
-
   useEffect(() => {
     setStarsState(getStepStars(userId, lesson.code, api.step));
   }, [userId, lesson.code, api.step]);
 
   useEffect(() => () => {
-    if (takeUrlRef.current) URL.revokeObjectURL(takeUrlRef.current);
     if (flashTimer.current) window.clearTimeout(flashTimer.current);
     if (advanceTimer.current) window.clearTimeout(advanceTimer.current);
   }, []);
@@ -221,13 +197,9 @@ function Player({ lesson, userId, startAt, unlockAll }: { lesson: PracticeLesson
     if (!hasAudio) setPlaying(false);
   }, [hasAudio]);
 
-  // Mic capture was removed from steps 1-5 (GRASP/HUM/SHADOW/READ/RECALL): on
-  // both Safari and Chrome, requesting the mic (getUserMedia) while this step's
-  // reference <audio> is playing intermittently suspends playback, leaving the
-  // learner stuck at PAUSED 0:00. Listening, reps, and step progression don't
-  // depend on a recording, so simply not recording removes the conflict entirely.
-  // FREESTYLE (step 6) still records — it has no reference audio playing, so
-  // there's nothing for getUserMedia to interrupt. See FreestylePanel.tsx.
+  // No step records the learner's mic anymore. Listening, reps, and step
+  // progression are all driven by playback (onEnded) and self-rating; FREESTYLE
+  // (step 6) finishes via a self-rating too — see FreestylePanel.tsx.
   const onEnded = useCallback(async () => {
     addRepEvent(userId, lesson.code, api.step, REPS_PER_PLAY);
     api.bumpPass(api.step);
@@ -250,13 +222,6 @@ function Player({ lesson, userId, startAt, unlockAll }: { lesson: PracticeLesson
       advanceTimer.current = window.setTimeout(() => api.next(), 550);
     }
   }, [userId, lesson.code, api, isUnlockComplete]);
-
-  const toggleTake = () => {
-    const a = takeAudioRef.current;
-    if (!a) return;
-    if (a.paused) void a.play().catch(() => {});
-    else a.pause();
-  };
 
   const body = () => {
     switch (cfg.body) {
@@ -292,7 +257,7 @@ function Player({ lesson, userId, startAt, unlockAll }: { lesson: PracticeLesson
             {lesson.code} · {lesson.title}
           </div>
           <div className="max-w-[260px] font-serif text-[15px] italic leading-[1.5] text-cream/90">
-            You worked every step and recorded a full freestyle. {lifetime} reps and climbing.
+            You worked every step and rated your freestyle. {lifetime} reps and climbing.
           </div>
           <div className="mt-3 flex w-full max-w-[250px] flex-col items-stretch gap-2.5">
             {nextLesson ? (
@@ -442,25 +407,6 @@ function Player({ lesson, userId, startAt, unlockAll }: { lesson: PracticeLesson
               {stars !== null ? `${stars}/5` : api.isLast ? 'RATE THIS STEP' : 'RATE TO CONTINUE ›'}
             </span>
           </div>
-        )}
-        {isCurrentStepUnlocked && takeUrl && (
-          <>
-            <audio
-              ref={takeAudioRef}
-              src={takeUrl}
-              playsInline
-              onPlay={() => setTakePlaying(true)}
-              onPause={() => setTakePlaying(false)}
-              onEnded={() => setTakePlaying(false)}
-            />
-            <button
-              onClick={toggleTake}
-              className="mt-2.5 inline-flex items-center gap-2 rounded-full border border-coral/50 px-3 py-1.5 text-[11px] font-bold tracking-[.07em] text-coral"
-            >
-              <span className="text-[9px]">{takePlaying ? '❚❚' : '▶'}</span>
-              {takePlaying ? 'PAUSE TAKE' : 'HEAR YOUR TAKE'}
-            </button>
-          </>
         )}
       </div>
         </>

@@ -7,8 +7,7 @@ import { PulseDot } from '../components/MicIndicator';
 import { useSession } from '../session';
 import { getLessonCatalog, type PracticeLesson } from '../data/content';
 // scope = the learner's username (lesson-code prefix)
-import { lessonProgress, isLessonUnlockComplete } from '../lib/progress';
-import { getCompletedFreestyleLessons } from '../lib/recordings';
+import { lessonProgress, isLessonUnlockComplete, getFreestyleRatedLessons } from '../lib/progress';
 import { STEPS } from '../tokens';
 
 function LockIcon({ size = 18 }: { size?: number }) {
@@ -145,7 +144,7 @@ export function LessonsScreen() {
   useEffect(() => {
     if (!user) return;
     void getLessonCatalog(user.username ?? '').then(setLessons);
-    void getCompletedFreestyleLessons(user.id).then(setFreestyleDone);
+    setFreestyleDone(getFreestyleRatedLessons(user.id));
   }, [user?.id, user?.username]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!user) return <Navigate to="/" replace />;

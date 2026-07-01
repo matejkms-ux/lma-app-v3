@@ -2,11 +2,20 @@
 
 Context for Claude working in this repo. Read `README.md` and `PROJECT.md` too.
 
-> **Status note (2026-06-25).** Some details below are out of date — current reality:
+> **Status note (2026-07-01).** Some details below are out of date — current reality:
+> - **No step records the learner's mic anymore** (removed repo-wide 2026-07-01).
+>   Steps 1–5 clear on listening (unchanged); **FREESTYLE** (6th step) no longer
+>   records either — it's a pass-through: speak on your own, then self-rate
+>   (`screens/practice/FreestylePanel.tsx`), which is the lesson-completion gate
+>   (`lib/progress.ts` `getFreestyleRatedLessons`). `lib/recordings.ts`,
+>   `components/MicNotice.tsx`, and `lib/micEnv.ts` were deleted as dead code.
+>   `useRecorder.ts` / `lib/audioGuard.ts` remain — still used by the separate
+>   Final Week Assessment capstone (`FinalConversationScreen.tsx`), which was left
+>   untouched. The `learner_recordings` table / `learner-recordings` &amp;
+>   `freestyle-recordings` Storage buckets are now unused but were left in place
+>   (historical data, no harm sitting idle).
 > - **Six** steps, not five: GRASP → HUM → SHADOW → READ → RECALL → **FREESTYLE**
->   (`STEPS` in `tokens.ts`; the first five are `AUDIO_STEPS`). FREESTYLE has no
->   reference audio and finishes the lesson with a >=50s take
->   (`FREESTYLE_COMPLETE_SECONDS` in `lib/recordings.ts`).
+>   (`STEPS` in `tokens.ts`; the first five are `AUDIO_STEPS`).
 > - **Progress syncs to Supabase** (`lib/progress.ts` `initProgressSync`) — not
 >   "100% local". Local keys: `lma:progress|reps|stars:<id>` + a `lma:sb:<id>`
 >   snapshot of the last Supabase fetch.

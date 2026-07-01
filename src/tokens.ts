@@ -55,8 +55,9 @@ export const radius = {
 /**
  * The practice steps, in fixed order. The first five are the canonical method
  * steps backed by reference audio + rep/mastery progress. FREESTYLE is a sixth,
- * open-ended production step: no reference audio, the learner speaks freely and
- * self-rates. It sits OUTSIDE the rep/unlock system (see lib/recordings).
+ * open-ended production step: no reference audio, no recording — the learner
+ * speaks freely on their own and self-rates. It sits OUTSIDE the rep/unlock
+ * system (see lib/progress's getFreestyleRatedLessons).
  */
 export const STEPS = ['GRASP', 'HUM', 'SHADOW', 'READ', 'RECALL', 'FREESTYLE'] as const;
 export type Step = (typeof STEPS)[number];
@@ -66,8 +67,8 @@ export type Step = (typeof STEPS)[number];
  * system. FREESTYLE has no reference audio, so it stays out of AUDIO_STEPS — but
  * it IS a valid step value in the DB now: the `lesson_step_progress`,
  * `lesson_audio` and `sentence_scores` step CHECKs all include it (migration
- * 20260626140000_freestyle_step_in_checks). FREESTYLE takes/ratings live in
- * `learner_recordings`.
+ * 20260626140000_freestyle_step_in_checks). FREESTYLE's self-rating lives in
+ * the same `lesson_step_progress` stars column as every other step.
  */
 export const AUDIO_STEPS = ['GRASP', 'HUM', 'SHADOW', 'READ', 'RECALL'] as const;
 export type AudioStep = (typeof AUDIO_STEPS)[number];

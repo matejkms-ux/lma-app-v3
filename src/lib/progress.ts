@@ -93,6 +93,21 @@ export function getStepStars(userId: string, code: string, step: Step): number |
   return Math.max(localVal ?? 0, sbVal ?? 0);
 }
 
+/** Lesson codes for which FREESTYLE has been self-rated — the FREESTYLE completion gate. */
+export function getFreestyleRatedLessons(userId: string): Set<string> {
+  const suffix = ':FREESTYLE';
+  const codes = new Set<string>();
+  const local = lsRead<Record<string, number>>(starsKey(userId), {});
+  for (const [key, val] of Object.entries(local)) {
+    if (key.endsWith(suffix) && val > 0) codes.add(key.slice(0, -suffix.length));
+  }
+  const sb = getSbCache(userId);
+  for (const [key, val] of Object.entries(sb)) {
+    if (key.endsWith(suffix) && (val.stars ?? 0) > 0) codes.add(key.slice(0, -suffix.length));
+  }
+  return codes;
+}
+
 /**
  * Reps are awarded per PLAY: every completed play of an audio step is worth a
  * flat REPS_PER_PLAY. Totals are DERIVED from the captured play count (the local
