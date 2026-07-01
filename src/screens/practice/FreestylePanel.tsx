@@ -51,6 +51,16 @@ export function FreestylePanel({
 
   const startedAtRef = useRef<number | null>(null);
   const tickRef = useRef<number | null>(null);
+  // True from the moment finish() starts tearing a take down until recorder.stop()
+  // resolves. recorder.status only flips to 'idle' inside that async resolution, so
+  // there's a window where status still reads 'recording' even though we've already
+  // called finish() and set recording=false — without this guard the status-watcher
+  // effect below sees "recording, but our flag says not recording" and treats it as
+  // a fresh mic-granted start, restarting the timer from 0 while the real recorder is
+  // mid-teardown. That's the "resets and doesn't save" bug: the phantom restart steals
+  // the recording state, so the NEXT auto-stop calls finish() again with no live
+  // recorder to stop, and that take is lost.
+  const finishingRef = useRef(false);
 
   // Local-only playback of the take just recorded (covers the case where the
   // cloud is unconfigured, and gives instant playback before the signed URL).
@@ -98,8 +108,10 @@ export function FreestylePanel({
     clearTick();
     const seconds = startedAtRef.current ? (Date.now() - startedAtRef.current) / 1000 : elapsed;
     startedAtRef.current = null;
+    finishingRef.current = true;
     setRecording(false);
     const take = await recorder.stop();
+    finishingRef.current = false;
     if (!take) {
       setCaptureFailed(true);
       return;
@@ -124,7 +136,7 @@ export function FreestylePanel({
 
   // Begin the timer once recording has actually started; auto-stop at the cap.
   useEffect(() => {
-    if (recorder.status === 'recording' && !recording) {
+    if (recorder.status === 'recording' && !recording && !finishingRef.current) {
       setRecording(true);
       startedAtRef.current = Date.now();
       clearTick();

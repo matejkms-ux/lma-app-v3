@@ -183,22 +183,16 @@ function ReadPhase({ audio, sentences }: { audio: string; sentences: ReaderSente
     else a.pause();
   };
 
-  // Tapping a line: reveal its English, jump there, and play from it.
+  // Tapping a line reveals its English only — it must NOT touch playback. Seeking
+  // here used to restart the sentence from its beginning on every tap, which is
+  // disruptive when the learner just wants the translation mid-listen (reported by
+  // Anamarija 2026-07-01). Jump-to-line is a separate concern from reveal-English.
   const tapLine = (i: number) => {
     setRevealed((prev) => {
       const next = new Set(prev);
       next.has(i) ? next.delete(i) : next.add(i);
       return next;
     });
-    const a = audioRef.current;
-    if (a) {
-      try {
-        a.currentTime = sentences[i].start;
-      } catch {
-        /* ignore unseekable edge */
-      }
-      setCur(sentences[i].start);
-    }
   };
 
   const pct = dur > 0 ? Math.min(100, (cur / dur) * 100) : 0;
@@ -244,7 +238,7 @@ function ReadPhase({ audio, sentences }: { audio: string; sentences: ReaderSente
               <span
                 className={`block font-serif leading-snug transition-colors ${
                   large ? 'text-[30px]' : 'text-[19px]'
-                } ${active ? 'text-coral' : 'text-cream'}`}
+                } ${active ? 'text-coral font-semibold' : 'text-cream'}`}
               >
                 {s.l2}
               </span>
