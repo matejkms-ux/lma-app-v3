@@ -1,2 +1,18 @@
 node_modules/
+
+# secrets — anon key may ship in builds, service-role key must never leave local env files
 .env
+.env.local
+.env*.local
+scripts/.env
+
+# build output — both Netlify sites build from source (see DEPLOY.md §2); dist is never committed
+dist/
+tsconfig.tsbuildinfo
+
+# local tool state
+.netlify/
+.claude/
+.DS_Store
+deno.lock
+*.log
