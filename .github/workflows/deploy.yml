@@ -29,7 +29,12 @@ jobs:
         run: npx netlify-cli@26 deploy --build --prod
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          # Site ID pinned to the VIDEO site (lma-video-app). This build has
+          # VITE_APP_MODE=video baked in — publishing it to the learner site
+          # (lma-islands-app, 679b9a40-…) gives learners the video roster
+          # (the 2026-06-27 outage). Pinning removes the misconfigured-secret
+          # failure mode: do NOT switch this back to a secret.
+          NETLIFY_SITE_ID: 0cb0a16d-8c78-48f4-ad8a-e2d5277e4607
           # Build-time client vars (Vite inlines VITE_*). Public-safe (anon key,
           # RLS-protected). VITE_APP_MODE=video makes "/" open the adventurer
           # chooser; the practice app (no flag) keeps its normal entry.

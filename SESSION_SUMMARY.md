@@ -1,5 +1,10 @@
 # Session summary
 
+> **Historical document.** This records the original build session (2026-06-18),
+> when the repo was `lma-app-v2`. The active repo is **`matejkms-ux/lma-app-v3`**
+> and much of what's described below has since changed — see `CLAUDE.md` for
+> current reality.
+
 A record of what was asked and done while turning the LMA Practice Player design
 handoff into a working app. Most recent session date: 2026-06-18.
 
