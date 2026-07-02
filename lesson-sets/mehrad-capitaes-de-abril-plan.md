@@ -18,7 +18,7 @@ The **app never serves the film.** Mehrad supplies his own playback; the app onl
 
 ## Segment map
 
-> Timestamps are **approximate** — calibrate to the actual cut as you watch. Lesson titles in the app stay "Lesson N" (validator requires the number to match the code); the segment names below live here and in each lesson's context note.
+> Timestamps are **approximate** — calibrate to the actual cut as you watch. Lesson titles in the app are **"N.1 — <PT segment name>"** (retitled 2026-07-01; the validator requires the `N.v` title prefix, and the bare "Lesson N" titles failed `TITLE_PREFIX_MISMATCH`). The segment map below is the source of those titles.
 
 | # | ≈Time | Segment (PT · EN) | Beat | CSV |
 |---|-------|-------------------|------|-----|

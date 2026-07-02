@@ -39,6 +39,12 @@ To add a rule, add one `union all` block to the view migration, re-apply it, and
 add a row to the table above. The view is the single source of truth — the script
 is just a runner, so a new check is live everywhere the moment the view changes.
 
+**Bonus lessons** (`…-bonusNNN`) are exempt from the four *numbering* checks
+(title prefix, code suffix, number null, dup number) — they're off the main
+path with free-form titles by design
+(`20260701230000_content_audit_bonus_exemptions.sql`). All content-quality
+checks still apply to them.
+
 ### When this runs
 After **any** content change — `import:sentences`, `land-lesson.py`, or a manual
 edit in the Supabase SQL editor — and before telling anyone a lesson is ready.
